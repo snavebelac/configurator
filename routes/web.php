@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Users\UserList;
 use App\Http\Middleware\RequireActiveUser;
+use App\Livewire\Admin\Features\FeaturesList;
 
 Route::get('/', function () {
     return view('welcome', [
@@ -34,4 +35,5 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/profile', Profile::class)->name('dashboard.profile');
     Route::get('/users', UserList::class)->name('dashboard.users');
+    Route::get('/features', FeaturesList::class)->name('dashboard.features');
 });

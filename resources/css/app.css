@@ -25,6 +25,30 @@
     --color-primary-900: oklch(0.391 0.09 240.876);
     --color-primary-950: oklch(0.293 0.066 243.157);
 
+    --color-success-50: oklch(0.979 0.021 166.113);
+    --color-success-100: oklch(0.95 0.052 163.051);
+    --color-success-200: oklch(0.905 0.093 164.15);
+    --color-success-300: oklch(0.845 0.143 164.978);
+    --color-success-400: oklch(0.765 0.177 163.223);
+    --color-success-500: oklch(0.696 0.17 162.48);
+    --color-success-600: oklch(0.596 0.145 163.225);
+    --color-success-700: oklch(0.508 0.118 165.612);
+    --color-success-800: oklch(0.432 0.095 166.913);
+    --color-success-900: oklch(0.378 0.077 168.94);
+    --color-success-950: oklch(0.262 0.051 172.552);
+
+    --color-warning-50: oklch(0.969 0.015 12.422);
+    --color-warning-100: oklch(0.941 0.03 12.58);
+    --color-warning-200: oklch(0.892 0.058 10.001);
+    --color-warning-300: oklch(0.81 0.117 11.638);
+    --color-warning-400: oklch(0.712 0.194 13.428);
+    --color-warning-500: oklch(0.645 0.246 16.439);
+    --color-warning-600: oklch(0.586 0.253 17.585);
+    --color-warning-700: oklch(0.514 0.222 16.935);
+    --color-warning-800: oklch(0.455 0.188 13.697);
+    --color-warning-900: oklch(0.41 0.159 10.272);
+    --color-warning-950: oklch(0.271 0.105 12.094);
+
 
     --color-gray-50: oklch(0.984 0.003 247.858);
     --color-gray-100: oklch(0.968 0.007 247.896);
@@ -39,11 +63,31 @@
     --color-gray-950: oklch(0.129 0.042 264.695);
 }
 
+.button {
+    @apply inline-block rounded-full bg-primary-600 px-4 py-2 mx-1 text-center text-sm font-semibold text-primary-50 hover:text-white shadow-xs hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600
+}
+
+.button.button-icon {
+    @apply flex items-center gap-2;
+}
+
+.button.button-secondary {
+    @apply bg-gray-600 hover:bg-gray-500;
+}
+
+.button.button-success {
+    @apply bg-success-600 hover:bg-success-500;
+}
+
+.button.button-warning {
+    @apply bg-warning-600 hover:bg-warning-500;
+}
+
 /*Override all Toastify styles*/
 .toastify {
     @apply p-4
-        bg-green-50 shadow-md
-        font-medium text-green-800
+        bg-success-50 shadow-md
+        font-medium text-success-800
         rounded-md fixed opacity-0 transition-all duration-250 ease-in-out
         no-underline
         flex items-center;
@@ -52,7 +96,7 @@
 }
 
 .toastify.warning {
-    @apply bg-red-50 text-red-800;
+    @apply bg-warning-50 text-warning-800;
 }
 
 .toastify.on {

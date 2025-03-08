@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Tenant;
+use App\Models\Feature;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -69,5 +70,26 @@ class TenantScopeTest extends TestCase
         $createdUser = User::factory()->create();
 
         $this->assertSame($createdUser->tenant_id, $user1->tenant_id);
+    }
+
+    #[Test]
+    public function a_user_can_only_create_features_in_the_same_tenant()
+    {
+        $tenant1 = Tenant::factory()->create();
+        $tenant2 = Tenant::factory()->create();
+
+        $user1 = User::factory()->create([
+            'tenant_id' => $tenant1->id,
+        ]);
+
+        auth()->login($user1);
+
+        $this->actingAs($user1)->session([
+            'tenant_id' => $tenant1->id,
+        ]);
+
+        $feature = Feature::factory()->create();
+
+        $this->assertSame($feature->tenant_id, $user1->tenant_id);
     }
 }

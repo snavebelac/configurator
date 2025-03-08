@@ -15,6 +15,14 @@ return new class extends Migration
             $table->id();
             $table->uuid()->unique();
             $table->unsignedBigInteger('tenant_id')->index();
+            $table->string('name');
+            $table->text('description');
+            $table->decimal('price', 10, 2);
+            $table->unsignedMediumInteger('quantity');
+            $table->boolean('optional')->default(false);
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->unsignedMediumInteger('order')->default(1);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

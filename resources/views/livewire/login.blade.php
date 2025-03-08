@@ -1,6 +1,6 @@
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <x-logo class="block mx-auto h-12" />
+        <x-logo class="block mx-auto h-12 text-primary-600" />
 
         <h2 class="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
     </div>
