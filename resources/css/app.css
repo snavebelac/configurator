@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/wire-elements/modal/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source "../**/*.blade.php";
+@source "../**/*.js";
+@source "../**/*.vue";
+
+@theme {
+  --font-sans:
+    Figtree, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/*Override all Toastify styles*/
+.toastify {
+    @apply p-4
+        bg-green-50 shadow-md
+        font-medium text-green-800
+        rounded-md fixed opacity-0 transition-all duration-250 ease-in-out
+        no-underline
+        flex items-center;
+    max-width: calc(50% - 20px);
+    z-index: 2147483647;
+}
+
+.toastify.warning {
+    @apply bg-red-50 text-red-800;
+}
+
+.toastify.on {
+    @apply opacity-100 transition-all duration-250 ease-in-out
+}
+
+.toast-close {
+    @apply absolute -top-3 -right-3 cursor-pointer bg-gray-50 shadow-sm rounded-full border-0 text-xl size-6;
+}
+
+.toastify-right {
+    @apply right-4;
+}
+
+.toastify-left {
+    @apply left-4;
+}
+
+.toastify-top {
+    @apply -top-40;
+}
+
+.toastify-bottom {
+    @apply -bottom-40;
+}
+
+.toastify-rounded {
+    @apply rounded-2xl;
+}
+
+.toastify-avatar {
+    @apply size-6 -mx-2 my-1.5 rounded;
+}
+
+.toastify-center {
+    @apply mx-auto left-0 right-0 max-w-fit;
+}
+
+@media only screen and (max-width: 360px) {
+    .toastify-right, .toastify-left {
+        @apply mx-auto left-0 right-0 max-w-fit;
+    }
+}
