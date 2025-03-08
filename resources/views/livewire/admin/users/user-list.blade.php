@@ -5,7 +5,7 @@
 {{--                <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>--}}
 {{--            </div>--}}
 {{--            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">--}}
-{{--                <button type="button" wire:click="$dispatch('openModal', {component: 'admin.users.user-modal'})" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">--}}
+{{--                <button type="button" wire:click="$dispatch('openModal', {component: 'admin.users.user-modal'})" class="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">--}}
 {{--                    Add user--}}
 {{--                </button>--}}
 {{--            </div>--}}
@@ -31,7 +31,7 @@
 {{--                            </thead>--}}
 {{--                            <tbody class="divide-y divide-gray-200">--}}
 {{--                            @forelse ($users as $user)--}}
-{{--                            <tr class="even:bg-gray-50 hover:bg-indigo-50">--}}
+{{--                            <tr class="even:bg-gray-50 hover:bg-primary-50">--}}
 {{--                                <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">--}}
 {{--                                    @if ($user->active)--}}
 {{--                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-green-800">--}}
@@ -55,7 +55,7 @@
 {{--                                    </span>--}}
 {{--                                </td>--}}
 {{--                                <td class="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3">--}}
-{{--                                    <button wire:click="$dispatch('openModal', {component: 'admin.users.user-modal', arguments: {userId: {{ $user->id }} }})" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, {{ $user->full_name }}</span></button>--}}
+{{--                                    <button wire:click="$dispatch('openModal', {component: 'admin.users.user-modal', arguments: {userId: {{ $user->id }} }})" class="text-primary-600 hover:text-primary-900">Edit<span class="sr-only">, {{ $user->full_name }}</span></button>--}}
 {{--                                </td>--}}
 {{--                                <td class="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3">--}}
 {{--                                    <button wire:click="delete({{ $user->id }})" wire:confirm="Are you sure you wish to delete [{{ $user->full_name }}]?" class="text-rose-400 hover:text-rose-500">Delete<span class="sr-only">, {{ $user->full_name }}</span></button>--}}
@@ -82,7 +82,7 @@
             <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, email, and role.</p>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <button type="button" wire:click="$dispatch('openModal', {component: 'admin.users.user-modal'})" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add user</button>
+            <button type="button" wire:click="$dispatch('openModal', {component: 'admin.users.user-modal'})" class="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Add user</button>
         </div>
     </div>
     <div class="mt-8 flow-root">
@@ -106,7 +106,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
                         @forelse ($users as $user)
-                            <tr class="even:bg-gray-50 hover:bg-indigo-50">
+                            <tr class="even:bg-gray-50 hover:bg-primary-50">
                                 <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6">
                                     @if ($user->active)
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-green-800">
@@ -130,7 +130,7 @@
                                     </span>
                                 </td>
                                 <td class="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3">
-                                    <button wire:click="$dispatch('openModal', {component: 'admin.users.user-modal', arguments: {userId: {{ $user->id }} }})" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, {{ $user->full_name }}</span></button>
+                                    <button wire:click="$dispatch('openModal', {component: 'admin.users.user-modal', arguments: {userId: {{ $user->id }} }})" class="text-primary-600 hover:text-primary-900">Edit<span class="sr-only">, {{ $user->full_name }}</span></button>
                                 </td>
                                 <td class="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3">
                                     <button wire:click="delete({{ $user->id }})" wire:confirm="Are you sure you wish to delete [{{ $user->full_name }}]?" class="text-rose-400 hover:text-rose-500">Delete<span class="sr-only">, {{ $user->full_name }}</span></button>
