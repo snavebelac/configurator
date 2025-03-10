@@ -15,7 +15,7 @@ class TenantScope implements Scope
     {
         $tenantId = session('tenant_id', -1);
         if (auth()->hasUser()) {
-            $builder->where('tenant_id', $tenantId);
+            $builder->where($model->qualifyColumn('tenant_id'), $tenantId);
         }
     }
 }

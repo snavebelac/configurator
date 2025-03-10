@@ -5,13 +5,14 @@ use App\Livewire\Login;
 use App\Livewire\PasswordReset;
 use App\Livewire\Admin\Profile;
 use App\Livewire\Admin\Dashboard;
-use App\Livewire\Admin\U§serList;
 use App\Livewire\ForgottenPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Users\UserList;
+use App\Livewire\Admin\Proposals\Preview;
 use App\Http\Middleware\RequireActiveUser;
 use App\Livewire\Admin\Features\FeaturesList;
+use App\Livewire\Admin\Proposals\ProposalCreate;
 
 Route::get('/', function () {
     return view('welcome', [
@@ -36,4 +37,8 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/profile', Profile::class)->name('dashboard.profile');
     Route::get('/users', UserList::class)->name('dashboard.users');
     Route::get('/features', FeaturesList::class)->name('dashboard.features');
+    Route::get('/proposal/create', ProposalCreate::class)->name('dashboard.proposal.create');
+    Route::get('/proposal/preview/{proposal:uuid}', Preview::class)->name('dashboard.proposal.preview');
 });
+
+// View Proposals

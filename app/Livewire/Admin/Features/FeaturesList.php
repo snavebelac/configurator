@@ -13,7 +13,7 @@ class FeaturesList extends AdminComponent
     use WithPagination;
 
     public $search = '';
-    private $pageLength = 20;
+    private $pageLength = 5;
 
     #[On('refresh-features')]
     public function loadFeatures(): void

@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 trait Uuid
 {
@@ -12,5 +13,10 @@ trait Uuid
         static::creating(function ($model) {
            $model->uuid = (string) Str::uuid7();
         });
+    }
+
+    public static function findByUuid($uuid): Model
+    {
+        return self::where('uuid', $uuid)->first();
     }
 }

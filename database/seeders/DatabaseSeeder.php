@@ -6,6 +6,8 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Tenant;
 use App\Models\Feature;
+use App\Models\Setting;
+use App\Models\Proposal;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -38,13 +40,23 @@ class DatabaseSeeder extends Seeder
         User::factory()->count(10)->create([
             'tenant_id' => $tenant1->id,
         ]);
-
         User::factory()->count(10)->create();
 
         Feature::factory()->count(10)->create([
             'tenant_id' => $tenant1->id,
         ]);
-
         Feature::factory()->count(10)->create();
+
+        Proposal::factory()->count(10)->create([
+            'user_id' => $user->id,
+            'tenant_id' => $tenant1->id
+        ]);
+        Proposal::all()->each(function($proposal) use ($tenant1) {
+            $proposal->features()->attach(Feature::all()->random(rand(3, 10))->pluck('id'), ['tenant_id' => $tenant1->id]);
+        });
+        Proposal::factory()->count(12)->create();
+        Setting::factory()->count(1)->create([
+            'tenant_id' => $tenant1->id,
+        ]);
     }
 }
