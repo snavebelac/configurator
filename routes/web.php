@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\ClientList;
 use App\Models\User;
 use App\Livewire\Login;
 use App\Livewire\PasswordReset;
@@ -39,6 +40,7 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/features', FeaturesList::class)->name('dashboard.features');
     Route::get('/proposal/create', ProposalCreate::class)->name('dashboard.proposal.create');
     Route::get('/proposal/preview/{proposal:uuid}', Preview::class)->name('dashboard.proposal.preview');
+    Route::get('/clients', ClientList::class)->name('dashboard.clients');
 });
 
 // View Proposals

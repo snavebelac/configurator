@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Status;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('proposals', function (Blueprint $table) {
+        Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
-            $table->unsignedBigInteger('tenant_id')->index();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('client_id');
-            $table->string('status')->default(Status::DRAFT);
             $table->string('name');
-            $table->decimal('total_price', 10, 2)->default(0);
+            $table->string('contact');
+            $table->string('contact_phone')->nullable();
+            $table->string('contact_email')->nullable();
+            $table->unsignedBigInteger('tenant_id')->index();
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('proposals');
+        Schema::dropIfExists('clients');
     }
 };

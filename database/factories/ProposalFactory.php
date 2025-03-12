@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Client;
 use App\Models\User;
 use App\Enums\Status;
 use App\Models\Tenant;
@@ -28,6 +29,7 @@ class ProposalFactory extends Factory
             'status' => $randomStatus,
             'user_id' => User::factory()->create(),
             'tenant_id' => Tenant::factory()->create(),
+            'client_id' => Client::factory()->create(),
         ];
     }
 }

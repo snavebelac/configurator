@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Tenant;
@@ -42,6 +43,9 @@ class DatabaseSeeder extends Seeder
         ]);
         User::factory()->count(10)->create();
 
+        Client::factory()->count(19)->create();
+        $client = Client::factory()->create(['tenant_id' => $tenant1->id]);
+
         Feature::factory()->count(10)->create([
             'tenant_id' => $tenant1->id,
         ]);
@@ -49,7 +53,8 @@ class DatabaseSeeder extends Seeder
 
         Proposal::factory()->count(10)->create([
             'user_id' => $user->id,
-            'tenant_id' => $tenant1->id
+            'tenant_id' => $tenant1->id,
+            'client_id' => $client->id,
         ]);
         Proposal::all()->each(function($proposal) use ($tenant1) {
             $proposal->features()->attach(Feature::all()->random(rand(3, 10))->pluck('id'), ['tenant_id' => $tenant1->id]);
@@ -58,5 +63,6 @@ class DatabaseSeeder extends Seeder
         Setting::factory()->count(1)->create([
             'tenant_id' => $tenant1->id,
         ]);
+
     }
 }
