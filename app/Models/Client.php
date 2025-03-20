@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 class Client extends Model
 {
     /** @use HasFactory<\Database\Factories\ClientFactory> */
-    use HasFactory;
-    use Uuid, BelongsToTenant;
+    use HasFactory, Uuid, BelongsToTenant;
+
+    protected $fillable = [
+        'name',
+        'contact_email',
+        'contact_phone',
+        'contact'
+    ];
 }

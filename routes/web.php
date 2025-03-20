@@ -1,19 +1,19 @@
 <?php
 
-use App\Livewire\ClientList;
-use App\Models\User;
+use App\Http\Middleware\RequireActiveUser;
+use App\Livewire\Admin\Clients\ClientList;
+use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Features\FeaturesList;
+use App\Livewire\Admin\Profile;
+use App\Livewire\Admin\Proposals\Preview;
+use App\Livewire\Admin\Proposals\ProposalCreate;
+use App\Livewire\Admin\Users\UserList;
+use App\Livewire\ForgottenPassword;
 use App\Livewire\Login;
 use App\Livewire\PasswordReset;
-use App\Livewire\Admin\Profile;
-use App\Livewire\Admin\Dashboard;
-use App\Livewire\ForgottenPassword;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Admin\Users\UserList;
-use App\Livewire\Admin\Proposals\Preview;
-use App\Http\Middleware\RequireActiveUser;
-use App\Livewire\Admin\Features\FeaturesList;
-use App\Livewire\Admin\Proposals\ProposalCreate;
 
 Route::get('/', function () {
     return view('welcome', [
