@@ -24,12 +24,13 @@ class ProposalFactory extends Factory
     {
         $statuses = Status::cases();
         $randomStatus = Arr::random($statuses);
+        $tenant = Tenant::factory()->create();
         return [
             'name' => Str::ucFirst($this->faker->sentence(4, true)),
             'status' => $randomStatus,
             'user_id' => User::factory()->create(),
-            'tenant_id' => Tenant::factory()->create(),
-            'client_id' => Client::factory()->create(),
+            'tenant_id' => $tenant->id,
+            'client_id' => Client::factory()->create(['tenant_id' => $tenant->id]),
         ];
     }
 }

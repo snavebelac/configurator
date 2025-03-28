@@ -14,8 +14,8 @@ class ClientList extends AdminComponent
     public $search = '';
     private $pageLength = 5;
 
-    #[On('refresh-features')]
-    public function loadClientss(): void
+    #[On('refresh-proposals')]
+    public function loadClients(): void
     {
         $this->resetPage();
     }

@@ -7,6 +7,7 @@ use App\Livewire\Admin\Features\FeaturesList;
 use App\Livewire\Admin\Profile;
 use App\Livewire\Admin\Proposals\Preview;
 use App\Livewire\Admin\Proposals\ProposalCreate;
+use App\Livewire\Admin\Proposals\ProposalsList;
 use App\Livewire\Admin\Users\UserList;
 use App\Livewire\ForgottenPassword;
 use App\Livewire\Login;
@@ -38,6 +39,7 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/profile', Profile::class)->name('dashboard.profile');
     Route::get('/users', UserList::class)->name('dashboard.users');
     Route::get('/features', FeaturesList::class)->name('dashboard.features');
+    Route::get('/proposals', ProposalsList::class)->name('dashboard.proposals');
     Route::get('/proposal/create', ProposalCreate::class)->name('dashboard.proposal.create');
     Route::get('/proposal/preview/{proposal:uuid}', Preview::class)->name('dashboard.proposal.preview');
     Route::get('/clients', ClientList::class)->name('dashboard.clients');

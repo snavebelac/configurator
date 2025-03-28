@@ -70,4 +70,9 @@ class Proposal extends Model
             ->withPivot(['price', 'quantity', 'tenant_id'])
             ->withTimestamps();
     }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
 }

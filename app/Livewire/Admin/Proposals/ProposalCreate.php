@@ -14,8 +14,22 @@ class ProposalCreate extends AdminComponent
     use WithPagination;
 
     public string $featureSearch = '';
-    public int $pageLength = 10;
+    public int $pageLength = 16;
     public array $selectedFeatureIds = [];
+
+    public array $stages = [
+        1 => 'Add Features',
+        2 => 'Customise',
+        3 => 'Preview',
+        4 => 'Complete'
+    ];
+
+    public int $stage = 1;
+
+    public function setStage(int $stage)
+    {
+        $this->stage = $stage;
+    }
 
     public function selectFeature(int $featureId): void
     {
