@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('tax_rate', 10, 2)->default('20');
             $table->string('tax_name')->default('VAT');
             $table->boolean('tax_inclusive')->default(false);
+            $table->string('logo', 255)->nullable();
+            $table->string('company_name')->nullable();
             $table->timestamps();
         });
     }

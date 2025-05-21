@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('contact');
             $table->string('contact_phone')->nullable();
             $table->string('contact_email')->nullable();
+            $table->string('logo', 255)->nullable();
             $table->unsignedBigInteger('tenant_id')->index();
             $table->timestamps();
         });

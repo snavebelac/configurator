@@ -3,11 +3,13 @@
 namespace App\Livewire\Admin\Shared;
 
 use Livewire\Component;
+use Livewire\Attributes\Modelable;
 
 class Progress extends Component
 {
     public array $stages = [];
-    public int $currentStage = 0;
+    #[Modelable]
+    public int $currentStage = 1;
 
     public function render()
     {

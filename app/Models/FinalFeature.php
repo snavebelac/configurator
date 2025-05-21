@@ -5,18 +5,14 @@ namespace App\Models;
 use App\Facades\Formatter;
 use App\Traits\BelongsToTenant;
 use App\Traits\Uuid;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Feature extends Model
+class FinalFeature extends Model
 {
-    /** @use HasFactory<\Database\Factories\FeatureFactory> */
-    use HasFactory, Uuid, BelongsToTenant, SoftDeletes;
+    use Uuid, BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -55,11 +51,8 @@ class Feature extends Model
         );
     }
 
-    public function proposals(): BelongsToMany
+    public function proposal(): BelongsTo
     {
-        return $this->belongsToMany(Proposal::class)
-            ->using(FeatureProposal::class)
-            ->withPivot(['price', 'quantity', 'tenant_id'])
-            ->withTimestamps();
+        return $this->belongsTo(Proposal::class);
     }
 }

@@ -21,8 +21,8 @@ class FeatureFactory extends Factory
         return [
             'name' => Str::ucFirst($this->faker->words(3, true)),
             'description' => $this->faker->sentence(),
-            'price' => $this->faker->numberBetween(6000, 99999) / 100,
-            'quantity' => $this->faker->numberBetween(1, 10),
+            'price' => $this->faker->numberBetween(600, 9999) / 100,
+            'quantity' => $this->faker->numberBetween(1, 3),
             'optional' => $this->faker->boolean(),
             'parent_id' => null,
             'order' => $this->faker->numberBetween(1, 100),

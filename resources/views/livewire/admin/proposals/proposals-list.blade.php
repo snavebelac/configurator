@@ -39,9 +39,10 @@
                                     {{ $proposal->client->name }}<br>
                                     <x-email-link :email="$proposal->client->contact_email" />
                                 </x-tables.table-cell>
-                                <x-tables.table-cell></x-tables.table-cell>
+                                <x-tables.table-cell>{!! $proposal->total_for_humans !!}</x-tables.table-cell>
+                                <x-tables.table-cell>{{ $proposal->status }}</x-tables.table-cell>
                                 <x-tables.table-cell>
-                                    <button  class="button">Edit<span class="sr-only">, {{ $proposal->name }}</span></button>
+                                    <a href="{{ route('dashboard.proposal.edit', ['proposal' => $proposal->id]) }}" class="button">Edit<span class="sr-only">, {{ $proposal->name }}</span></a>
                                     <button wire:click="delete({{ $proposal->id }})" wire:confirm="Are you sure you wish to delete [{{ $proposal->name }}]?" class="button button-warning">Delete<span class="sr-only">, {{ $proposal->name }}</span></button>
                                 </x-tables.table-cell>
                             </x-tables.table-row>

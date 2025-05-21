@@ -33,9 +33,9 @@
                                             {{ $feature->description }}
                                         </div>
                                     </td>
-                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{{ $feature->quantity }}</td>
-                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{!! $feature->price_for_humans !!}</td>
-                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">&pound;{{ $feature->quantity * $feature->price }}</td>
+                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{{ $feature->pivot->quantity ?? $feature->quantity }}</td>
+                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{!! $feature->pivot->price_for_humans ?? $feature->price_for_humans !!}</td>
+                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">&pound;{{ ($feature->pivot->quantity ?? $feature->quantity) * ($feature->pivot->price ?? $feature->price) }}</td>
                                 </tr>
                             @endforeach
                             <tr class="border-b border-gray-200">

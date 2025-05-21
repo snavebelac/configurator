@@ -20,6 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('client_id');
             $table->string('status')->default(Status::DRAFT);
             $table->string('name');
+            $table->string('description', 4000)->nullable();
+            $table->string('additional', 4000)->nullable();
             $table->decimal('total_price', 10, 2)->default(0);
             $table->timestamps();
         });

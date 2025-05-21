@@ -15,8 +15,7 @@
                             <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-lg max-w-lg">Name</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">By</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Value</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Modified</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Last updated</th>
                             <th scope="col" class="relative py-3.5 pr-4 pl-3 sm:pr-6">
                                 <span class="sr-only">Edit or Preview</span>
                             </th>
@@ -33,9 +32,6 @@
                                 </td>
                                 <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">
                                     {!! $draft->total_for_humans !!}
-                                </td>
-                                <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap  text-gray-900 sm:pl-3">
-                                    {{ $draft->created_for_humans }}
                                 </td>
                                 <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">
                                     {{ $draft->updated_for_humans }}

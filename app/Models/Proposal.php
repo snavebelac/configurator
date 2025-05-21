@@ -9,6 +9,7 @@ use App\Traits\BelongsToTenant;
 use App\Traits\Uuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,15 @@ class Proposal extends Model
 {
     /** @use HasFactory<\Database\Factories\ProposalFactory> */
     use HasFactory, Uuid, BelongsToTenant, HasStatus;
+
+    protected $fillable = [
+        'status',
+        'name',
+    ];
+
+    protected $casts = [
+        'status' => Status::class,
+    ];
 
     public function user(): BelongsTo
     {
@@ -29,8 +39,10 @@ class Proposal extends Model
         $total = 0;
         $this->loadMissing('features');
         foreach($this->features as $feature) {
-            $price = $feature->pivot->price ?? $feature->price;
-            $quantity = $feature->pivot->quantity ?? $feature->quantity;
+//            $price = $feature->pivot->price ?? $feature->price;
+//            $quantity = $feature->pivot->quantity ?? $feature->quantity;
+            $price = $feature->price;
+            $quantity = $feature->quantity;
             $total += $price * $quantity;
         }
         return $total;
@@ -63,12 +75,17 @@ class Proposal extends Model
         );
     }
 
-    public function features(): BelongsToMany
+//    public function features(): BelongsToMany
+//    {
+//        return $this->belongsToMany(Feature::class)
+//            ->using(FeatureProposal::class)
+//            ->withPivot(['price', 'quantity', 'tenant_id', 'id'])
+//            ->withTimestamps();
+//    }
+
+    public function features(): HasMany
     {
-        return $this->belongsToMany(Feature::class)
-            ->using(FeatureProposal::class)
-            ->withPivot(['price', 'quantity', 'tenant_id'])
-            ->withTimestamps();
+        return $this->hasMany(FinalFeature::class);
     }
 
     public function client(): BelongsTo
