@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Feature;
+use App\Models\FinalFeature;
 use App\Models\Proposal;
 use App\Models\Tenant;
 use App\Models\User;
@@ -94,51 +95,47 @@ class TenantScopeTest extends TestCase
     }
 
     #[Test]
-    public function a_proposal_a_feature_and_their_pivot_table_share_the_same_tenant()
+    public function proposals_and_final_feature_snapshots_are_scoped_by_tenant()
     {
         $tenant1 = Tenant::factory()->create();
         $tenant2 = Tenant::factory()->create();
 
-        $user1 = User::factory()->create([
-            'tenant_id' => $tenant1->id,
-        ]);
+        $user1 = User::factory()->create(['tenant_id' => $tenant1->id]);
+        $user2 = User::factory()->create(['tenant_id' => $tenant2->id]);
 
-        $user2 = User::factory()->create([
-            'tenant_id' => $tenant2->id,
+        $this->actingAs($user2)->session(['tenant_id' => $tenant2->id]);
+        $proposal2 = Proposal::factory()->create(['user_id' => $user2->id]);
+        $finalFeature2 = $proposal2->features()->create([
+            'name' => 'Tenant 2 snapshot',
+            'description' => 'desc',
+            'price' => 1.00,
+            'quantity' => 1,
+            'optional' => false,
+            'order' => 1,
         ]);
-
-        auth()->login($user2);
-        $this->actingAs($user2)->session([
-            'tenant_id' => $tenant2->id,
-        ]);
-        $feature2 = Feature::factory()->create();
-        $proposal2 = Proposal::factory()->create([
-            'user_id' => $user2->id,
-        ]);
-        $proposal2->features()->attach($feature2);
         auth()->logout();
+        session()->forget('tenant_id');
 
-        auth()->login($user1);
-        $this->actingAs($user1)->session([
-            'tenant_id' => $tenant1->id,
+        $this->actingAs($user1)->session(['tenant_id' => $tenant1->id]);
+        $proposal1 = Proposal::factory()->create(['user_id' => $user1->id]);
+        $finalFeature1 = $proposal1->features()->create([
+            'name' => 'Tenant 1 snapshot',
+            'description' => 'desc',
+            'price' => 2.00,
+            'quantity' => 2,
+            'optional' => false,
+            'order' => 1,
         ]);
-        $feature1 = Feature::factory()->create();
-        $proposal1 = Proposal::factory()->create([
-            'user_id' => $user1->id,
-        ]);
-        $feature1->proposals()->attach($proposal1);
 
-        $proposalPivot1 = $feature1->proposals()->first();
-        $featurePivot1 = $proposal1->features()->first();
+        $this->assertSame($tenant1->id, $proposal1->fresh()->tenant_id);
+        $this->assertSame($tenant1->id, $finalFeature1->fresh()->tenant_id);
+        $this->assertSame($tenant2->id, $proposal2->fresh()->tenant_id);
+        $this->assertSame($tenant2->id, $finalFeature2->fresh()->tenant_id);
 
-        $this->assertFalse($proposal1->tenant_id === $user2->tenant_id);
-        $this->assertFalse($proposal2->tenant_id === $user1->tenant_id);
-        $this->assertFalse($feature2->tenant_id === $user1->tenant_id);
-        $this->assertFalse($feature1->tenant_id === $user2->tenant_id);
-
-        $this->assertSame($feature1->tenant_id, $user1->tenant_id);
-        $this->assertSame($proposal1->tenant_id, $user1->tenant_id);
-        $this->assertSame($proposalPivot1->pivot->tenant_id, $user1->tenant_id);
-        $this->assertSame($featurePivot1->pivot->tenant_id, $user1->tenant_id);
+        $this->assertSame(1, Proposal::count());
+        $this->assertSame(1, FinalFeature::count());
+        $this->assertNull(Proposal::find($proposal2->id));
+        $this->assertNull(FinalFeature::find($finalFeature2->id));
+        $this->assertCount(1, $proposal1->fresh()->features);
     }
 }

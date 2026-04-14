@@ -74,6 +74,19 @@ changes may occur in any minor release.
   `Admin\Proposals\Preview`). Livewire 4 changed the default to a
   `layouts::app` namespace, producing `No hint path defined for [layouts]`
   on any component without an explicit layout attribute.
+- Resolved the long-standing `TenantScopeTest` failure carried over from
+  v0.1.0. The test was written against an earlier pivot-based design; the
+  application has since adopted snapshotting features into a separate
+  `final_features` table on proposal creation. The test now verifies tenant
+  auto-fill and cross-tenant isolation across `Proposal` and `FinalFeature`.
+
+### Removed
+
+- Dead pivot-based feature/proposal code left over from the earlier design:
+  `App\Models\FeatureProposal`, the `Feature::proposals()` relationship, the
+  commented-out `BelongsToMany` version of `Proposal::features()`, and the
+  unused `feature_proposal` migration / table. Proposals now exclusively use
+  `final_features` snapshots.
 
 ### Known issues
 
@@ -82,9 +95,6 @@ changes may occur in any minor release.
   upstream plugin publishes a new release.
 - Upgrade verification so far is test-suite-only; a full browser pass across
   the admin UI is still outstanding and should precede any new feature work.
-- The pre-existing `Proposal::features()` / `Feature::proposals()` pivot
-  mismatch carries over from v0.1.0 and still fails one `TenantScopeTest`
-  case. To be addressed as the first post-upgrade fix.
 
 ## [0.1.0] - 2026-04-14
 

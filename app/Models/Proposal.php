@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Proposal extends Model
@@ -39,11 +38,7 @@ class Proposal extends Model
         $total = 0;
         $this->loadMissing('features');
         foreach ($this->features as $feature) {
-            //            $price = $feature->pivot->price ?? $feature->price;
-            //            $quantity = $feature->pivot->quantity ?? $feature->quantity;
-            $price = $feature->price;
-            $quantity = $feature->quantity;
-            $total += $price * $quantity;
+            $total += $feature->price * $feature->quantity;
         }
 
         return $total;
@@ -76,14 +71,6 @@ class Proposal extends Model
             get: fn (mixed $value, array $attributes) => Formatter::date($attributes['updated_at'])
         );
     }
-
-    //    public function features(): BelongsToMany
-    //    {
-    //        return $this->belongsToMany(Feature::class)
-    //            ->using(FeatureProposal::class)
-    //            ->withPivot(['price', 'quantity', 'tenant_id', 'id'])
-    //            ->withTimestamps();
-    //    }
 
     public function features(): HasMany
     {
