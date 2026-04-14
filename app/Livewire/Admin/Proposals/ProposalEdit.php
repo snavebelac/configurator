@@ -2,15 +2,15 @@
 
 namespace App\Livewire\Admin\Proposals;
 
+use App\Livewire\Admin\AdminComponent;
 use App\Models\Proposal;
 use Livewire\Attributes\Title;
-use App\Livewire\Admin\AdminComponent;
 
 #[Title('Edit a new proposal')]
 class ProposalEdit extends AdminComponent
 {
-
     public ?int $proposalId = null;
+
     public Proposal $proposal;
 
     public function mount(Proposal $proposal): void

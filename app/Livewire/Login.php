@@ -2,21 +2,21 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
-use App\Models\Scopes\TenantScope;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Request;
+use Livewire\Component;
 
-#[Title("Login")]
+#[Title('Login')]
 class Login extends Component
 {
     #[Validate('required|email')]
     public $email = '';
+
     #[Validate('required')]
     public $password = '';
+
     public bool $remember = false;
 
     public $loginMessage = '';
@@ -28,7 +28,7 @@ class Login extends Component
         if (Auth::attempt([
             'email' => $this->email,
             'password' => $this->password,
-            'active' => true
+            'active' => true,
         ], $this->remember)) {
             Request::session()->regenerate();
             $this->redirectIntended(route('dashboard'));

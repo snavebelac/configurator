@@ -9,10 +9,10 @@ use Livewire\WithPagination;
 
 class ProposalsList extends AdminComponent
 {
-
     use WithPagination;
 
     public $search = '';
+
     private $pageLength = 6;
 
     #[On('refresh-proposals')]
@@ -34,18 +34,18 @@ class ProposalsList extends AdminComponent
         }
     }
 
-
     public function render()
     {
         $proposals = Proposal::with(['client'])
             ->when($this->search != '', fn ($query) => $query
-                ->where('name', 'like', '%' . $this->search . '%')
-                ->orWhere('client.name', 'like', '%' . $this->search . '%')
-                ->orWhere('client.contact', 'like', '%' . $this->search . '%')
-                ->orWhere('client.contact_email', 'like', '%' . $this->search . '%')
+                ->where('name', 'like', '%'.$this->search.'%')
+                ->orWhere('client.name', 'like', '%'.$this->search.'%')
+                ->orWhere('client.contact', 'like', '%'.$this->search.'%')
+                ->orWhere('client.contact_email', 'like', '%'.$this->search.'%')
             )
             ->orderBy('name')
             ->paginate($this->pageLength);
+
         return view('livewire.admin.proposals.proposals-list', [
             'proposals' => $proposals,
         ]);

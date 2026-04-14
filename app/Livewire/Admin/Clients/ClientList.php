@@ -12,6 +12,7 @@ class ClientList extends AdminComponent
     use WithPagination;
 
     public $search = '';
+
     private $pageLength = 5;
 
     #[On('refresh-proposals')]
@@ -36,14 +37,15 @@ class ClientList extends AdminComponent
     public function render()
     {
         $clients = Client::when($this->search != '', fn ($query) => $query
-            ->where('name', 'like', '%' . $this->search . '%')
-            ->orWhere('contact', 'like', '%' . $this->search . '%')
-            ->orWhere('contact_email', 'like', '%' . $this->search . '%')
-            )
+            ->where('name', 'like', '%'.$this->search.'%')
+            ->orWhere('contact', 'like', '%'.$this->search.'%')
+            ->orWhere('contact_email', 'like', '%'.$this->search.'%')
+        )
             ->orderBy('name')
             ->paginate($this->pageLength);
+
         return view('livewire.admin.clients.client-list', [
-            'clients' => $clients
+            'clients' => $clients,
         ]);
     }
 }

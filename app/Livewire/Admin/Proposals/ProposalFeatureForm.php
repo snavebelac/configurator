@@ -2,12 +2,18 @@
 
 namespace App\Livewire\Admin\Proposals;
 
-use Livewire\Component;
 use App\Models\FinalFeature;
+use Livewire\Component;
 
 class ProposalFeatureForm extends Component
 {
-    public $finalFeature, $quantity, $price, $name;
+    public $finalFeature;
+
+    public $quantity;
+
+    public $price;
+
+    public $name;
 
     public function mount($finalFeatureId)
     {

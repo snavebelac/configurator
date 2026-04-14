@@ -2,16 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\Client;
-use App\Models\User;
 use App\Enums\Status;
+use App\Models\Client;
+use App\Models\Proposal;
 use App\Models\Tenant;
-use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Proposal>
+ * @extends Factory<Proposal>
  */
 class ProposalFactory extends Factory
 {
@@ -25,6 +26,7 @@ class ProposalFactory extends Factory
         $statuses = Status::cases();
         $randomStatus = Arr::random($statuses);
         $tenant = Tenant::factory()->create();
+
         return [
             'name' => Str::ucFirst($this->faker->sentence(4, true)),
             'status' => $randomStatus,

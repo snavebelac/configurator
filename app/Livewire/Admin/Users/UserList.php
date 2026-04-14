@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Livewire\Admin\AdminComponent;
 use App\Models\User;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use App\Livewire\Admin\AdminComponent;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Title;
 
 #[Title('Users')]
 class UserList extends AdminComponent
@@ -35,10 +35,13 @@ class UserList extends AdminComponent
         } else {
             $reason = 'Unable to delete user';
 
-            if (!$user): $reason .= '. User cannot be found.';
-            elseif (!$user->canBeDeleted()): $reason .= '. User has existing associated data.';
-            elseif ($user->id == Auth::id()): $reason .= '. Cannot delete yourself.';
-            endif;
+            if (! $user) {
+                $reason .= '. User cannot be found.';
+            } elseif (! $user->canBeDeleted()) {
+                $reason .= '. User has existing associated data.';
+            } elseif ($user->id == Auth::id()) {
+                $reason .= '. Cannot delete yourself.';
+            }
 
             $this->dispatch('toast', ...$this->warning(['text' => $reason]));
         }

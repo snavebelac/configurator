@@ -3,17 +3,16 @@
 namespace Database\Seeders;
 
 use App\Models\Client;
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\Tenant;
 use App\Models\Feature;
-use App\Models\Setting;
-use App\Models\Proposal;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\FinalFeature;
+use App\Models\Proposal;
+use App\Models\Setting;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
-use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,7 +23,7 @@ class DatabaseSeeder extends Seeder
     {
         $tenant1 = Tenant::factory()->create([
             'name' => 'Fantasea',
-            'subdomain' => 'fantasea'
+            'subdomain' => 'fantasea',
         ]);
 
         $super = Role::create(['name' => 'superadmin']);
@@ -89,7 +88,7 @@ class DatabaseSeeder extends Seeder
             'client_id' => $client->id,
         ]);
 
-        Proposal::all()->each(function($proposal) use ($tenant1) {
+        Proposal::all()->each(function ($proposal) use ($tenant1) {
             $features = Feature::where('tenant_id', $tenant1->id)->get()->random(rand(3, 10));
             foreach ($features as $feature) {
                 $ff = new FinalFeature([

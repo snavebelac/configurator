@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Tenant;
 use App\Models\Feature;
 use App\Models\Proposal;
-use Illuminate\Support\Facades\File;
-use PHPUnit\Framework\Attributes\Test;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\File;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TenantScopeTest extends TestCase
@@ -48,7 +48,6 @@ class TenantScopeTest extends TestCase
         auth()->login($user1);
 
         $this->assertEquals(10, User::count());
-
 
     }
 

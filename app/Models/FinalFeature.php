@@ -5,14 +5,14 @@ namespace App\Models;
 use App\Facades\Formatter;
 use App\Traits\BelongsToTenant;
 use App\Traits\Uuid;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FinalFeature extends Model
 {
-    use Uuid, BelongsToTenant, SoftDeletes;
+    use BelongsToTenant, SoftDeletes, Uuid;
 
     protected $fillable = [
         'name',
@@ -21,12 +21,12 @@ class FinalFeature extends Model
         'quantity',
         'optional',
         'order',
-        'final'
+        'final',
     ];
 
     protected $casts = [
         'optional' => 'boolean',
-        'price' => 'integer'
+        'price' => 'integer',
     ];
 
     protected function price(): Attribute
@@ -40,14 +40,14 @@ class FinalFeature extends Model
     protected function priceForHumans(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, array $attributes) => Formatter::currency(Formatter::convertIntegerPrice($attributes['price']))
+            get: fn (mixed $value, array $attributes) => Formatter::currency(Formatter::convertIntegerPrice($attributes['price']))
         );
     }
 
     protected function lineTotalForHumans(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, array $attributes) => Formatter::currency($attributes['price'] * $attributes['quantity'])
+            get: fn (mixed $value, array $attributes) => Formatter::currency($attributes['price'] * $attributes['quantity'])
         );
     }
 

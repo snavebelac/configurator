@@ -3,19 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Traits\Uuid;
 use App\Traits\BelongsToTenant;
-use Spatie\Permission\Traits\HasRoles;
+use App\Traits\Uuid;
+use Database\Factories\UserFactory;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, CanResetPassword, HasRoles, Uuid, BelongsToTenant;
+    /** @use HasFactory<UserFactory> */
+    use BelongsToTenant, CanResetPassword, HasFactory, HasRoles, Notifiable, Uuid;
 
     /**
      * The attributes that are mass assignable.
@@ -58,14 +59,14 @@ class User extends Authenticatable
     public function fullName(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['name'] . " " . $attributes['last_name']
+            get: fn (mixed $value, array $attributes) => $attributes['name'].' '.$attributes['last_name']
         );
     }
 
     public function gravatar(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => "https://www.gravatar.com/avatar/" . md5(strtolower(trim($attributes['email']))) . "?d=initials&&name=" . $attributes['name'] . " " . $attributes['last_name']
+            get: fn (mixed $value, array $attributes) => 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($attributes['email']))).'?d=initials&&name='.$attributes['name'].' '.$attributes['last_name']
         );
     }
 

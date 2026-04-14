@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Admin\Clients;
 
-
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Client;
 use Livewire\Attributes\Locked;
@@ -10,12 +9,15 @@ use LivewireUI\Modal\ModalComponent;
 
 class ClientModal extends ModalComponent
 {
-
     #[Locked]
     public ?int $clientId = null;
+
     public string $name = '';
+
     public string $contact = '';
+
     public string $contactEmail = '';
+
     public string $contactPhone = '';
 
     protected function rules(): array

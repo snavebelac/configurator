@@ -2,18 +2,23 @@
 
 namespace App\Livewire\Admin\Features;
 
+use App\Livewire\Admin\AdminComponent;
 use App\Models\Feature;
 use Illuminate\Contracts\View\View;
 use LivewireUI\Modal\ModalComponent;
-use App\Livewire\Admin\AdminComponent;
 
 class FeatureModal extends ModalComponent
 {
     public ?int $featureId = null;
+
     public string $name = '';
+
     public string $description = '';
+
     public string $price = '';
+
     public string $quantity = '';
+
     public bool $optional = false;
 
     protected function rules(): array

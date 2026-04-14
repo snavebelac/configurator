@@ -3,22 +3,23 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Validate;
 
 #[Title('Profile')]
 class Profile extends AdminComponent
 {
-
     #[Locked]
     public int $userId;
 
     #[Validate('required')]
     public string $name;
+
     #[Validate('required')]
     public string $lastName;
+
     #[Validate('required|email')]
     public string $email;
 

@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
+use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
-use Illuminate\Support\Facades\Password;
+use Livewire\Component;
 
 #[Title('Reset your password')]
 class ForgottenPassword extends Component
@@ -14,6 +14,7 @@ class ForgottenPassword extends Component
     public $email = '';
 
     public ?string $successMessage;
+
     public ?string $errorMessage;
 
     public function resetPassword(): void

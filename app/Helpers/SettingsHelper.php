@@ -2,16 +2,19 @@
 
 namespace App\Helpers;
 
-use App\Models\Setting;
 use App\Enums\CurrencySymbol;
+use App\Models\Setting;
 
 class SettingsHelper
 {
     private string $taxName;
+
     private float $taxRate;
+
     private CurrencySymbol $currency;
 
-    public function __construct() {
+    public function __construct()
+    {
         // gets the setting values for the current tenant (utilising the global scope)
         $setting = Setting::first();
         $this->taxName = $setting->tax_name;
@@ -33,5 +36,4 @@ class SettingsHelper
     {
         return $this->currency;
     }
-
 }

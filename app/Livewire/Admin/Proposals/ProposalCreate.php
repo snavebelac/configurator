@@ -3,15 +3,15 @@
 namespace App\Livewire\Admin\Proposals;
 
 use App\Enums\Status;
+use App\Facades\Formatter;
+use App\Livewire\Admin\AdminComponent;
 use App\Models\Client;
 use App\Models\Feature;
-use App\Models\Proposal;
-use App\Facades\Formatter;
-use Livewire\WithPagination;
 use App\Models\FinalFeature;
+use App\Models\Proposal;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
-use App\Livewire\Admin\AdminComponent;
+use Livewire\WithPagination;
 
 #[Title('Create a new proposal')]
 class ProposalCreate extends AdminComponent
@@ -19,27 +19,32 @@ class ProposalCreate extends AdminComponent
     use WithPagination;
 
     public string $featureSearch = '';
+
     public int $pageLength = 16;
+
     public ?int $proposalId = null;
+
     #[Validate('required|array|min:1')]
     public array $selectedFeatureIds = [];
+
     #[Validate('required|max:255')]
     public string $name = '';
+
     #[Validate('required')]
     public ?int $clientId = null;
 
     protected $messages = [
         'selectedFeatureIds' => 'Please select at least one feature',
-        'clientId' => 'Please select the client'
+        'clientId' => 'Please select the client',
     ];
 
     public function createProposal(): void
     {
         $this->validate();
 
-//        $selectedFeatures = Feature::whereIn('id', $this->selectedFeatureIds)
-//            ->orderBy('name')
-//            ->get();
+        //        $selectedFeatures = Feature::whereIn('id', $this->selectedFeatureIds)
+        //            ->orderBy('name')
+        //            ->get();
 
         $proposal = new Proposal([
             'status' => Status::DRAFT,
@@ -85,8 +90,8 @@ class ProposalCreate extends AdminComponent
         $selectedFeatures = Feature::whereIn('id', $this->selectedFeatureIds)
             ->orderBy('name')
             ->get();
-        $totalForSelectedFeatures = empty($selectedFeatures) ? 0 : Formatter::currency($selectedFeatures->sum(fn($feature) => $feature->price * $feature->quantity));
-        $features = Feature::when($this->featureSearch != '', fn($query) => $query->where('name', 'like', '%' . $this->search . '%'))
+        $totalForSelectedFeatures = empty($selectedFeatures) ? 0 : Formatter::currency($selectedFeatures->sum(fn ($feature) => $feature->price * $feature->quantity));
+        $features = Feature::when($this->featureSearch != '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
             ->orderBy('name')
             ->paginate($this->pageLength, pageName: 'features-page');
 

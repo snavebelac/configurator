@@ -2,11 +2,11 @@
 
 namespace App\Enums;
 
-enum Status: String
+enum Status: string
 {
     case DRAFT = 'draft';
     case DELIVERED = 'delivered';
-    case ACCEPTED ='accepted';
-    case REJECTED ='rejected';
-    case ARCHIVED ='archived';
+    case ACCEPTED = 'accepted';
+    case REJECTED = 'rejected';
+    case ARCHIVED = 'archived';
 }

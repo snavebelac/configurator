@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Setting;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Setting>
+ * @extends Factory<Setting>
  */
 class SettingFactory extends Factory
 {

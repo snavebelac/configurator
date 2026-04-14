@@ -10,14 +10,14 @@ enum CurrencySymbol: string
 
     public function toHtml(): string
     {
-        return match($this) {
-            CurrencySymbol::GBP, CurrencySymbol::USD, CurrencySymbol::EUR => '&' . $this->value . ';',
+        return match ($this) {
+            CurrencySymbol::GBP, CurrencySymbol::USD, CurrencySymbol::EUR => '&'.$this->value.';',
         };
     }
 
     public function toSymbol(): string
     {
-        return match($this) {
+        return match ($this) {
             CurrencySymbol::GBP => '£',
             CurrencySymbol::USD => '$',
             CurrencySymbol::EUR => '€',

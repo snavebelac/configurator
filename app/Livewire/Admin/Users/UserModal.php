@@ -2,23 +2,31 @@
 
 namespace App\Livewire\Admin\Users;
 
-use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Illuminate\Contracts\View\View;
-use LivewireUI\Modal\ModalComponent;
-use Illuminate\Support\Facades\Hash;
 use App\Livewire\Admin\AdminComponent;
+use App\Models\User;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Hash;
+use LivewireUI\Modal\ModalComponent;
+use Spatie\Permission\Models\Role;
 
 class UserModal extends ModalComponent
 {
     public $roles = [];
+
     public ?User $user = null;
+
     public string $name = '';
+
     public string $lastName = '';
+
     public string $role = '';
+
     public string $email = '';
+
     public bool $active = true;
+
     public ?string $password = null;
+
     public ?string $password_confirmation = null;
 
     protected function rules()
@@ -27,7 +35,7 @@ class UserModal extends ModalComponent
             'name' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
             'role' => 'required',
-            'email' => 'required|string|email|max:255|unique:users,email,' . ($this->user?->id ?? 0),
+            'email' => 'required|string|email|max:255|unique:users,email,'.($this->user?->id ?? 0),
         ];
 
         if ($this->user) {
@@ -37,6 +45,7 @@ class UserModal extends ModalComponent
             $rules['password'] = 'required|min:8';
             $rules['password_confirmation'] = 'required|same:password';
         }
+
         return $rules;
     }
 
@@ -65,10 +74,10 @@ class UserModal extends ModalComponent
                 'name' => $this->name,
                 'last_name' => $this->lastName,
                 'email' => $this->email,
-                'active' => $this->active
+                'active' => $this->active,
             ];
 
-            if (!empty($this->password)) {
+            if (! empty($this->password)) {
                 $updateData['password'] = Hash::make($this->password);
             }
 
@@ -81,7 +90,7 @@ class UserModal extends ModalComponent
                 'last_name' => $this->lastName,
                 'email' => $this->email,
                 'active' => $this->active,
-                'password' => Hash::make($this->password)
+                'password' => Hash::make($this->password),
             ]);
 
             $user->assignRole($this->role);

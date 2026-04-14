@@ -2,12 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Feature;
 use App\Models\Tenant;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Feature>
+ * @extends Factory<Feature>
  */
 class FeatureFactory extends Factory
 {

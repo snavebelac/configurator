@@ -6,8 +6,8 @@ use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Features\FeaturesList;
 use App\Livewire\Admin\Profile;
 use App\Livewire\Admin\Proposals\Preview;
-use App\Livewire\Admin\Proposals\ProposalEdit;
 use App\Livewire\Admin\Proposals\ProposalCreate;
+use App\Livewire\Admin\Proposals\ProposalEdit;
 use App\Livewire\Admin\Proposals\ProposalsList;
 use App\Livewire\Admin\Users\UserList;
 use App\Livewire\ForgottenPassword;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome', [
-        'users_count' => User::count()
+        'users_count' => User::count(),
     ]);
 })->name('home');
 
@@ -31,6 +31,7 @@ Route::middleware(['throttle:authentication'])->group(function () {
 
 Route::post('/logout', function () {
     Auth::logout();
+
     return redirect()->route('home');
 })->name('logout');
 

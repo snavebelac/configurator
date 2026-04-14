@@ -2,20 +2,26 @@
 
 namespace App\Livewire\Admin\Shared;
 
-use Livewire\Component;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
+use Livewire\Component;
 
 class Select extends Component
 {
     public $items;
+
     #[Locked]
     public $itemsArray;
+
     #[Modelable]
     public $selected = null;
+
     public $placeholder = 'Select option';
-    public $label = "Choose item";
+
+    public $label = 'Choose item';
+
     public $open = false;
+
     public $selectedLabel = '';
 
     public function mount()
@@ -26,7 +32,7 @@ class Select extends Component
 
     public function toggle()
     {
-        $this->open = !$this->open;
+        $this->open = ! $this->open;
     }
 
     public function close()

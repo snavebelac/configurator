@@ -3,22 +3,25 @@
 namespace App\Livewire;
 
 use App\Models\User;
-use Livewire\Component;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
+use Livewire\Component;
 
 #[Title('Reset Password')]
 class PasswordReset extends Component
 {
     #[Validate('required')]
     public string $token;
+
     #[Validate('required|email')]
     public $email = '';
+
     #[Validate('required|min:8')]
     public $password = '';
+
     #[Validate('min:8|required_with:password|same:password')]
     public $passwordConfirmation = '';
 
