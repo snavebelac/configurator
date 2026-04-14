@@ -66,6 +66,15 @@ changes may occur in any minor release.
   attributes (`#[Layout]`, `#[On]`) carried over without changes. No
   non-self-closed `<livewire:…>` tags existed to rewrite.
 
+### Fixed
+
+- Added explicit `#[Layout('components.layouts.app')]` to the four full-page
+  Livewire components that previously relied on the Livewire 3 default
+  (`Login`, `ForgottenPassword`, `PasswordReset`, and the public
+  `Admin\Proposals\Preview`). Livewire 4 changed the default to a
+  `layouts::app` namespace, producing `No hint path defined for [layouts]`
+  on any component without an explicit layout attribute.
+
 ### Known issues
 
 - `vite-plugin-full-reload@1.2.0` (transitive via `laravel-vite-plugin`) pins
