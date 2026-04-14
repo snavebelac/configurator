@@ -15,6 +15,10 @@ changes may occur in any minor release.
 - Upgraded Livewire to 3.7.15, clearing
   [CVE-2025-54068](https://github.com/advisories/GHSA-29cq-5w36-x7w3) — a
   critical RCE vulnerability affecting Livewire versions prior to 3.6.4.
+- Cleared all outstanding Composer security advisories: Livewire RCE above,
+  `psy/psysh` local privilege escalation (via Tinker 3), and the PHPUnit
+  PHPT deserialization advisory (via PHPUnit 12.5.8+). `composer audit` is
+  now clean.
 
 ### Changed
 
@@ -44,6 +48,11 @@ changes may occur in any minor release.
 - Upgraded `laravel/boost` 1 → 2. The `.mcp.json` `boost:mcp` command is
   unchanged; consider running `php artisan boost:install` once to pick up v2's
   refreshed guidelines and skills sync.
+- Upgraded testing stack: Pest 3 → 4 (4.6.0) and PHPUnit 11 → 12.5. PHPUnit
+  13 is not yet reachable because Pest 4 pins PHPUnit to `^12.5` — we'll
+  revisit when Pest publishes a PHPUnit-13-compatible release. PHPUnit 12.5.8+
+  clears [CVE-2026-24765](https://github.com/advisories/GHSA-vvj3-c3rp-c85p).
+  No changes were required to `phpunit.xml`, test files, or the base TestCase.
 
 ### Known issues
 
