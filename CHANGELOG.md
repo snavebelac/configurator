@@ -39,6 +39,11 @@ changes may occur in any minor release.
   code changes are required — the admin layout already uses the renamed
   `@livewire('wire-elements-modal')` directive, and no modal views have been
   published to `resources/views/vendor/`.
+- Upgraded `laravel/tinker` 2 → 3, which also clears the `psy/psysh`
+  CVE-2026-25129 advisory.
+- Upgraded `laravel/boost` 1 → 2. The `.mcp.json` `boost:mcp` command is
+  unchanged; consider running `php artisan boost:install` once to pick up v2's
+  refreshed guidelines and skills sync.
 
 ### Known issues
 
