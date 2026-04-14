@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "193b259dfcff052acf6a1a771a92ab02",
+    "content-hash": "e32205d50fa889293a78f8e8ab651f19",
     "packages": [
         {
             "name": "brick/math",
@@ -6351,20 +6351,20 @@
         },
         {
             "name": "wire-elements/modal",
-            "version": "2.0.13",
+            "version": "3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wire-elements/modal.git",
-                "reference": "65d9db80a0befaa38ae99a47a26818e784aa7101"
+                "reference": "3c17ed4e5d1506773db37dbbfdcacff12b037317"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wire-elements/modal/zipball/65d9db80a0befaa38ae99a47a26818e784aa7101",
-                "reference": "65d9db80a0befaa38ae99a47a26818e784aa7101",
+                "url": "https://api.github.com/repos/wire-elements/modal/zipball/3c17ed4e5d1506773db37dbbfdcacff12b037317",
+                "reference": "3c17ed4e5d1506773db37dbbfdcacff12b037317",
                 "shasum": ""
             },
             "require": {
-                "livewire/livewire": "^3.2.3",
+                "livewire/livewire": "^3.2.3|^4.0",
                 "php": "^8.1",
                 "spatie/laravel-package-tools": "^1.9"
             },
@@ -6403,7 +6403,7 @@
             ],
             "support": {
                 "issues": "https://github.com/wire-elements/modal/issues",
-                "source": "https://github.com/wire-elements/modal/tree/2.0.13"
+                "source": "https://github.com/wire-elements/modal/tree/3.0.4"
             },
             "funding": [
                 {
@@ -6411,7 +6411,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-20T13:07:12+00:00"
+            "time": "2026-01-23T11:08:48+00:00"
         }
     ],
     "packages-dev": [

@@ -34,6 +34,11 @@ changes may occur in any minor release.
   continue to work unchanged; v7 only added type declarations to the public
   API and renamed internal event and command classes (neither of which are
   referenced in this project).
+- Upgraded `wire-elements/modal` 2 → 3. v3 targets Tailwind v4 and also adds
+  Livewire 4 compatibility, clearing the way for the Livewire upgrade. No
+  code changes are required — the admin layout already uses the renamed
+  `@livewire('wire-elements-modal')` directive, and no modal views have been
+  published to `resources/views/vendor/`.
 
 ### Known issues
 
