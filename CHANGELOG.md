@@ -10,6 +10,21 @@ changes may occur in any minor release.
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded frontend toolchain: Vite 6 → 8, `laravel-vite-plugin` 1.2 → 3,
+  Tailwind CSS v4 plugin and runtime to 4.2, SweetAlert2 to 11.26, axios to
+  1.15, concurrently to 9.2.
+- Resolved the Vite 6.0.9+ CORS regression that blocked the dev server from
+  serving assets to the Herd/Valet `.test` host by upgrading
+  `laravel-vite-plugin` past its CORS-aware release.
+
+### Known issues
+
+- `vite-plugin-full-reload@1.2.0` (transitive via `laravel-vite-plugin`) pins
+  `picomatch@2.3.1`, which has a dev-only ReDoS advisory. Will clear when the
+  upstream plugin publishes a new release.
+
 ## [0.1.0] - 2026-04-14
 
 Initial baseline of ConfiguPro — a multi-tenant SaaS for building custom price
