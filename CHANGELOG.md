@@ -29,6 +29,11 @@ changes may occur in any minor release.
   `laravel/sail` 1.43 → 1.57, `laravel/pint` 1.22 → 1.29,
   `fruitcake/laravel-telescope-toolbar` 1.3.6 → 1.3.7,
   `nunomaduro/collision` 8.8.0 → 8.8.3, `fakerphp/faker` 1.23 → 1.24.
+- Upgraded `spatie/laravel-permission` 6 → 7. The existing `HasRoles` usage,
+  `assignRole` / `syncRoles` calls, and the `permission_tables` migration all
+  continue to work unchanged; v7 only added type declarations to the public
+  API and renamed internal event and command classes (neither of which are
+  referenced in this project).
 
 ### Known issues
 
