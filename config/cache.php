@@ -105,4 +105,18 @@ return [
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | As a hardening measure introduced in Laravel 13, cached values must not
+    | deserialize arbitrary PHP objects. Set this to `true` to allow object
+    | serialization in the cache, or list specific classes to allow. The
+    | framework default in Laravel 13 is `false`.
+    |
+    */
+
+    'serializable_classes' => false,
+
 ];

@@ -53,6 +53,13 @@ changes may occur in any minor release.
   revisit when Pest publishes a PHPUnit-13-compatible release. PHPUnit 12.5.8+
   clears [CVE-2026-24765](https://github.com/advisories/GHSA-vvj3-c3rp-c85p).
   No changes were required to `phpunit.xml`, test files, or the base TestCase.
+- Upgraded `laravel/framework` 12 → 13 (13.5.0). Added
+  `serializable_classes => false` to `config/cache.php` per the Laravel 13
+  hardening guidance. No other code changes were needed — the CSRF
+  middleware rename (`VerifyCsrfToken` → `PreventRequestForgery`) is not
+  referenced anywhere in this project, and the new Eloquent restriction
+  against creating models during boot does not apply to the `BelongsToTenant`
+  or `Uuid` traits, which only register closures.
 
 ### Known issues
 
