@@ -10,6 +10,12 @@ changes may occur in any minor release.
 
 ## [Unreleased]
 
+### Security
+
+- Upgraded Livewire to 3.7.15, clearing
+  [CVE-2025-54068](https://github.com/advisories/GHSA-29cq-5w36-x7w3) — a
+  critical RCE vulnerability affecting Livewire versions prior to 3.6.4.
+
 ### Changed
 
 - Upgraded frontend toolchain: Vite 6 → 8, `laravel-vite-plugin` 1.2 → 3,
@@ -18,6 +24,11 @@ changes may occur in any minor release.
 - Resolved the Vite 6.0.9+ CORS regression that blocked the dev server from
   serving assets to the Herd/Valet `.test` host by upgrading
   `laravel-vite-plugin` past its CORS-aware release.
+- Refreshed safe-range Composer dependencies: `laravel/framework` 12.14 →
+  12.56, `laravel/telescope` 5.7 → 5.20, `laravel/pail` 1.2.2 → 1.2.6,
+  `laravel/sail` 1.43 → 1.57, `laravel/pint` 1.22 → 1.29,
+  `fruitcake/laravel-telescope-toolbar` 1.3.6 → 1.3.7,
+  `nunomaduro/collision` 8.8.0 → 8.8.3, `fakerphp/faker` 1.23 → 1.24.
 
 ### Known issues
 
