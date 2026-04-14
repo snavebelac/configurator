@@ -60,12 +60,22 @@ changes may occur in any minor release.
   referenced anywhere in this project, and the new Eloquent restriction
   against creating models during boot does not apply to the `BelongsToTenant`
   or `Uuid` traits, which only register closures.
+- Upgraded Livewire 3 → 4 (4.2.4). All existing directives (`wire:model`,
+  `.live`, `.lazy`, `.live.debounce`, `wire:click`/`submit`/`loading`/
+  `key`/`confirm`), lifecycle hooks (`mount`, `render`, `updated*`), and
+  attributes (`#[Layout]`, `#[On]`) carried over without changes. No
+  non-self-closed `<livewire:…>` tags existed to rewrite.
 
 ### Known issues
 
 - `vite-plugin-full-reload@1.2.0` (transitive via `laravel-vite-plugin`) pins
   `picomatch@2.3.1`, which has a dev-only ReDoS advisory. Will clear when the
   upstream plugin publishes a new release.
+- Upgrade verification so far is test-suite-only; a full browser pass across
+  the admin UI is still outstanding and should precede any new feature work.
+- The pre-existing `Proposal::features()` / `Feature::proposals()` pivot
+  mismatch carries over from v0.1.0 and still fails one `TenantScopeTest`
+  case. To be addressed as the first post-upgrade fix.
 
 ## [0.1.0] - 2026-04-14
 
