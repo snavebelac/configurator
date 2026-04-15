@@ -22,6 +22,14 @@ changes may occur in any minor release.
 
 ### Changed
 
+- Rewrote `README.md` for prospective users: dropped the original marketing
+  copy in favour of a plain-English overview of the product concept (feature
+  library → clients → interactive proposals with optional toggles and live
+  totals), the planned operator/client two-screen presentation mode, and an
+  honest split of what works today versus what is still to come (self-serve
+  sign-up, screen mirroring, unifying the interactive proposal with the
+  simpler HTML proposal output). Flagged that the "ConfiguPro" name is not
+  final.
 - Upgraded frontend toolchain: Vite 6 → 8, `laravel-vite-plugin` 1.2 → 3,
   Tailwind CSS v4 plugin and runtime to 4.2, SweetAlert2 to 11.26, axios to
   1.15, concurrently to 9.2.
