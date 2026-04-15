@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halverson Studio · Brand identity system — Present</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="present">
+
+    <!-- Top bar -->
+    <header class="present__topbar">
+        <div class="present__brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4 L8 4 L12 9 L16 4 L21 4 L21 13 C21 17.4 17 21 12 21 C7 21 3 17.4 3 13 Z" fill="currentColor" stroke="none"/>
+                <circle cx="9" cy="12" r="1" fill="#242423"/>
+                <circle cx="15" cy="12" r="1" fill="#242423"/>
+            </svg>
+            <span class="present__brand__meta">Operator view · v3</span>
+        </div>
+
+        <div class="present__live">
+            <span class="present__live__dot"></span>
+            Mirroring to client
+        </div>
+
+        <a href="proposals.html" class="present__exit">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M6 18 18 6"/></svg>
+            Exit present
+        </a>
+    </header>
+
+    <!-- Body -->
+    <div class="present__body">
+
+        <!-- Operator side -->
+        <section class="present__main">
+            <div class="present__intro">
+                <div class="present__client">For Halverson Studio · prepared by Caleb Evans</div>
+                <h1>Brand identity system,<br>end-to-end.</h1>
+                <p>A complete identity refresh — from positioning through to applied brand assets and a small site refresh. Tick the optional pieces with Iris on the call to land a final scope.</p>
+            </div>
+
+            <!-- Group 1: Foundation -->
+            <div class="present__group">
+                <div class="present__group-head">
+                    <span class="present__group-title">Foundation</span>
+                    <span class="present__group-meta">Required · 4 features</span>
+                </div>
+
+                <div class="feature is-on" data-required>
+                    <div>
+                        <div class="feature__title">Discovery &amp; positioning workshop</div>
+                        <div class="feature__sub">Two half-day sessions with the leadership team. Outputs a positioning brief and visual direction.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>3,200</div>
+                    <div class="toggle toggle--locked" title="Required">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                    </div>
+                </div>
+
+                <div class="feature is-on" data-required>
+                    <div>
+                        <div class="feature__title">Logo &amp; wordmark design</div>
+                        <div class="feature__sub">Three rounds of exploration, two rounds of refinement, final master files.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>4,800</div>
+                    <div class="toggle toggle--locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+                </div>
+
+                <div class="feature is-on" data-required>
+                    <div>
+                        <div class="feature__title">Type system &amp; colour palette</div>
+                        <div class="feature__sub">Primary and secondary type pairings, full colour system with accessibility tokens.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>2,400</div>
+                    <div class="toggle toggle--locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+                </div>
+
+                <div class="feature is-on" data-required>
+                    <div>
+                        <div class="feature__title">Brand guidelines document</div>
+                        <div class="feature__sub">A 30–40 page PDF and an interactive Notion mirror, designed for the team.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>3,400</div>
+                    <div class="toggle toggle--locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+                </div>
+            </div>
+
+            <!-- Group 2: Optional -->
+            <div class="present__group">
+                <div class="present__group-head">
+                    <span class="present__group-title">Optional add-ons</span>
+                    <span class="present__group-meta">Tick to include</span>
+                </div>
+
+                <div class="feature is-on" data-optional>
+                    <div>
+                        <div class="feature__title">Stationery &amp; print collateral</div>
+                        <div class="feature__sub">Letterheads, business cards, compliments slips. Print-ready files plus a small print run.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>1,800</div>
+                    <button class="toggle is-on" data-toggle></button>
+                </div>
+
+                <div class="feature is-on" data-optional>
+                    <div>
+                        <div class="feature__title">Email signature &amp; templates</div>
+                        <div class="feature__sub">HTML signature, two slide-deck templates, and a Notion document template.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>1,200</div>
+                    <button class="toggle is-on" data-toggle></button>
+                </div>
+
+                <div class="feature is-off" data-optional>
+                    <div>
+                        <div class="feature__title">Photography art direction</div>
+                        <div class="feature__sub">Brief, mood references, and a half-day shoot direction with your photographer.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>2,800</div>
+                    <button class="toggle" data-toggle></button>
+                </div>
+
+                <div class="feature is-on" data-optional>
+                    <div>
+                        <div class="feature__title">Site landing-page refresh</div>
+                        <div class="feature__sub">Hero, about, services, and contact pages re-designed against the new identity. Build is excluded.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>4,400</div>
+                    <button class="toggle is-on" data-toggle></button>
+                </div>
+
+                <div class="feature is-off" data-optional>
+                    <div>
+                        <div class="feature__title">Motion identity</div>
+                        <div class="feature__sub">Logo animation, transition kit, and three short brand idents for video use.</div>
+                    </div>
+                    <div class="feature__price"><span class="currency">£</span>3,600</div>
+                    <button class="toggle" data-toggle></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <aside class="present__summary">
+            <div class="summary__label">Total to date</div>
+            <div class="summary__total">
+                <span class="currency">£</span><span id="total" class="tnum">21,200</span>
+            </div>
+            <p class="summary__caveat">Updates live as you tick optional features. Excludes VAT at 20%.</p>
+
+            <div class="summary__breakdown">
+                <div class="summary__row">
+                    <span>Foundation (required)</span>
+                    <span><span style="color:var(--slate-faint);">£</span>13,800</span>
+                </div>
+                <div class="summary__row">
+                    <span>Optional included <em style="color:var(--slate-faint);font-style:normal;">· <span id="optCount">3</span> of 5</em></span>
+                    <span><span style="color:var(--slate-faint);">£</span><span id="optTotal" class="tnum">7,400</span></span>
+                </div>
+                <div class="summary__row summary__row--muted">
+                    <span>VAT (20%)</span>
+                    <span><span style="color:var(--slate-faint);">£</span><span id="vat" class="tnum">4,240</span></span>
+                </div>
+            </div>
+
+            <div class="summary__hint">
+                Press <span class="kbd">space</span> to toggle the focused feature, <span class="kbd">esc</span> to exit.
+                The client view at <span class="mono" style="color:var(--sage);">halverson.configurator.live</span> mirrors this in real time.
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="present__foot">
+        <span>Configurator · live presentation</span>
+        <span class="present__foot__page">Vol I · Proposal No. 3 of 22</span>
+        <span>halverson · brand-identity-system</span>
+    </footer>
+</div>
+
+<script>
+    const REQUIRED = 13800;
+    const VAT_RATE = 0.20;
+
+    function recalc() {
+        const optionals = document.querySelectorAll('[data-optional]');
+        let optTotal = 0;
+        let optCount = 0;
+        optionals.forEach(row => {
+            const on = row.classList.contains('is-on');
+            const priceText = row.querySelector('.feature__price').textContent.replace(/[^\d.]/g, '');
+            const price = parseFloat(priceText) || 0;
+            if (on) { optTotal += price; optCount += 1; }
+        });
+        const subtotal = REQUIRED + optTotal;
+        const vat = subtotal * VAT_RATE;
+
+        document.getElementById('total').textContent   = subtotal.toLocaleString('en-GB');
+        document.getElementById('optTotal').textContent = optTotal.toLocaleString('en-GB');
+        document.getElementById('optCount').textContent = optCount;
+        document.getElementById('vat').textContent     = Math.round(vat).toLocaleString('en-GB');
+    }
+
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = btn.closest('.feature');
+            row.classList.toggle('is-on');
+            row.classList.toggle('is-off');
+            btn.classList.toggle('is-on');
+            recalc();
+        });
+    });
+
+    recalc();
+</script>
+
+</body>
+</html>

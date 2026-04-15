@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposals — Configurator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="rail">
+        <a href="dashboard.html" class="rail__brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4 L8 4 L12 9 L16 4 L21 4 L21 13 C21 17.4 17 21 12 21 C7 21 3 17.4 3 13 Z" fill="currentColor" stroke="none"/>
+                <circle cx="9" cy="12" r="1" fill="#242423"/>
+                <circle cx="15" cy="12" r="1" fill="#242423"/>
+            </svg>
+        </a>
+        <nav class="rail__items">
+            <a href="dashboard.html" class="rail__item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg>
+                <span class="rail__tooltip">Overview</span>
+            </a>
+            <a href="proposals.html" class="rail__item is-active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13a0 0 0 0 1 0 0H5a0 0 0 0 1 0 0V3z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg>
+                <span class="rail__tooltip">Proposals</span>
+            </a>
+            <a href="#" class="rail__item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><circle cx="6" cy="11" r="2"/><circle cx="18" cy="11" r="2"/><path d="M3 19c0-2.5 4-4.5 9-4.5s9 2 9 4.5"/></svg>
+                <span class="rail__tooltip">Clients</span>
+            </a>
+            <a href="#" class="rail__item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l7-4 7 4-7 4z"/><path d="M5 12l7 4 7-4"/><path d="M5 17l7 4 7-4"/></svg>
+                <span class="rail__tooltip">Features</span>
+            </a>
+            <a href="#" class="rail__item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                <span class="rail__tooltip">Team</span>
+            </a>
+        </nav>
+        <div class="rail__spacer"></div>
+        <div class="rail__divider"></div>
+        <div class="rail__avatar">CE</div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="crumbs">
+                <span>Epicfox Studio</span>
+                <span class="crumbs__sep">/</span>
+                <strong>Proposals</strong>
+            </div>
+            <button class="search-trigger" id="palette-trigger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+                <span>Search anything…</span>
+                <span class="search-trigger__hint">
+                    <span class="kbd">⌘</span><span class="kbd">K</span>
+                </span>
+            </button>
+            <button class="topbar__action">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 4 2 6 2 6H4s2-2 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+            </button>
+        </header>
+
+        <div class="page">
+            <div class="page__header">
+                <div class="page__intro">
+                    <span class="eyebrow">22 in flight</span>
+                    <h1>Proposals.</h1>
+                    <p>Every quote you've sent, every draft you've started. Walk a proposal through with a client by hitting <em>Present</em> on any row.</p>
+                </div>
+                <div class="page__actions">
+                    <button class="btn btn--ghost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6l-7 7v3l-2 2v-5l-7-7z"/></svg>
+                        Filter
+                    </button>
+                    <button class="btn btn--accent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                        New proposal
+                    </button>
+                </div>
+            </div>
+
+            <section class="table-wrap">
+                <div class="table-toolbar">
+                    <div class="segments">
+                        <button class="segments__btn is-active">All <span class="count">22</span></button>
+                        <button class="segments__btn">Drafts <span class="count">5</span></button>
+                        <button class="segments__btn">Delivered <span class="count">7</span></button>
+                        <button class="segments__btn">Accepted <span class="count">8</span></button>
+                        <button class="segments__btn">Rejected <span class="count">2</span></button>
+                        <button class="segments__btn">Archived <span class="count">14</span></button>
+                    </div>
+                    <div class="tbl-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+                        <input type="text" placeholder="Filter…">
+                    </div>
+                </div>
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:34%">Proposal</th>
+                            <th>Client</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th class="tnum">Value</th>
+                            <th>Updated</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Brand identity system</div>
+                                <div class="tbl__sub">12 features · 4 optional · v3</div>
+                            </td>
+                            <td>Halverson Studio</td>
+                            <td><span class="tbl__avatar">CE</span>Caleb</td>
+                            <td><span class="pill pill--accepted">Accepted</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>18,750</td>
+                            <td>2h ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">E-commerce launch</div>
+                                <div class="tbl__sub">21 features · 9 optional</div>
+                            </td>
+                            <td>Northwind Trading</td>
+                            <td><span class="tbl__avatar" style="background:#F5CB5C;">MK</span>Mara</td>
+                            <td><span class="pill pill--delivered">Delivered</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>52,400</td>
+                            <td>Yesterday</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Service redesign — discovery phase</div>
+                                <div class="tbl__sub">7 features · 2 optional</div>
+                            </td>
+                            <td>Beacon &amp; Crow</td>
+                            <td><span class="tbl__avatar" style="background:#CFDBD5;">CE</span>Caleb</td>
+                            <td><span class="pill pill--draft">Draft</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>8,400</td>
+                            <td>9d ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Annual report — print &amp; digital</div>
+                                <div class="tbl__sub">9 features · 3 optional</div>
+                            </td>
+                            <td>Fenwick + Reid</td>
+                            <td><span class="tbl__avatar" style="background:#5F6463;color:#FBFBF7;">CE</span>Caleb</td>
+                            <td><span class="pill pill--delivered">Delivered</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>14,600</td>
+                            <td>11d ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Wayfinding system</div>
+                                <div class="tbl__sub">6 features · 1 optional</div>
+                            </td>
+                            <td>Linden Tate</td>
+                            <td><span class="tbl__avatar">MK</span>Mara</td>
+                            <td><span class="pill pill--draft">Draft</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>6,250</td>
+                            <td>13d ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Editorial site &amp; CMS migration</div>
+                                <div class="tbl__sub">18 features · 7 optional · v2</div>
+                            </td>
+                            <td>Pellish Quarterly</td>
+                            <td><span class="tbl__avatar" style="background:#F5CB5C;">MK</span>Mara</td>
+                            <td><span class="pill pill--accepted">Accepted</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>34,800</td>
+                            <td>2d ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Site refresh</div>
+                                <div class="tbl__sub">14 features · 6 optional</div>
+                            </td>
+                            <td>Karol Vass Architecture</td>
+                            <td><span class="tbl__avatar">CE</span>Caleb</td>
+                            <td><span class="pill pill--rejected">Declined</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>21,900</td>
+                            <td>3d ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Membership portal</div>
+                                <div class="tbl__sub">11 features · 5 optional</div>
+                            </td>
+                            <td>The Athenaeum</td>
+                            <td><span class="tbl__avatar">CE</span>Caleb</td>
+                            <td><span class="pill pill--delivered">Delivered</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>27,300</td>
+                            <td>5d ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="tbl__title">Packaging system &amp; print</div>
+                                <div class="tbl__sub">8 features · 3 optional</div>
+                            </td>
+                            <td>Saltbird Provisions</td>
+                            <td><span class="tbl__avatar">MK</span>Mara</td>
+                            <td><span class="pill pill--archived">Archived</span></td>
+                            <td class="tbl__money"><span class="currency">£</span>11,400</td>
+                            <td>3w ago</td>
+                            <td><div class="tbl__actions">
+                                <button class="btn btn--quiet">Open</button>
+                                <a href="present.html" class="btn btn--quiet">Present →</a>
+                            </div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Command palette -->
+<div class="palette-overlay" id="palette">
+    <div class="palette" role="dialog" aria-modal="true">
+        <div class="palette__input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+            <input type="text" placeholder="Search proposals, clients, features — or type a command…" autofocus>
+            <span class="kbd">esc</span>
+        </div>
+        <div class="palette__group">
+            <div class="palette__label">Suggested</div>
+            <div class="palette__item is-focused">
+                <svg class="palette__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Create new proposal…
+                <span class="palette__hint">N</span>
+            </div>
+            <div class="palette__item">
+                <svg class="palette__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+                Add a new feature to library
+            </div>
+        </div>
+        <div class="palette__foot">
+            <div class="palette__foot__keys">
+                <span><span class="kbd">↑↓</span> navigate</span>
+                <span><span class="kbd">↵</span> select</span>
+                <span><span class="kbd">esc</span> close</span>
+            </div>
+            <div>Configurator · workspace</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const overlay = document.getElementById('palette');
+    document.getElementById('palette-trigger').addEventListener('click', () => overlay.classList.add('is-open'));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('is-open'); });
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); overlay.classList.toggle('is-open'); }
+        if (e.key === 'Escape') overlay.classList.remove('is-open');
+    });
+</script>
+
+</body>
+</html>

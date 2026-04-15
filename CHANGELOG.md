@@ -10,6 +10,16 @@ changes may occur in any minor release.
 
 ## [Unreleased]
 
+### Added
+
+- Static `design-prototypes/` reference folder containing the agreed direction
+  for the admin refactor: a dashboard, a proposals list, and a "present mode"
+  for live client walkthroughs. Built around the Epic Fox brand palette
+  (`#242423` ink, `#CFDBD5` sage, `#F5CB5C` fox-yellow, `#5F6463` slate),
+  with Fraunces (display, SOFT 50) + Geist (body) + JetBrains Mono (numerals).
+  Frozen reference only — not served by the app. Open
+  `design-prototypes/dashboard.html` to view.
+
 ### Security
 
 - Upgraded Livewire to 3.7.15, clearing
