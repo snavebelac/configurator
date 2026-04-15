@@ -8,11 +8,50 @@
 @source "../**/*.vue";
 
 @theme {
-  --font-sans:
-    Figtree, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    /* ----- Typography (Epic Fox brand) ----- */
+    --font-sans:
+        'Geist', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Fraunces', 'Iowan Old Style', 'Times New Roman', serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
+    /* ----- Brand palette ----- */
+    --color-ink: #242423;
+    --color-ink-2: #1A1A19;
+    --color-ink-3: #2E2E2D;
+    --color-ink-soft: #3A3A39;
+    --color-sage: #CFDBD5;
+    --color-sage-soft: #DDE4E0;
+    --color-sage-paper: #ECEEEA;
+    --color-fox: #F5CB5C;
+    --color-fox-deep: #E0B544;
+    --color-fox-soft: #FBEFC9;
+    --color-slate: #5F6463;
+    --color-slate-soft: #898D8C;
+    --color-slate-faint: #B8BBB9;
+    --color-paper: #FBFBF7;
+    --color-paper-2: #F4F4EE;
+    --color-rule: #E5E3D9;
+    --color-rule-soft: #EFEDE4;
 
+    /* ----- Status hues (editorial, muted) ----- */
+    --color-status-draft-bg: #F0EEE0;
+    --color-status-draft-fg: #6E6643;
+    --color-status-draft-dot: #B0A77F;
+    --color-status-delivered-bg: #E5EAEF;
+    --color-status-delivered-fg: #3F4D5C;
+    --color-status-delivered-dot: #6B7C8C;
+    --color-status-accepted-bg: #DFEAE2;
+    --color-status-accepted-fg: #2E5C3D;
+    --color-status-accepted-dot: #5B9069;
+    --color-status-rejected-bg: #F2E2DC;
+    --color-status-rejected-fg: #7E3F2C;
+    --color-status-rejected-dot: #B57460;
+    --color-status-archived-bg: #ECEEEA;
+    --color-status-archived-fg: #5F6463;
+    --color-status-archived-dot: #898D8C;
+
+    /* ----- Existing primary/* palette retained while non-dashboard pages migrate ----- */
     --color-primary-50: oklch(0.977 0.013 236.62);
     --color-primary-100: oklch(0.951 0.026 236.824);
     --color-primary-200: oklch(0.901 0.058 230.902);
@@ -143,4 +182,17 @@
     .toastify-right, .toastify-left {
         @apply mx-auto left-0 right-0 max-w-fit;
     }
+}
+
+/* ----- Body baseline for the brand UI ----- */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Tabular numerals — apply to any element holding money/figures */
+.tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
 }

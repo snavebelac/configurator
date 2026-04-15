@@ -1,10 +1,6 @@
-{{--<svg {{ $attributes }} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">--}}
-{{--    <path d="M100 63.58L1.5 0V102.74H198.5V0L100 63.58Z" fill="#FF5F38"/>--}}
-{{--    <path d="M100 200L198.5 102.74L100 63.58L1.5 102.74L100 200Z" fill="#9F1900"/>--}}
-{{--    <path d="M78.3896 178.66L99.9996 200L121.61 178.66L99.9996 157.18L78.3896 178.66Z" fill="black"/>--}}
-{{--    <path d="M1.5 102.74L100 63.58L198.5 102.74L100 157.18L1.5 102.74Z" fill="#F02600"/>--}}
-{{--</svg>--}}
-<div {{ $attributes }}>
-    <p class="uppercase font-extrabold text-xl tracking-widest border-b-3 border-t-3 py-0.5 my-2">CONFIGURATOR</p>
-</div>
-
+{{-- Configurator brand mark --}}
+<svg {{ $attributes }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 4 L8 4 L12 9 L16 4 L21 4 L21 13 C21 17.4 17 21 12 21 C7 21 3 17.4 3 13 Z" fill="currentColor" stroke="none"/>
+    <circle cx="9" cy="12" r="1" fill="#242423"/>
+    <circle cx="15" cy="12" r="1" fill="#242423"/>
+</svg>

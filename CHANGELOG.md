@@ -12,6 +12,29 @@ changes may occur in any minor release.
 
 ### Added
 
+- New brand UI baseline applied to the admin shell and dashboard, in line with
+  the static reference in `design-prototypes/`:
+    - Epic Fox brand palette and typography wired into `resources/css/app.css`
+      as additive Tailwind v4 tokens (`bg-ink`, `text-fox`, `text-sage`,
+      `text-slate`, `bg-paper`, `border-rule`, status hues, plus
+      `font-display` / `font-sans` / `font-mono`). The legacy `primary/*`
+      palette is retained so non-dashboard pages continue to render until
+      they migrate.
+    - Refactored `components/layouts/admin.blade.php` to a 64px ink rail with
+      icon-only nav (fox-yellow active accent + tooltip on hover) and a
+      sticky 60px topbar with workspace breadcrumb and a visual
+      `⌘K` search trigger (palette wiring still to come).
+    - New `<x-pill>` Blade component for status badges; `<x-logo>` rebuilt as
+      the geometric fox mark; `<x-menu-item>` rewritten for the slim rail.
+    - `Dashboard` Livewire component now computes real KPIs (open pipeline
+      value, won this month, conversion %, average closed value) plus a
+      "needs your attention" feed (delivered > 14d, drafts untouched > 7d)
+      and the eight most recent updates.
+    - `dashboard.blade.php` rebuilt: serif greeting, four-tile KPI strip
+      (first tile in ink + fox-yellow), attention panel, recent-activity
+      feed, and a segmented proposals table. Numbers use tabular figures.
+    - `tests/Feature/DashboardTest.php` covers the empty state and the
+      populated state across all proposal statuses.
 - Static `design-prototypes/` reference folder containing the agreed direction
   for the admin refactor: a dashboard, a proposals list, and a "present mode"
   for live client walkthroughs. Built around the Epic Fox brand palette
