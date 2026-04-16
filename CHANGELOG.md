@@ -12,6 +12,32 @@ changes may occur in any minor release.
 
 ### Added
 
+- Shared Blade primitives for the admin UI so the brand look only lives in
+  one place: `<x-page-header>` (eyebrow + serif h1 + lede + actions slot),
+  `<x-card>` + `<x-card-header>`, `<x-btn>` (`accent` / `ghost` / `quiet` /
+  `row` / `destructive` variants), `<x-money>` (`kpi` / `kpi-fox` / `row` /
+  `mono` / `body` sizes, optional 2dp precision), and `<x-th>`. The
+  dashboard and proposals list were retrofitted onto them as part of the
+  same change.
+- Brand UI migration for the remaining back-office list pages:
+    - Clients list (`/dashboard/clients`) — brand header, single search
+      toolbar (name / contact / email via a proper `whereHas` query, fixing
+      the same silent `orWhere('client.name', ...)` bug the proposals list
+      had), URL-backed search.
+    - Features list (`/dashboard/features`) — brand header with
+      `{total} · {optional} optional` eyebrow, per-row Optional badge in
+      fox-soft tones, prices via `<x-money :precise="true">`.
+    - Users list (`/dashboard/users`) — brand header, inline
+      Active/Inactive pill, "You" marker on the signed-in row, delete
+      action hidden on the current user.
+    - Profile form (`/dashboard/profile`) — rebuilt as a single bordered
+      card: ink-on-paper inputs with focus ring, cancel/save footer using
+      `<x-btn>` variants, and a status-accepted banner when the update
+      succeeds.
+- Feature tests for each migrated page:
+  `tests/Feature/{ClientListTest,FeaturesListTest,UserListTest,ProfileTest}.php`
+  cover the empty state, the populated list, the search filter (where the
+  page has one), and the delete / update paths. 30 tests, 84 assertions.
 - Proposals list page (`/dashboard/proposals`) rebuilt against the new
   design system, following the `design-prototypes/proposals.html` pattern:
   serif page header with in-flight count, segmented status control (All /

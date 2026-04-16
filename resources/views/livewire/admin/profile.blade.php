@@ -1,51 +1,66 @@
-<div class="mt-1 max-w-7xl">
-    <div class="mb-6 ml-3">
-        <h2 class="text-lg font-semibold text-gray-900">Profile</h2>
-        <p class="mt-1 text-sm/6 text-gray-600">Update you name and email address</p>
-    </div>
-    <div class="bg-white px-6 pt-1 pb-6 shadow-sm sm:rounded-lg sm:px-12">
+<div class="mx-auto max-w-3xl">
+
+    <x-page-header
+        title="Your profile."
+        eyebrow="Account settings"
+        lede="Update the name and email address that appear on your proposals and inside the admin." />
+
+    <x-card>
         <form wire:submit="updateUser({{ $userId }})">
-            <div class="space-y-12">
-                <div class="border-b border-gray-900/10 pb-12">
+            <div class="space-y-8 px-8 py-8">
 
-                    @if (session('profile.updated'))
-                        <x-info :message="session('profile.updated')" />
-                    @endif
+                @if (session('profile.updated'))
+                    <div class="flex items-center gap-3 rounded-lg border border-status-accepted-dot/30 bg-status-accepted-bg px-4 py-2.5 text-[13px] text-status-accepted-fg">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg>
+                        {{ session('profile.updated') }}
+                    </div>
+                @endif
 
-                    <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                        <div class="sm:col-span-3">
-                            <label for="first-name" class="block text-sm/6 font-medium text-gray-900">First name</label>
-                            <div class="mt-2">
-                                <input type="text" name="first-name" id="first-name" wire:model="name" autocomplete="given-name" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6">
-                            </div>
-                            @error('name')<p class="text-red-600">{{ $message }}</p>@enderror
-                        </div>
+                <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <label for="first-name" class="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.08em] text-slate">First name</label>
+                        <input id="first-name"
+                               type="text"
+                               wire:model="name"
+                               autocomplete="given-name"
+                               class="block w-full rounded-lg border border-rule bg-paper-2 px-3 py-2 text-[14px] text-ink focus:border-ink focus:bg-white focus:outline-none transition-colors">
+                        @error('name')
+                            <p class="mt-1.5 text-[12px] text-status-rejected-fg">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                        <div class="sm:col-span-3">
-                            <label for="last-name" class="block text-sm/6 font-medium text-gray-900">Last name</label>
-                            <div class="mt-2">
-                                <input type="text" name="last-name" id="last-name" wire:model="lastName" autocomplete="family-name" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6">
-                            </div>
-                            @error('lastName')<p class="text-red-600">{{ $message }}</p>@enderror
-                        </div>
+                    <div>
+                        <label for="last-name" class="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Last name</label>
+                        <input id="last-name"
+                               type="text"
+                               wire:model="lastName"
+                               autocomplete="family-name"
+                               class="block w-full rounded-lg border border-rule bg-paper-2 px-3 py-2 text-[14px] text-ink focus:border-ink focus:bg-white focus:outline-none transition-colors">
+                        @error('lastName')
+                            <p class="mt-1.5 text-[12px] text-status-rejected-fg">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                        <div class="sm:col-span-4">
-                            <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
-                            <div class="mt-2">
-                                <input id="email" name="email" type="email" wire:model="email" autocomplete="email" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6">
-                            </div>
-                            @error('email')<p class="text-red-600">{{ $message }}</p>@enderror
-                        </div>
-
+                    <div class="sm:col-span-2">
+                        <label for="email" class="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Email address</label>
+                        <input id="email"
+                               type="email"
+                               wire:model="email"
+                               autocomplete="email"
+                               class="block w-full rounded-lg border border-rule bg-paper-2 px-3 py-2 text-[14px] text-ink focus:border-ink focus:bg-white focus:outline-none transition-colors">
+                        @error('email')
+                            <p class="mt-1.5 text-[12px] text-status-rejected-fg">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
+
             </div>
 
-
-            <div class="mt-6 flex items-center justify-end gap-x-6">
-                <a href="{{ route('dashboard') }}" class="text-sm/6 font-semibold text-gray-900">Cancel</a>
-                <button type="submit" class="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Save</button>
+            <div class="flex items-center justify-end gap-2 border-t border-rule-soft bg-paper-2 px-8 py-4">
+                <x-btn variant="ghost" :href="route('dashboard')">Cancel</x-btn>
+                <x-btn variant="accent" type="submit">Save changes</x-btn>
             </div>
         </form>
-    </div>
+    </x-card>
+
 </div>

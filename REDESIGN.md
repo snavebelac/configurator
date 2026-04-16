@@ -6,12 +6,16 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 
 ## Where we are
 
-The dashboard (`/dashboard`) and the proposals list (`/dashboard/proposals`)
-have been rebuilt against the new design system, and the admin layout shell
-matches the agreed direction. The remaining admin pages (proposal builder,
-clients, features, users, profile, settings) still use the legacy `primary/*`
-blue palette and will look visually inconsistent inside the new shell until
-they're migrated.
+All list-style admin pages (dashboard, proposals, clients, features, users)
+and the profile form have been rebuilt against the new design system, on
+top of a shared set of Blade primitives (`<x-page-header>`, `<x-card>`,
+`<x-card-header>`, `<x-btn>`, `<x-money>`, `<x-th>`, `<x-pill>`). The only
+un-migrated back-office surface is the proposal builder (create/edit) —
+that's flagged below as its own session because of its size.
+
+The wire-elements modals (client / feature / user / proposal-feature)
+still render with their default styling inside the new shell. Restyling
+those is also pending.
 
 The static reference for the whole direction lives in `design-prototypes/`
 (`dashboard.html`, `proposals.html`, `present.html`). Open
@@ -45,6 +49,17 @@ The static reference for the whole direction lives in `design-prototypes/`
 - `resources/views/components/menu-item.blade.php` — icon-only rail item
   with active accent and tooltip.
 - `resources/views/components/pill.blade.php` — status pill component.
+- `resources/views/components/page-header.blade.php` — eyebrow + serif h1
+  + lede + actions slot. Used by every migrated admin page.
+- `resources/views/components/card.blade.php` +
+  `resources/views/components/card-header.blade.php` — rounded panel
+  wrapper and its titled header row.
+- `resources/views/components/btn.blade.php` — button / link with
+  `accent` / `ghost` / `quiet` / `row` / `destructive` variants.
+- `resources/views/components/money.blade.php` — `£` + tnum figure with
+  `kpi` / `kpi-fox` / `row` / `mono` / `body` sizes. `:precise` toggles
+  2dp vs. whole-pound.
+- `resources/views/components/th.blade.php` — uppercase table header cell.
 - `app/Livewire/Admin/Dashboard.php` — real KPI computation.
 - `resources/views/livewire/admin/dashboard.blade.php` — KPI strip,
   attention feed, recent feed, segmented table.
@@ -58,27 +73,45 @@ The static reference for the whole direction lives in `design-prototypes/`
   owner column, value column, preserved delete action.
 - `tests/Feature/ProposalsListTest.php` — empty state, multi-status list,
   status filter, name/client search, delete.
+- `app/Livewire/Admin/Clients/ClientList.php` +
+  `resources/views/livewire/admin/clients/client-list.blade.php` — brand
+  header, single search toolbar, clean table. URL-backed search via
+  `#[Url]`, `whereHas`-style search across client fields.
+- `app/Livewire/Admin/Features/FeaturesList.php` +
+  `resources/views/livewire/admin/features/features-list.blade.php` —
+  brand header with `{total} · {optional} optional` eyebrow, per-row
+  Optional badge, prices via `<x-money :precise="true">`.
+- `resources/views/livewire/admin/users/user-list.blade.php` — brand
+  header, inline Active/Inactive pill, "You" badge on the signed-in row,
+  delete hidden on the current user.
+- `resources/views/livewire/admin/profile.blade.php` — brand form:
+  bordered card, ink focus ring, cancel/save footer using `<x-btn>`.
+- `tests/Feature/{ClientListTest,FeaturesListTest,UserListTest,ProfileTest}.php`
+  covering empty state, listing, search (where applicable), and
+  delete / update paths.
 
 ## What's left, in rough priority
 
-### 1. Migrate the remaining admin pages to the new shell
-
-Each page below currently renders in the new layout but with old `primary/*`
-classes. Rewrite to use brand tokens (`bg-paper`, `border-rule`, `text-ink`,
-`<x-pill>`, etc.) following the prototype patterns.
+### 1. Migrate the proposal builder
 
 - `resources/views/livewire/admin/proposals/proposal-create.blade.php` and
-  `proposal-edit.blade.php` — the proposal builder. The biggest piece
-  here. Worth its own session.
-- `resources/views/livewire/admin/clients/*` — list + create/edit modal.
-- `resources/views/livewire/admin/features/*` — list + create/edit modal.
-- `resources/views/livewire/admin/users/*` — list + create/edit modal.
-- `resources/views/livewire/admin/profile.blade.php`.
+  `proposal-edit.blade.php` — the biggest remaining piece, and worth its
+  own session. Rewrite to use brand tokens and the shared components
+  (`<x-page-header>`, `<x-card>`, `<x-btn>`, `<x-money>`), matching the
+  proposal-edit flow implied by the dashboard and proposals-list patterns.
+- `resources/views/livewire/admin/proposals/proposal-feature-form.blade.php`
+  — the feature-add modal that sits inside the builder.
 
-For modals (`wire-elements/modal`), audit the modal patterns and decide
-whether to keep the off-the-shelf component styling or restyle.
+### 2. Restyle the wire-elements modals
 
-### 2. Wire the command palette
+The modals (`client-modal`, `feature-modal`, `user-modal`,
+`proposal-feature-form`) all still use the old `primary/*` form styling.
+Audit the `wire-elements/modal` skin and decide whether to publish the
+vendor views and restyle, or wrap our form controls in a shared form-field
+component first so the styling is consistent regardless of whether a form
+renders on a page or inside a modal.
+
+### 3. Wire the command palette
 
 Today the topbar's search trigger is purely visual.
 
@@ -91,7 +124,7 @@ Today the topbar's search trigger is purely visual.
   input top, grouped sections, focused-item ink-on-fox highlight, footer
   hints).
 
-### 3. Replace the "Lately" stand-in with a real activity feed
+### 4. Replace the "Lately" stand-in with a real activity feed
 
 The dashboard currently shows the last eight updated proposals as a stand-in
 for activity. Real activity needs an event store.
@@ -104,7 +137,7 @@ for activity. Real activity needs an event store.
 - Update the Dashboard component to load the latest 8 events instead of
   recently-updated proposals.
 
-### 4. Build "Present mode"
+### 5. Build "Present mode"
 
 Once the back-office is consistent, build the live presentation experience:
 
@@ -115,12 +148,12 @@ Once the back-office is consistent, build the live presentation experience:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes to
   Livewire events from the operator — eventual real-time sync.
 
-### 5. Mobile / tablet support
+### 6. Mobile / tablet support
 
 Deferred until the desktop pass is complete. The current rail will need a
 collapsible/off-canvas treatment at narrow widths.
 
-### 6. Drop the legacy `primary/*` palette
+### 7. Drop the legacy `primary/*` palette
 
 Once every admin page uses brand tokens, remove the `primary/*`,
 `success/*`, `warning/*`, `gray/*` ramps from `resources/css/app.css` and
@@ -132,7 +165,7 @@ whether to keep Toastify + SweetAlert2 or replace with in-house components.
 - Static design reference: `design-prototypes/` (HTML/CSS only — not served).
 - Brand tokens: `resources/css/app.css` (top of `@theme` block).
 - Layout shell: `resources/views/components/layouts/admin.blade.php`.
-- Shared components: `resources/views/components/{logo,menu-item,pill}.blade.php`.
+- Shared components: `resources/views/components/{logo,menu-item,pill,page-header,card,card-header,btn,money,th}.blade.php`.
 - Done dashboard: `resources/views/livewire/admin/dashboard.blade.php` +
   `app/Livewire/Admin/Dashboard.php`.
 - Coverage pattern to copy for new pages: `tests/Feature/DashboardTest.php`.

@@ -1,6 +1,4 @@
 @php
-    use App\Enums\Status;
-
     $segments = [
         ['key' => 'all',       'label' => 'All'],
         ['key' => 'draft',     'label' => 'Drafts'],
@@ -17,33 +15,19 @@
 @endphp
 <div class="mx-auto max-w-[1480px]">
 
-    {{-- =========================================================
-         PAGE HEADER
-         ========================================================= --}}
-    <div class="mb-9 flex items-end justify-between gap-8 border-b border-rule pb-7">
-        <div class="flex max-w-2xl flex-col gap-1.5">
-            <span class="text-[11px] font-medium uppercase tracking-[0.14em] text-slate">
-                {{ $total }} {{ Str::plural('proposal', $total) }} in flight
-            </span>
-            <h1 class="font-display text-[clamp(34px,3.4vw,46px)] font-[450] leading-[1.04] tracking-[-0.022em] text-ink"
-                style="font-variation-settings: 'opsz' 144, 'SOFT' 50;">
-                Proposals.
-            </h1>
-            <p class="max-w-xl text-[14.5px] text-slate">{{ $intro }}</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('dashboard.proposal.create') }}"
-               class="inline-flex items-center gap-2 rounded-lg border border-fox bg-fox px-4 py-[9px] text-[13px] font-semibold text-ink transition-colors hover:bg-fox-deep hover:border-fox-deep">
+    <x-page-header
+        title="Proposals."
+        :eyebrow="$total . ' ' . Str::plural('proposal', $total) . ' in flight'"
+        :lede="$intro">
+        <x-slot:actions>
+            <x-btn variant="accent" :href="route('dashboard.proposal.create')">
                 <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                 New proposal
-            </a>
-        </div>
-    </div>
+            </x-btn>
+        </x-slot:actions>
+    </x-page-header>
 
-    {{-- =========================================================
-         TABLE
-         ========================================================= --}}
-    <section class="overflow-hidden rounded-2xl border border-rule bg-white">
+    <x-card>
 
         {{-- Toolbar: segmented status + search --}}
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-rule-soft px-5 py-3.5">
@@ -84,13 +68,13 @@
         <table class="w-full">
             <thead>
                 <tr>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate" style="width:34%">Proposal</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Client</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Owner</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Status</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Value</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Updated</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3"></th>
+                    <x-th style="width:34%">Proposal</x-th>
+                    <x-th>Client</x-th>
+                    <x-th>Owner</x-th>
+                    <x-th>Status</x-th>
+                    <x-th>Value</x-th>
+                    <x-th>Updated</x-th>
+                    <x-th></x-th>
                 </tr>
             </thead>
             <tbody>
@@ -114,24 +98,22 @@
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
                             <x-pill :status="$proposal->status->value" />
                         </td>
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle font-mono text-[13px] text-ink">
-                            <span class="mr-0.5 text-slate-soft">£</span><span class="tnum">{{ number_format($proposal->total(), 0) }}</span>
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
+                            <x-money :value="$proposal->total()" size="mono" />
                         </td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-slate">
                             {{ $proposal->updated_at->diffForHumans(short: true) }}
                         </td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
                             <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">
-                                <a href="{{ route('dashboard.proposal.edit', ['proposal' => $proposal->id]) }}"
-                                   class="rounded-md px-2.5 py-1.5 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">Edit</a>
-                                <a href="{{ route('dashboard.proposal.preview', ['proposal' => $proposal->uuid]) }}"
-                                   class="rounded-md px-2.5 py-1.5 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">Preview</a>
-                                <button type="button"
-                                        wire:click="delete({{ $proposal->id }})"
-                                        wire:confirm="Are you sure you wish to delete [{{ $proposal->name }}]?"
-                                        class="rounded-md px-2.5 py-1.5 text-xs font-medium text-status-rejected-fg hover:bg-status-rejected-bg">
+                                <x-btn variant="row" :href="route('dashboard.proposal.edit', ['proposal' => $proposal->id])">Edit</x-btn>
+                                <x-btn variant="row" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])">Preview</x-btn>
+                                <x-btn variant="row"
+                                       class="text-status-rejected-fg hover:bg-status-rejected-bg"
+                                       wire:click="delete({{ $proposal->id }})"
+                                       wire:confirm="Are you sure you wish to delete [{{ $proposal->name }}]?">
                                     Delete
-                                </button>
+                                </x-btn>
                             </div>
                         </td>
                     </tr>
@@ -154,6 +136,6 @@
                 {{ $proposals->links() }}
             </div>
         @endif
-    </section>
+    </x-card>
 
 </div>

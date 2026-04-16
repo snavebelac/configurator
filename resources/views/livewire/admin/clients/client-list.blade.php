@@ -1,62 +1,106 @@
-<div class="mt-1 max-w-7xl">
-    <div class="flex flex-col gap-2 md:flex-row items-start md:items-center px-3">
-        <div class="md:flex-auto">
-            <h1 class="text-base font-semibold text-gray-900">Clients</h1>
-            <p class="mt-2 text-sm text-gray-700">A list of your clients</p>
-        </div>
-        <div class="md:flex-auto flex items-center gap-2">
-            <label for="search">Search</label>
-            <input id="search" name="search" type="text" wire:model.live.debounce="search" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6">
-            <button class="button button-round" wire:click="$set('search', '')" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        <div class="mt-4 sm:mt-0 md:ml-16 sm:flex-none">
-            <button type="button" wire:click="$dispatch('openModal', {component: 'admin.clients.client-modal'})" class="button">Add Client</button>
-        </div>
-    </div>
-    <div class="mt-8 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <x-tables.table>
-                    <x-slot:thead>
-                        <x-tables.table-row :is-head="true">
-                            <x-tables.table-head-cell>Client</x-tables.table-head-cell>
-                            <x-tables.table-head-cell>Contact</x-tables.table-head-cell>
-                            <x-tables.table-head-cell>Email</x-tables.table-head-cell>
-                            <x-tables.table-head-cell>Phone</x-tables.table-head-cell>
-                            <x-tables.table-head-cell>Actions</x-tables.table-head-cell>
-                        </x-tables.table-row>
-                    </x-slot:thead>
-                    <x-slot:tbody>
-                        @forelse ($clients as $client)
-                            <x-tables.table-row wire:key="{{ $client->id }}">
-                                <x-tables.table-cell>{{ $client->name }}</x-tables.table-cell>
-                                <x-tables.table-cell>{{ $client->contact }}</x-tables.table-cell>
-                                <x-tables.table-cell><x-email-link :email="$client->contact_email" /></x-tables.table-cell>
-                                <x-tables.table-cell><x-tel-link :number="$client->contact_phone" /></x-tables.table-cell>
-                                <x-tables.table-cell>
-                                    <button wire:click="$dispatch('openModal', {component: 'admin.clients.client-modal', arguments: {clientId: {{ $client->id }} }})" class="button">Edit<span class="sr-only">, {{ $client->name }}</span></button>
-                                    <button wire:click="delete({{ $client->id }})" wire:confirm="Are you sure you wish to delete [{{ $client->name }}]?" class="button button-warning">Delete<span class="sr-only">, {{ $client->name }}</span></button>
-                                    </x-tables.table-cell>
-                            </x-tables.table-row>
-                        @empty
-                            <x-tables.table-row-empty>No clients found</x-tables.table-row-empty>
-                        @endforelse
-                    </x-slot:tbody>
-                </x-tables.table>
+@php
+    $intro = $total === 0
+        ? 'You haven\'t added a client yet. Add one and they\'ll show up here — ready to attach to proposals.'
+        : 'Every person or company you\'ve ever sent a proposal to, in one place.';
+@endphp
+<div class="mx-auto max-w-[1480px]">
 
-                <div class="mt-3">
-                    {{ $clients->links() }}
-                </div>
+    <x-page-header
+        title="Clients."
+        :eyebrow="$total . ' ' . Str::plural('client', $total) . ' on file'"
+        :lede="$intro">
+        <x-slot:actions>
+            <x-btn variant="accent" wire:click="$dispatch('openModal', {component: 'admin.clients.client-modal'})">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Add client
+            </x-btn>
+        </x-slot:actions>
+    </x-page-header>
+
+    <x-card>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-rule-soft px-5 py-3.5">
+            <span class="text-xs text-slate">{{ $clients->total() }} {{ Str::plural('result', $clients->total()) }}</span>
+
+            <div class="relative flex items-center">
+                <svg class="pointer-events-none absolute left-3 size-3.5 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+                <input type="text"
+                       wire:model.live.debounce.250ms="search"
+                       placeholder="Filter by name, contact, email…"
+                       class="w-72 rounded-lg border border-rule bg-paper-2 py-[7px] pl-8 pr-3 text-[13px] text-ink placeholder:text-slate-soft focus:border-ink focus:outline-none focus:bg-white transition-colors">
+                @if ($search !== '')
+                    <button type="button" wire:click="$set('search', '')" class="absolute right-2 rounded p-1 text-slate-soft hover:text-ink" aria-label="Clear search">
+                        <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M6 18 18 6"/></svg>
+                    </button>
+                @endif
             </div>
-
-
         </div>
-    </div>
+
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <x-th style="width:32%">Client</x-th>
+                    <x-th>Contact</x-th>
+                    <x-th>Email</x-th>
+                    <x-th>Phone</x-th>
+                    <x-th></x-th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($clients as $client)
+                    <tr wire:key="client-{{ $client->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
+                            <div class="font-medium">{{ $client->name }}</div>
+                        </td>
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
+                            {{ $client->contact ?: '—' }}
+                        </td>
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
+                            @if ($client->contact_email)
+                                <x-email-link :email="$client->contact_email" />
+                            @else
+                                <span class="text-slate-soft">—</span>
+                            @endif
+                        </td>
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
+                            @if ($client->contact_phone)
+                                <x-tel-link :number="$client->contact_phone" />
+                            @else
+                                <span class="text-slate-soft">—</span>
+                            @endif
+                        </td>
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
+                            <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">
+                                <x-btn variant="row" wire:click="$dispatch('openModal', {component: 'admin.clients.client-modal', arguments: {clientId: {{ $client->id }} }})">
+                                    Edit
+                                </x-btn>
+                                <x-btn variant="row" class="text-status-rejected-fg hover:bg-status-rejected-bg"
+                                       wire:click="delete({{ $client->id }})"
+                                       wire:confirm="Are you sure you wish to delete [{{ $client->name }}]?">
+                                    Delete
+                                </x-btn>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-14 text-center text-sm text-slate">
+                            @if ($search !== '')
+                                No clients match "{{ $search }}".
+                            @else
+                                No clients yet — add your first one.
+                            @endif
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        @if ($clients->hasPages())
+            <div class="border-t border-rule-soft px-5 py-3">
+                {{ $clients->links() }}
+            </div>
+        @endif
+    </x-card>
+
 </div>
-
-
-

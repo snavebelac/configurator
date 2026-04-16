@@ -6,15 +6,22 @@ use App\Livewire\Admin\AdminComponent;
 use App\Models\Feature;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
 class FeaturesList extends AdminComponent
 {
     use WithPagination;
 
-    public $search = '';
+    #[Url(as: 'q', except: '')]
+    public string $search = '';
 
-    private $pageLength = 20;
+    private int $pageLength = 20;
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
 
     #[On('refresh-features')]
     public function loadFeatures(): void
@@ -37,12 +44,14 @@ class FeaturesList extends AdminComponent
 
     public function render(): View
     {
-        $features = Feature::when($this->search != '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
+        $features = Feature::when($this->search !== '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
             ->orderBy('name')
             ->paginate($this->pageLength);
 
         return view('livewire.admin.features.features-list', [
             'features' => $features,
+            'total' => Feature::count(),
+            'optionalCount' => Feature::where('optional', true)->count(),
         ]);
     }
 }

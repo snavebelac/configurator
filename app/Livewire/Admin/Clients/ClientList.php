@@ -4,18 +4,26 @@ namespace App\Livewire\Admin\Clients;
 
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Client;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
 class ClientList extends AdminComponent
 {
     use WithPagination;
 
-    public $search = '';
+    #[Url(as: 'q', except: '')]
+    public string $search = '';
 
-    private $pageLength = 5;
+    private int $pageLength = 12;
 
-    #[On('refresh-proposals')]
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    #[On('refresh-clients')]
     public function loadClients(): void
     {
         $this->resetPage();
@@ -34,18 +42,22 @@ class ClientList extends AdminComponent
         }
     }
 
-    public function render()
+    public function render(): View
     {
-        $clients = Client::when($this->search != '', fn ($query) => $query
-            ->where('name', 'like', '%'.$this->search.'%')
-            ->orWhere('contact', 'like', '%'.$this->search.'%')
-            ->orWhere('contact_email', 'like', '%'.$this->search.'%')
-        )
+        $clients = Client::when($this->search !== '', function ($query) {
+            $term = '%'.$this->search.'%';
+            $query->where(function ($inner) use ($term) {
+                $inner->where('name', 'like', $term)
+                    ->orWhere('contact', 'like', $term)
+                    ->orWhere('contact_email', 'like', $term);
+            });
+        })
             ->orderBy('name')
             ->paginate($this->pageLength);
 
         return view('livewire.admin.clients.client-list', [
             'clients' => $clients,
+            'total' => Client::count(),
         ]);
     }
 }

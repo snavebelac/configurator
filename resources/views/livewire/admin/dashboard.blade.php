@@ -1,5 +1,4 @@
 @php
-    use Carbon\Carbon;
     $hour = (int) now()->format('G');
     $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');
     $intro = $needsAttention->isNotEmpty()
@@ -8,26 +7,17 @@
 @endphp
 <div class="mx-auto max-w-[1480px]">
 
-    {{-- =========================================================
-         PAGE HEADER
-         ========================================================= --}}
-    <div class="mb-9 flex items-end justify-between gap-8 border-b border-rule pb-7">
-        <div class="flex max-w-2xl flex-col gap-1.5">
-            <span class="text-[11px] font-medium uppercase tracking-[0.14em] text-slate">{{ now()->format('l, j F') }}</span>
-            <h1 class="font-display text-[clamp(34px,3.4vw,46px)] font-[450] leading-[1.04] tracking-[-0.022em] text-ink"
-                style="font-variation-settings: 'opsz' 144, 'SOFT' 50;">
-                {{ $greeting }}, {{ $user->name }}.
-            </h1>
-            <p class="max-w-xl text-[14.5px] text-slate">{{ $intro }}</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('dashboard.proposal.create') }}"
-               class="inline-flex items-center gap-2 rounded-lg border border-fox bg-fox px-4 py-[9px] text-[13px] font-semibold text-ink transition-colors hover:bg-fox-deep hover:border-fox-deep">
+    <x-page-header
+        :title="$greeting . ', ' . $user->name . '.'"
+        :eyebrow="now()->format('l, j F')"
+        :lede="$intro">
+        <x-slot:actions>
+            <x-btn variant="accent" :href="route('dashboard.proposal.create')">
                 <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                 New proposal
-            </a>
-        </div>
-    </div>
+            </x-btn>
+        </x-slot:actions>
+    </x-page-header>
 
     {{-- =========================================================
          KPI STRIP
@@ -39,10 +29,7 @@
             <div class="flex items-center justify-between gap-3">
                 <span class="text-[10.5px] font-medium uppercase tracking-[0.13em] text-sage-soft">Open pipeline</span>
             </div>
-            <div class="font-display text-[38px] font-[450] leading-none tracking-[-0.025em] text-fox"
-                 style="font-variation-settings: 'opsz' 96;">
-                <span class="mr-0.5 align-[5px] text-2xl text-fox-deep">£</span><span class="tnum">{{ number_format($openValue, 0) }}</span>
-            </div>
+            <x-money :value="$openValue" size="kpi-fox" />
             <div class="flex items-center justify-between text-xs text-sage-soft">
                 <span>{{ $counts['draft'] + $counts['delivered'] }} live</span>
                 <span>across drafts &amp; delivered</span>
@@ -52,10 +39,7 @@
         {{-- Won this month --}}
         <div class="flex flex-col gap-3.5 bg-white p-6 pb-[22px]">
             <span class="text-[10.5px] font-medium uppercase tracking-[0.13em] text-slate">Won this month</span>
-            <div class="font-display text-[38px] font-[450] leading-none tracking-[-0.025em] text-ink"
-                 style="font-variation-settings: 'opsz' 96;">
-                <span class="mr-0.5 align-[5px] text-2xl text-slate-soft">£</span><span class="tnum">{{ number_format($wonThisMonth, 0) }}</span>
-            </div>
+            <x-money :value="$wonThisMonth" size="kpi" />
             <div class="flex items-center justify-between text-xs text-slate">
                 <span>{{ $monthAccepted }} accepted</span>
                 <span>{{ now()->format('F') }}</span>
@@ -82,10 +66,7 @@
         {{-- Avg proposal --}}
         <div class="flex flex-col gap-3.5 bg-white p-6 pb-[22px]">
             <span class="text-[10.5px] font-medium uppercase tracking-[0.13em] text-slate">Avg. proposal</span>
-            <div class="font-display text-[38px] font-[450] leading-none tracking-[-0.025em] text-ink"
-                 style="font-variation-settings: 'opsz' 96;">
-                <span class="mr-0.5 align-[5px] text-2xl text-slate-soft">£</span><span class="tnum">{{ number_format($avgValue, 0) }}</span>
-            </div>
+            <x-money :value="$avgValue" size="kpi" />
             <div class="flex items-center justify-between text-xs text-slate">
                 <span>{{ $closedCount }} closed deals</span>
                 <span>average value</span>
@@ -100,14 +81,10 @@
     <div class="mb-9 grid grid-cols-[1.3fr_1fr] gap-5">
 
         {{-- Needs attention --}}
-        <section class="overflow-hidden rounded-2xl border border-rule bg-white">
-            <header class="flex items-baseline justify-between border-b border-rule-soft px-[22px] pb-3.5 pt-[18px]">
-                <h3 class="font-display text-[18px] font-medium text-ink"
-                    style="font-variation-settings: 'opsz' 24;">
-                    Needs your attention
-                </h3>
-                <span class="text-xs text-slate">{{ $needsAttention->count() }} {{ Str::plural('item', $needsAttention->count()) }}</span>
-            </header>
+        <x-card>
+            <x-card-header
+                title="Needs your attention"
+                :meta="$needsAttention->count() . ' ' . Str::plural('item', $needsAttention->count())" />
             <div class="py-1.5">
                 @forelse ($needsAttention as $item)
                     @php
@@ -124,10 +101,7 @@
                             {{ $item->name }}
                             <x-pill :status="$item->status->value" :label="$label" />
                         </div>
-                        <div class="row-span-2 self-center font-display text-[17px] font-medium text-ink"
-                             style="font-variation-settings: 'opsz' 36;">
-                            <span class="mr-0.5 text-sm text-slate-soft">£</span><span class="tnum">{{ number_format($item->total(), 0) }}</span>
-                        </div>
+                        <x-money :value="$item->total()" size="row" class="row-span-2 self-center" />
                         <div class="text-[12.5px] text-slate">
                             {{ $item->client?->name ?? 'No client' }} · last edited by {{ $item->user?->name ?? 'unknown' }}
                         </div>
@@ -136,17 +110,11 @@
                     <div class="px-[22px] py-10 text-center text-sm text-slate">Nothing's stuck. Quiet shift.</div>
                 @endforelse
             </div>
-        </section>
+        </x-card>
 
         {{-- Recent updates --}}
-        <section class="overflow-hidden rounded-2xl border border-rule bg-white">
-            <header class="flex items-baseline justify-between border-b border-rule-soft px-[22px] pb-3.5 pt-[18px]">
-                <h3 class="font-display text-[18px] font-medium text-ink"
-                    style="font-variation-settings: 'opsz' 24;">
-                    Lately
-                </h3>
-                <span class="text-xs text-slate">last 8 changes</span>
-            </header>
+        <x-card>
+            <x-card-header title="Lately" meta="last 8 changes" />
             <div class="py-1">
                 @forelse ($recent as $item)
                     <a href="{{ route('dashboard.proposal.edit', ['proposal' => $item]) }}"
@@ -180,13 +148,13 @@
                     <div class="px-[22px] py-10 text-center text-sm text-slate">No proposals yet — start your first one.</div>
                 @endforelse
             </div>
-        </section>
+        </x-card>
     </div>
 
     {{-- =========================================================
          RECENT PROPOSALS TABLE
          ========================================================= --}}
-    <section class="overflow-hidden rounded-2xl border border-rule bg-white">
+    <x-card>
         <div class="flex items-center gap-2.5 border-b border-rule-soft px-5 py-3.5">
             <div class="inline-flex gap-0.5 rounded-[9px] border border-rule bg-paper-2 p-[3px]">
                 @foreach ([['all', 'All'], ['draft', 'Drafts'], ['delivered', 'Delivered'], ['accepted', 'Accepted'], ['rejected', 'Rejected']] as [$key, $label])
@@ -201,13 +169,13 @@
         <table class="w-full">
             <thead>
                 <tr>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate" style="width:38%">Proposal</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Client</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Owner</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Status</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Value</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3 text-left text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Updated</th>
-                    <th class="border-b border-rule bg-paper px-4 py-3"></th>
+                    <x-th style="width:38%">Proposal</x-th>
+                    <x-th>Client</x-th>
+                    <x-th>Owner</x-th>
+                    <x-th>Status</x-th>
+                    <x-th>Value</x-th>
+                    <x-th>Updated</x-th>
+                    <x-th></x-th>
                 </tr>
             </thead>
             <tbody>
@@ -220,14 +188,12 @@
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">{{ $item->client?->name ?? '—' }}</td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">{{ $item->user?->full_name ?? '—' }}</td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle"><x-pill :status="$item->status->value" /></td>
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle font-mono text-[13px] text-ink"><span class="mr-0.5 text-slate-soft">£</span><span class="tnum">{{ number_format($item->total(), 0) }}</span></td>
+                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle"><x-money :value="$item->total()" size="mono" /></td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-slate">{{ $item->updated_at->diffForHumans(short: true) }}</td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
                             <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">
-                                <a href="{{ route('dashboard.proposal.edit', ['proposal' => $item]) }}"
-                                   class="rounded-md px-2.5 py-1.5 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">Open</a>
-                                <a href="{{ route('dashboard.proposal.preview', ['proposal' => $item->uuid]) }}"
-                                   class="rounded-md px-2.5 py-1.5 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">Preview</a>
+                                <x-btn variant="row" :href="route('dashboard.proposal.edit', ['proposal' => $item])">Open</x-btn>
+                                <x-btn variant="row" :href="route('dashboard.proposal.preview', ['proposal' => $item->uuid])">Preview</x-btn>
                             </div>
                         </td>
                     </tr>
@@ -236,6 +202,6 @@
                 @endforelse
             </tbody>
         </table>
-    </section>
+    </x-card>
 
 </div>
