@@ -4,6 +4,9 @@ use App\Http\Middleware\RequireActiveUser;
 use App\Livewire\Admin\Clients\ClientList;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Features\FeaturesList;
+use App\Livewire\Admin\Packages\PackageCreate;
+use App\Livewire\Admin\Packages\PackageEdit;
+use App\Livewire\Admin\Packages\PackageList;
 use App\Livewire\Admin\Profile;
 use App\Livewire\Admin\Proposals\Preview;
 use App\Livewire\Admin\Proposals\ProposalCreate;
@@ -46,6 +49,9 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/proposal/preview/{proposal:uuid}', Preview::class)->name('dashboard.proposal.preview');
     Route::get('/proposal/edit/{proposal}', ProposalEdit::class)->name('dashboard.proposal.edit');
     Route::get('/clients', ClientList::class)->name('dashboard.clients');
+    Route::get('/packages', PackageList::class)->name('dashboard.packages');
+    Route::get('/package/create', PackageCreate::class)->name('dashboard.package.create');
+    Route::get('/package/edit/{package}', PackageEdit::class)->name('dashboard.package.edit');
 });
 
 // View Proposals

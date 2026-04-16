@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -87,5 +88,13 @@ class Feature extends Model
     public function scopeRoots(Builder $query): Builder
     {
         return $query->whereNull('parent_id');
+    }
+
+    public function packages(): BelongsToMany
+    {
+        return $this->belongsToMany(Package::class, 'feature_package')
+            ->using(FeaturePackage::class)
+            ->withPivot(['quantity', 'optional', 'price'])
+            ->withTimestamps();
     }
 }

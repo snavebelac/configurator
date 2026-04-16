@@ -7,6 +7,9 @@
         'dashboard.proposal.preview' => 'Proposals · Preview',
         'dashboard.clients'          => 'Clients',
         'dashboard.features'         => 'Features',
+        'dashboard.packages'         => 'Packages',
+        'dashboard.package.create'   => 'Packages · New',
+        'dashboard.package.edit'     => 'Packages · Edit',
         'dashboard.users'            => 'Team',
         'dashboard.profile'          => 'Profile',
     ];
@@ -59,6 +62,11 @@
                 <path d="M5 7l7-4 7 4-7 4z"/>
                 <path d="M5 12l7 4 7-4"/>
                 <path d="M5 17l7 4 7-4"/>
+            </x-menu-item>
+            <x-menu-item route="dashboard.packages" title="Packages">
+                <path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/>
+                <path d="M3.5 7.5 12 12l8.5-4.5"/>
+                <path d="M12 12v9"/>
             </x-menu-item>
             <x-menu-item route="dashboard.users" title="Team">
                 <circle cx="12" cy="8" r="4"/>

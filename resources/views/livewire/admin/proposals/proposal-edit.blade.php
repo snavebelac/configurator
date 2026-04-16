@@ -41,11 +41,18 @@
                 <h3 class="font-display text-[18px] text-ink">Features</h3>
                 <span class="text-xs text-slate">{{ $proposal->features->count() }} {{ Str::plural('line', $proposal->features->count()) }}</span>
             </div>
-            <x-btn variant="accent"
-                   wire:click="$dispatch('openModal', {component: 'admin.proposals.add-features-modal', arguments: {proposalId: {{ $proposal->id }} }})">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                Add features
-            </x-btn>
+            <div class="flex items-center gap-2">
+                <x-btn variant="ghost"
+                       wire:click="$dispatch('openModal', {component: 'admin.proposals.add-package-modal', arguments: {proposalId: {{ $proposal->id }} }})">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5"/><path d="M12 12v9"/></svg>
+                    Add package
+                </x-btn>
+                <x-btn variant="accent"
+                       wire:click="$dispatch('openModal', {component: 'admin.proposals.add-features-modal', arguments: {proposalId: {{ $proposal->id }} }})">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Add features
+                </x-btn>
+            </div>
         </x-card-header>
 
         @if ($featureGroups->isNotEmpty())

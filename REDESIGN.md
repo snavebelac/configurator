@@ -40,6 +40,15 @@ starting over. The old "Finalise" button has been dropped (a reversible
 ceremony we didn't need) in favour of an elevated "Preview (client
 view)" CTA.
 
+**Packages** — pre-curated sets of features that can be dropped onto a
+proposal in bulk. A `Package` has a many-to-many relationship to
+`Feature` via the `feature_package` pivot (a custom tenant-scoped
+`FeaturePackage` Pivot model), with optional per-package overrides on
+quantity, price, and required/optional. `AddPackageModal` snapshots a
+package's features onto an existing proposal (with the same auto-attach
+parent + de-dup logic), and `PackagePickerModal` covers the
+proposal-create path. Full admin CRUD at `/dashboard/packages`.
+
 The static reference for the whole direction lives in `design-prototypes/`
 (`dashboard.html`, `proposals.html`, `present.html`). Open
 `design-prototypes/dashboard.html` in a browser before continuing.

@@ -3,10 +3,12 @@
 namespace App\Livewire\Admin\Proposals;
 
 use App\Enums\Status;
+use App\Facades\Formatter;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Client;
 use App\Models\Feature;
 use App\Models\FinalFeature;
+use App\Models\Package;
 use App\Models\Proposal;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -21,6 +23,9 @@ class ProposalCreate extends AdminComponent
     /** @var array<int> */
     #[Validate('required|array|min:1')]
     public array $selectedFeatureIds = [];
+
+    /** @var array<int, array{quantity: ?int, optional: ?bool, price: ?int}> */
+    public array $packageOverrides = [];
 
     #[Validate('required|max:255')]
     public string $name = '';
@@ -39,6 +44,50 @@ class ProposalCreate extends AdminComponent
     public function handlePicked(int $featureId): void
     {
         $this->selectFeature($featureId);
+    }
+
+    #[On('package-picked')]
+    public function handlePackagePicked(int $packageId): void
+    {
+        $package = Package::with('features')->find($packageId);
+        if (! $package) {
+            return;
+        }
+
+        $addedCount = 0;
+
+        foreach ($package->features as $feature) {
+            if (in_array($feature->id, $this->selectedFeatureIds, true)) {
+                continue;
+            }
+
+            if ($feature->parent_id && ! in_array($feature->parent_id, $this->selectedFeatureIds, true)) {
+                $this->selectedFeatureIds[] = $feature->parent_id;
+            }
+
+            $this->selectedFeatureIds[] = $feature->id;
+
+            $pivot = $feature->pivot;
+            if ($pivot->quantity !== null || $pivot->optional !== null || $pivot->getRawOriginal('price') !== null) {
+                $this->packageOverrides[$feature->id] = [
+                    'quantity' => $pivot->quantity,
+                    'optional' => $pivot->optional,
+                    'price' => $pivot->getRawOriginal('price'),
+                ];
+            }
+
+            $addedCount++;
+        }
+
+        if ($addedCount > 0) {
+            $this->dispatch('toast', ...$this->success([
+                'text' => "Added {$addedCount} ".Str::plural('feature', $addedCount)." from \"{$package->name}\"",
+            ]));
+        } else {
+            $this->dispatch('toast', ...$this->warning([
+                'text' => "All features from \"{$package->name}\" were already selected.",
+            ]));
+        }
     }
 
     public function selectFeature(int $featureId): void
@@ -118,12 +167,23 @@ class ProposalCreate extends AdminComponent
 
     private function snapshotFeature(Feature $feature, Proposal $proposal, ?int $parentFinalId, int $order): FinalFeature
     {
+        $override = $this->packageOverrides[$feature->id] ?? null;
+
+        $quantity = $override['quantity'] ?? $feature->quantity;
+        $optional = $override['optional'] ?? $feature->optional;
+
+        if ($override !== null && $override['price'] !== null) {
+            $price = Formatter::convertIntegerPrice($override['price']);
+        } else {
+            $price = $feature->price;
+        }
+
         $finalFeature = new FinalFeature([
             'name' => $feature->name,
             'description' => $feature->description,
-            'price' => $feature->price,
-            'quantity' => $feature->quantity,
-            'optional' => $feature->optional,
+            'price' => $price,
+            'quantity' => $quantity,
+            'optional' => $optional,
             'parent_id' => $parentFinalId,
             'source_feature_id' => $feature->id,
             'order' => $order,
