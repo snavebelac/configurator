@@ -8,8 +8,7 @@
         @if ($eyebrow)
             <span class="text-[11px] font-medium uppercase tracking-[0.14em] text-slate">{{ $eyebrow }}</span>
         @endif
-        <h1 class="font-display text-[clamp(34px,3.4vw,46px)] font-[450] leading-[1.04] tracking-[-0.022em] text-ink"
-            style="font-variation-settings: 'opsz' 144, 'SOFT' 50;">
+        <h1 class="font-display text-[clamp(34px,3.4vw,46px)] leading-[1.06] tracking-[-0.04em] italic text-ink">
             {{ $title }}
         </h1>
         @if ($lede)

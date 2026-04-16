@@ -3,11 +3,26 @@
    Editorial precision meets warm confidence.
    ============================================================ */
 
+@font-face {
+    font-family: 'Office Code Pro';
+    src: url('fonts/officecodepro-regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Office Code Pro';
+    src: url('fonts/officecodepro-medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     font-size: 14px;
     line-height: 1.55;
     color: var(--ink);
@@ -65,23 +80,22 @@ table { border-collapse: collapse; width: 100%; }
 }
 
 /* ----------------------------------------------------------
-   Typography
+   Typography — Libre Baskerville (display) + Inter (body) + Office Code Pro (mono)
    ---------------------------------------------------------- */
 .display, h1, h2, h3 {
-    font-family: 'Fraunces', 'Iowan Old Style', 'Times New Roman', serif;
-    font-optical-sizing: auto;
-    font-weight: 450;
+    font-family: 'Libre Baskerville', 'Iowan Old Style', 'Times New Roman', serif;
+    font-weight: 400;
     letter-spacing: -0.012em;
     color: var(--ink);
 }
 h1 {
     font-size: clamp(34px, 3.4vw, 46px);
-    line-height: 1.04;
-    font-variation-settings: 'opsz' 144, 'SOFT' 50;
-    letter-spacing: -0.022em;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
+    font-style: italic;
 }
-h2 { font-size: 22px; line-height: 1.2; font-variation-settings: 'opsz' 96; }
-h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; font-weight: 500; }
+h2 { font-size: 22px; line-height: 1.22; }
+h3 { font-size: 17px; line-height: 1.3; }
 .eyebrow {
     text-transform: uppercase;
     font-size: 11px;
@@ -90,12 +104,12 @@ h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; fon
     font-weight: 500;
 }
 .mono {
-    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-family: 'Office Code Pro', ui-monospace, 'SF Mono', Menlo, monospace;
     font-feature-settings: 'tnum' 1, 'zero' 1;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.005em;
 }
 .tnum { font-variant-numeric: tabular-nums; }
-.serif { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+.serif { font-family: 'Libre Baskerville', serif; }
 
 /* ----------------------------------------------------------
    App shell
@@ -228,7 +242,7 @@ h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; fon
 .search-trigger svg { width: 15px; height: 15px; opacity: 0.6; }
 .search-trigger__hint { margin-left: auto; display: flex; gap: 3px; }
 .kbd {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Office Code Pro', monospace;
     font-size: 10.5px;
     background: white;
     border: 1px solid var(--rule);
@@ -343,11 +357,9 @@ h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; fon
     font-weight: 500;
 }
 .kpi__value {
-    font-family: 'Fraunces', serif;
-    font-optical-sizing: auto;
-    font-variation-settings: 'opsz' 96;
+    font-family: 'Libre Baskerville', serif;
     font-size: 38px;
-    font-weight: 450;
+    font-weight: 400;
     letter-spacing: -0.025em;
     color: var(--ink);
     line-height: 1;
@@ -401,7 +413,7 @@ h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; fon
     justify-content: space-between;
     border-bottom: 1px solid var(--rule-soft);
 }
-.panel__head h3 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; }
+.panel__head h3 { font-family: 'Libre Baskerville', serif; font-weight: 400; font-size: 18px; }
 .panel__head__meta { color: var(--slate); font-size: 12px; }
 .panel__body { padding: 6px 0; }
 
@@ -419,7 +431,7 @@ h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; fon
 .attn-item:hover { background: var(--paper-2); cursor: pointer; }
 .attn-item__title { font-weight: 500; color: var(--ink); font-size: 14px; display: flex; align-items: center; gap: 10px; }
 .attn-item__sub { color: var(--slate); font-size: 12.5px; grid-column: 1; }
-.attn-item__value { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; color: var(--ink); grid-row: span 2; align-self: center; }
+.attn-item__value { font-family: 'Libre Baskerville', serif; font-size: 17px; font-weight: 400; color: var(--ink); grid-row: span 2; align-self: center; }
 .attn-item__value .currency { color: var(--slate-soft); margin-right: 2px; font-size: 14px; }
 
 /* Activity feed */
@@ -513,7 +525,7 @@ h3 { font-size: 17px; line-height: 1.25; font-variation-settings: 'opsz' 24; fon
 .segments__btn:hover { color: var(--ink); }
 .segments__btn .count {
     color: var(--slate-soft);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Office Code Pro', monospace;
     font-size: 10.5px;
     font-weight: 400;
 }
@@ -563,7 +575,7 @@ table.tbl tbody tr { transition: background 120ms ease; }
 table.tbl tbody tr:hover { background: var(--paper-2); cursor: pointer; }
 .tbl__title { font-weight: 500; }
 .tbl__sub { color: var(--slate); font-size: 12px; margin-top: 1px; }
-.tbl__money { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum' 1; font-size: 13px; color: var(--ink); }
+.tbl__money { font-family: 'Office Code Pro', monospace; font-feature-settings: 'tnum' 1; font-size: 13px; color: var(--ink); }
 .tbl__money .currency { color: var(--slate-soft); margin-right: 2px; }
 .tbl__actions { display: flex; gap: 6px; justify-content: flex-end; opacity: 0.55; transition: opacity 140ms ease; }
 table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
@@ -619,7 +631,7 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     background: transparent;
     font-size: 16px;
     color: var(--ink);
-    font-family: 'Fraunces', serif;
+    font-family: 'Libre Baskerville', serif;
     font-weight: 400;
     letter-spacing: -0.01em;
 }
@@ -764,8 +776,7 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     margin-bottom: 14px;
 }
 .present__intro h1 {
-    font-family: 'Fraunces', serif;
-    font-variation-settings: 'opsz' 144, 'SOFT' 50;
+    font-family: 'Libre Baskerville', serif;
     font-size: clamp(40px, 4vw, 60px);
     font-weight: 400;
     color: var(--paper);
@@ -790,10 +801,10 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     margin-bottom: 4px;
 }
 .present__group-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'Libre Baskerville', serif;
     font-size: 18px;
     color: var(--paper);
-    font-weight: 500;
+    font-weight: 400;
 }
 .present__group-meta {
     color: var(--slate-faint);
@@ -815,10 +826,10 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
 .feature:last-child { border-bottom: none; }
 .feature.is-off { opacity: 0.36; }
 .feature__title {
-    font-family: 'Fraunces', serif;
+    font-family: 'Libre Baskerville', serif;
     font-size: 19px;
     color: var(--paper);
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.01em;
 }
 .feature__sub {
@@ -829,7 +840,7 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     max-width: 460px;
 }
 .feature__price {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Office Code Pro', monospace;
     font-size: 16px;
     color: var(--sage);
     font-feature-settings: 'tnum' 1;
@@ -909,8 +920,7 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     margin-bottom: 24px;
 }
 .summary__total {
-    font-family: 'Fraunces', serif;
-    font-variation-settings: 'opsz' 144, 'SOFT' 80;
+    font-family: 'Libre Baskerville', serif;
     font-size: clamp(64px, 7vw, 104px);
     line-height: 0.95;
     color: var(--fox);
@@ -947,7 +957,7 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     font-size: 13px;
 }
 .summary__row span:last-child {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Office Code Pro', monospace;
     color: var(--paper);
     font-feature-settings: 'tnum' 1;
 }
@@ -978,6 +988,6 @@ table.tbl tbody tr:hover .tbl__actions { opacity: 1; }
     font-size: 11.5px;
 }
 .present__foot__page {
-    font-family: 'Fraunces', serif;
+    font-family: 'Libre Baskerville', serif;
     letter-spacing: 0.04em;
 }

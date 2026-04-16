@@ -49,8 +49,7 @@
         {{-- Conversion --}}
         <div class="flex flex-col gap-3.5 bg-white p-6 pb-[22px]">
             <span class="text-[10.5px] font-medium uppercase tracking-[0.13em] text-slate">Conversion</span>
-            <div class="font-display text-[38px] font-[450] leading-none tracking-[-0.025em] text-ink"
-                 style="font-variation-settings: 'opsz' 96;">
+            <div class="font-display text-[38px] leading-none tracking-[-0.025em] text-ink">
                 @if ($conversion === null)
                     <span class="text-slate-soft">—</span>
                 @else

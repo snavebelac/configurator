@@ -56,7 +56,7 @@
                 @empty
                     <tr>
                         <td colspan="6" class="px-4 py-16 text-center">
-                            <div class="font-display text-[18px] font-medium text-ink" style="font-variation-settings: 'opsz' 24;">This proposal has no features</div>
+                            <div class="font-display text-[18px] text-ink">This proposal has no features</div>
                             <p class="mt-1.5 text-sm text-slate">Return to the list and start a new proposal to pick features from your library.</p>
                         </td>
                     </tr>

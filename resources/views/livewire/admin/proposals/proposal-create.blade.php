@@ -40,7 +40,7 @@
             <x-card>
                 <x-card-header>
                     <div class="flex items-baseline gap-3">
-                        <h3 class="font-display text-[18px] font-medium text-ink" style="font-variation-settings: 'opsz' 24;">Feature library</h3>
+                        <h3 class="font-display text-[18px] text-ink">Feature library</h3>
                         <span class="text-xs text-slate">{{ $features->total() }} available</span>
                     </div>
                     <button type="button"
@@ -108,7 +108,7 @@
             <x-card>
                 <x-card-header>
                     <div class="flex items-baseline gap-3">
-                        <h3 class="font-display text-[18px] font-medium text-ink" style="font-variation-settings: 'opsz' 24;">Selected features</h3>
+                        <h3 class="font-display text-[18px] text-ink">Selected features</h3>
                         <span class="text-xs text-slate">{{ $selectedCount }} {{ Str::plural('item', $selectedCount) }}</span>
                     </div>
                     <div class="flex items-baseline gap-2 text-slate">
@@ -153,7 +153,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="px-4 py-16 text-center text-sm text-slate">
-                                    <div class="font-display text-[18px] font-medium text-ink" style="font-variation-settings: 'opsz' 24;">Nothing selected yet</div>
+                                    <div class="font-display text-[18px] text-ink">Nothing selected yet</div>
                                     <p class="mt-1.5 text-slate">Pick features from the library on the left.</p>
                                 </td>
                             </tr>
