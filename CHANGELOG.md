@@ -12,6 +12,15 @@ changes may occur in any minor release.
 
 ### Added
 
+- Swapped the admin typography stack from Fraunces + Geist + JetBrains
+  Mono to Libre Baskerville (display) + Inter (body) + Office Code Pro
+  (numerals), after prototyping the change in `design-prototypes/`.
+  Libre Baskerville and Inter load from Google Fonts; Office Code Pro is
+  self-hosted from `public/fonts/` (OFL-licensed webfont kit from Font
+  Squirrel — the original `nathco/Office-Code-Pro` GitHub repo currently
+  404s). Display h1s are now italic with `-0.04em` tracking. Dropped all
+  inline Fraunces-specific `font-variation-settings` and the synthetic
+  half-step `font-[450]` weights from component templates.
 - Toast notifications restyled to the brand UI: ink background, paper
   text, colored status dot on the left (`status-accepted-dot` for success,
   `status-rejected-dot` for the `.warning` variant). The JS dispatch

@@ -28,9 +28,11 @@ The static reference for the whole direction lives in `design-prototypes/`
   `#5F6463` slate. Yellow is reserved for primary CTA, active nav indicator,
   the "open pipeline" KPI tile, the live-presentation total, and the
   "live" indicator. Used at most twice per screen.
-- **Type pairing** — Fraunces (display, with `SOFT 50` on headlines and
-  `SOFT 80` on the giant present-mode total) + Geist (body) + JetBrains
-  Mono (numerals).
+- **Type pairing** — Libre Baskerville (display; h1 in italic with
+  `-0.04em` tracking, regular upright elsewhere) + Inter (body) + Office
+  Code Pro (numerals, self-hosted from `public/fonts/`). Libre
+  Baskerville only ships weight 400 and 700, so don't reach for
+  `font-medium` on display elements.
 - **Shell** — 64px slim icon rail (ink, fox-yellow active accent, tooltip on
   hover) + 60px sticky topbar with workspace breadcrumb and a `⌘K` search
   trigger.
