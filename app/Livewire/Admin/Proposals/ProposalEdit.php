@@ -4,9 +4,10 @@ namespace App\Livewire\Admin\Proposals;
 
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Proposal;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Title;
 
-#[Title('Edit a new proposal')]
+#[Title('Edit proposal')]
 class ProposalEdit extends AdminComponent
 {
     public ?int $proposalId = null;
@@ -15,13 +16,11 @@ class ProposalEdit extends AdminComponent
 
     public function mount(Proposal $proposal): void
     {
-        if ($proposal) {
-            $this->proposalId = $proposal->id;
-            $this->proposal->load(['features']);
-        }
+        $this->proposalId = $proposal->id;
+        $this->proposal->load(['features', 'client', 'user']);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.proposals.proposal-edit');
     }

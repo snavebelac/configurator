@@ -6,16 +6,17 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 
 ## Where we are
 
-All list-style admin pages (dashboard, proposals, clients, features, users)
-and the profile form have been rebuilt against the new design system, on
-top of a shared set of Blade primitives (`<x-page-header>`, `<x-card>`,
-`<x-card-header>`, `<x-btn>`, `<x-money>`, `<x-th>`, `<x-pill>`). The only
-un-migrated back-office surface is the proposal builder (create/edit) —
-that's flagged below as its own session because of its size.
+The entire back-office is now on the new design system: dashboard,
+proposals list, proposal builder (create + edit), clients, features,
+users, and the profile form. All four `wire-elements/modal` modals
+(client, feature, user, and the inline proposal-feature editor) have also
+been restyled.
 
-The wire-elements modals (client / feature / user / proposal-feature)
-still render with their default styling inside the new shell. Restyling
-those is also pending.
+Everything is built on a shared set of Blade primitives —
+`<x-page-header>`, `<x-card>`, `<x-card-header>`, `<x-btn>`, `<x-money>`,
+`<x-th>`, `<x-pill>`, `<x-field>`, `<x-checkbox-field>`, `<x-select-field>`,
+`<x-modal>` — so every form field, button, table, and card has a single
+source of truth.
 
 The static reference for the whole direction lives in `design-prototypes/`
 (`dashboard.html`, `proposals.html`, `present.html`). Open
@@ -60,6 +61,17 @@ The static reference for the whole direction lives in `design-prototypes/`
   `kpi` / `kpi-fox` / `row` / `mono` / `body` sizes. `:precise` toggles
   2dp vs. whole-pound.
 - `resources/views/components/th.blade.php` — uppercase table header cell.
+- `resources/views/components/field.blade.php` — labelled text-like input
+  (text / email / tel / password / number) with ink focus, status-rejected
+  error state, optional `prefix` slot (e.g. `£` for prices), optional
+  `hint`. Respects `@error('field-name')`.
+- `resources/views/components/checkbox-field.blade.php` — ink-accent
+  checkbox with label + optional description.
+- `resources/views/components/select-field.blade.php` — native select
+  styled like `<x-field>`, takes an `$options` map.
+- `resources/views/components/modal.blade.php` — rebuilt as a brand panel:
+  titled header, border, rule-soft footer seam. Everything published by
+  `wire-elements/modal` now drops into this consistently.
 - `app/Livewire/Admin/Dashboard.php` — real KPI computation.
 - `resources/views/livewire/admin/dashboard.blade.php` — KPI strip,
   attention feed, recent feed, segmented table.
@@ -89,29 +101,33 @@ The static reference for the whole direction lives in `design-prototypes/`
 - `tests/Feature/{ClientListTest,FeaturesListTest,UserListTest,ProfileTest}.php`
   covering empty state, listing, search (where applicable), and
   delete / update paths.
+- `app/Livewire/Admin/Proposals/ProposalCreate.php` — fixed an existing
+  `$this->search` / `$this->featureSearch` variable-name bug in the
+  feature filter query, added a post-create redirect to the edit page,
+  and improved validation messages.
+- `app/Livewire/Admin/Proposals/ProposalFeatureForm.php` — implemented
+  the missing `removeFinalFeature()` method (the button was wired to a
+  method that didn't exist), added in-place `optional` toggle.
+- `resources/views/livewire/admin/proposals/proposal-create.blade.php` —
+  two-pane builder (feature library + selected features) with running
+  total, serif headings, uses `<x-card>`, `<x-field>`, `<x-select-field>`,
+  `<x-money>`.
+- `resources/views/livewire/admin/proposals/proposal-edit.blade.php` —
+  meta strip (status pill / client / owner / updated) over an editable
+  features table using the in-place `ProposalFeatureForm` row component
+  and the restyled `ProposalTotalOnTheFly` footer.
+- `resources/views/livewire/admin/{clients,features,users}/{client,feature,user}-modal.blade.php`
+  — rewritten against `<x-modal>` + `<x-field>` + `<x-btn>` so every
+  create/edit flow has the same ink/paper/fox look.
+- `tests/Feature/ProposalBuilderTest.php` — 7 tests covering empty
+  render, select/remove features, validation, create+redirect, edit
+  render, in-place feature edit, feature removal.
+- `tests/Feature/ModalTest.php` — 8 tests covering create, edit-load,
+  validation for each of client / feature / user modals.
 
 ## What's left, in rough priority
 
-### 1. Migrate the proposal builder
-
-- `resources/views/livewire/admin/proposals/proposal-create.blade.php` and
-  `proposal-edit.blade.php` — the biggest remaining piece, and worth its
-  own session. Rewrite to use brand tokens and the shared components
-  (`<x-page-header>`, `<x-card>`, `<x-btn>`, `<x-money>`), matching the
-  proposal-edit flow implied by the dashboard and proposals-list patterns.
-- `resources/views/livewire/admin/proposals/proposal-feature-form.blade.php`
-  — the feature-add modal that sits inside the builder.
-
-### 2. Restyle the wire-elements modals
-
-The modals (`client-modal`, `feature-modal`, `user-modal`,
-`proposal-feature-form`) all still use the old `primary/*` form styling.
-Audit the `wire-elements/modal` skin and decide whether to publish the
-vendor views and restyle, or wrap our form controls in a shared form-field
-component first so the styling is consistent regardless of whether a form
-renders on a page or inside a modal.
-
-### 3. Wire the command palette
+### 1. Wire the command palette
 
 Today the topbar's search trigger is purely visual.
 
@@ -124,7 +140,7 @@ Today the topbar's search trigger is purely visual.
   input top, grouped sections, focused-item ink-on-fox highlight, footer
   hints).
 
-### 4. Replace the "Lately" stand-in with a real activity feed
+### 2. Replace the "Lately" stand-in with a real activity feed
 
 The dashboard currently shows the last eight updated proposals as a stand-in
 for activity. Real activity needs an event store.
@@ -137,7 +153,7 @@ for activity. Real activity needs an event store.
 - Update the Dashboard component to load the latest 8 events instead of
   recently-updated proposals.
 
-### 5. Build "Present mode"
+### 3. Build "Present mode"
 
 Once the back-office is consistent, build the live presentation experience:
 
@@ -148,12 +164,12 @@ Once the back-office is consistent, build the live presentation experience:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes to
   Livewire events from the operator — eventual real-time sync.
 
-### 6. Mobile / tablet support
+### 4. Mobile / tablet support
 
 Deferred until the desktop pass is complete. The current rail will need a
 collapsible/off-canvas treatment at narrow widths.
 
-### 7. Drop the legacy `primary/*` palette
+### 5. Drop the legacy `primary/*` palette
 
 Once every admin page uses brand tokens, remove the `primary/*`,
 `success/*`, `warning/*`, `gray/*` ramps from `resources/css/app.css` and
@@ -165,7 +181,7 @@ whether to keep Toastify + SweetAlert2 or replace with in-house components.
 - Static design reference: `design-prototypes/` (HTML/CSS only — not served).
 - Brand tokens: `resources/css/app.css` (top of `@theme` block).
 - Layout shell: `resources/views/components/layouts/admin.blade.php`.
-- Shared components: `resources/views/components/{logo,menu-item,pill,page-header,card,card-header,btn,money,th}.blade.php`.
+- Shared components: `resources/views/components/{logo,menu-item,pill,page-header,card,card-header,btn,money,th,field,checkbox-field,select-field,modal}.blade.php`.
 - Done dashboard: `resources/views/livewire/admin/dashboard.blade.php` +
   `app/Livewire/Admin/Dashboard.php`.
 - Coverage pattern to copy for new pages: `tests/Feature/DashboardTest.php`.

@@ -12,6 +12,53 @@ changes may occur in any minor release.
 
 ### Added
 
+- Proposal builder rebuilt against the Epic Fox brand UI:
+    - `/dashboard/proposal/create` is now a two-pane builder — a searchable
+      feature library on the left, a Selected features table with a
+      running total on the right — on top of a client selector and
+      proposal-name meta strip. Uses the shared `<x-card>`, `<x-field>`,
+      `<x-select-field>`, `<x-money>`, `<x-btn>` components throughout.
+    - Fixed a long-standing bug where `ProposalCreate::render()` filtered
+      the library with `$this->search` but the property is named
+      `$this->featureSearch`, so the library search box never actually
+      filtered anything. The eager-loaded query now uses the correct
+      property and resets pagination when the term changes.
+    - `createProposal()` now redirects to the newly created proposal's
+      edit page (previously it stayed on the create page with no
+      feedback), and emits a toast.
+    - `/dashboard/proposal/edit/{proposal}` has a meta strip
+      (status pill / client / owner / last-updated) over an editable
+      features table. Each row is the existing `ProposalFeatureForm`
+      Livewire component restyled with brand tokens — name / quantity /
+      unit price / optional toggle / line total, all editable in place.
+    - Implemented the missing `removeFinalFeature()` method on
+      `ProposalFeatureForm` — the Delete button in the builder row was
+      wired to a method that didn't exist, silently throwing a JS error
+      on click. Also added the in-row Optional toggle so you no longer
+      need to go back to the feature library to change it.
+    - `ProposalTotalOnTheFly` is restyled as the builder's footer figure
+      (serif display type, `refreshFeatureProposalEdit` event contract
+      unchanged so the live update continues to work).
+- All four modal flows (`client-modal`, `feature-modal`, `user-modal`, and
+  the inline `proposal-feature-form` row) rewritten against brand tokens,
+  inside a rebuilt `<x-modal>` that has a titled header, ink-on-paper
+  body, and a rule-soft footer for the cancel/save row. Modal inputs use
+  the same `<x-field>` / `<x-checkbox-field>` / `<x-select-field>` as
+  full-page forms, so one style change now reaches every form in the app.
+- Shared Blade form primitives to round out the component set:
+  `<x-field>` (text / email / tel / password / number, with optional
+  `prefix` for £, `hint`, status-rejected error state, and automatic
+  `@error('name')` handling); `<x-checkbox-field>` (ink-accent checkbox
+  with label + optional description); `<x-select-field>` (native select
+  styled to match, takes an `$options` map).
+- Feature tests for the builder and modals:
+  `tests/Feature/ProposalBuilderTest.php` covers the empty create render,
+  select/remove library features, required-field validation,
+  create-and-redirect with snapshot feature copying, edit-page render
+  (with the new meta strip assertions), in-place feature edit, and
+  feature removal. `tests/Feature/ModalTest.php` covers the create, edit
+  mount, and required-field validation paths for each of the client,
+  feature, and user modals. Suite is now 45 tests / 147 assertions.
 - Shared Blade primitives for the admin UI so the brand look only lives in
   one place: `<x-page-header>` (eyebrow + serif h1 + lede + actions slot),
   `<x-card>` + `<x-card-header>`, `<x-btn>` (`accent` / `ghost` / `quiet` /
