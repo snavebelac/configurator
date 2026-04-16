@@ -189,18 +189,21 @@ Today the topbar's search trigger is purely visual.
   input top, grouped sections, focused-item ink-on-fox highlight, footer
   hints).
 
-### 2. Replace the "Lately" stand-in with a real activity feed
+### 2. Extend the activity feed coverage
 
-The dashboard currently shows the last eight updated proposals as a stand-in
-for activity. Real activity needs an event store.
+The Lately panel now reads from a real `Activity` event store
+(tenant-scoped, polymorphic `subject`, action enum, JSON payload). Model
+observers on `Proposal`, `Client` and `Package` write events for create
++ status-changed lifecycle moments. Headlines like "Caleb created Brand
+identity system" / "Caleb moved X to Delivered" render in the dashboard
+panel with subject-type-coloured icons. The dashboard also gained
+"New feature" + "New package" quick-action buttons in the page header.
 
-- Add an `Activity` model + migration: `id, tenant_id, user_id, subject_type,
-  subject_id, action (enum), payload (json), created_at`. Use
-  `BelongsToTenant` so it's automatically tenant-scoped.
-- Hook `created` / `updated` (specifically status transitions) on `Proposal`
-  to record events.
-- Update the Dashboard component to load the latest 8 events instead of
-  recently-updated proposals.
+Things worth adding next:
+- `feature.created` and `proposal.deleted` events for fuller coverage.
+- A "View all activity" page if the 8-row panel feels insufficient.
+- Periodic purge of activities older than ~12 months once volume
+  warrants it.
 
 ### 3. Build "Present mode"
 

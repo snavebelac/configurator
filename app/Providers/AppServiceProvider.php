@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
+use App\Models\Package;
+use App\Models\Proposal;
+use App\Observers\ClientObserver;
+use App\Observers\PackageObserver;
+use App\Observers\ProposalObserver;
 use App\View\Composers\AdminComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -29,5 +35,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('components.layouts.admin', AdminComposer::class);
+
+        Proposal::observe(ProposalObserver::class);
+        Client::observe(ClientObserver::class);
+        Package::observe(PackageObserver::class);
     }
 }

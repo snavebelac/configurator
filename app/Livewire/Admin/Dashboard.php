@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Enums\Status;
+use App\Models\Activity;
 use App\Models\Proposal;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -44,6 +45,11 @@ class Dashboard extends AdminComponent
 
         $recent = $proposals->sortByDesc('updated_at')->take(8)->values();
 
+        $activities = Activity::with(['user', 'subject'])
+            ->orderByDesc('created_at')
+            ->take(8)
+            ->get();
+
         $counts = [
             'all' => $proposals->count(),
             'draft' => $proposals->where('status', Status::DRAFT)->count(),
@@ -63,6 +69,7 @@ class Dashboard extends AdminComponent
             'avgValue' => $avgValue,
             'needsAttention' => $needsAttention,
             'recent' => $recent,
+            'activities' => $activities,
             'counts' => $counts,
         ]);
     }
