@@ -14,7 +14,7 @@
     <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
             @if ($isChild)
-                <svg class="size-3.5 shrink-0 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v10a3 3 0 0 0 3 3h9"/><path d="m16 13 3 4-3 4"/></svg>
+                <x-phosphor-arrow-elbow-down-right class="size-3.5 shrink-0 text-slate-soft" />
             @endif
             <span class="truncate text-[13.5px] font-medium text-ink">{{ $feature->name }}</span>
             @if ($feature->optional)
@@ -37,8 +37,8 @@
         </div>
     </div>
     @if ($isDisabled)
-        <svg class="size-4 text-status-accepted-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg>
+        <x-phosphor-check class="size-4 text-status-accepted-dot" />
     @else
-        <svg class="size-4 text-slate-soft transition-transform group-hover:translate-x-0.5 group-hover:text-ink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <x-phosphor-arrow-right class="size-4 text-slate-soft transition-transform group-hover:translate-x-0.5 group-hover:text-ink" />
     @endif
 </button>

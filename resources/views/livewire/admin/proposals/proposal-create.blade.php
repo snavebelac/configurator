@@ -46,13 +46,13 @@
                         <button type="button"
                                 wire:click="$dispatch('openModal', {component: 'admin.proposals.package-picker-modal'})"
                                 class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">
-                            <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5"/><path d="M12 12v9"/></svg>
+                            <x-phosphor-cube class="size-3" />
                             Add package
                         </button>
                         <button type="button"
                                 wire:click="$dispatch('openModal', {component: 'admin.features.feature-modal'})"
                                 class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">
-                            <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                            <x-phosphor-plus class="size-3" />
                             New feature
                         </button>
                     </div>
@@ -117,7 +117,7 @@
                     <span class="text-[12.5px] text-slate">You can customise quantities and pricing on the next step.</span>
                     <x-btn variant="accent" type="submit">
                         Create proposal
-                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        <x-phosphor-arrow-right class="size-3.5" />
                     </x-btn>
                 </div>
             </x-card>

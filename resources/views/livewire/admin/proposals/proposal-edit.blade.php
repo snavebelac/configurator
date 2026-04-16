@@ -10,7 +10,7 @@
             <x-btn variant="ghost" :href="route('dashboard.proposals')">Back to list</x-btn>
             <x-btn variant="ghost" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">
                 Preview
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                <x-phosphor-arrow-square-out class="size-3.5" />
             </x-btn>
         </x-slot:actions>
     </x-page-header>
@@ -44,12 +44,12 @@
             <div class="flex items-center gap-2">
                 <x-btn variant="ghost"
                        wire:click="$dispatch('openModal', {component: 'admin.proposals.add-package-modal', arguments: {proposalId: {{ $proposal->id }} }})">
-                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5"/><path d="M12 12v9"/></svg>
+                    <x-phosphor-cube class="size-3.5" />
                     Add package
                 </x-btn>
                 <x-btn variant="accent"
                        wire:click="$dispatch('openModal', {component: 'admin.proposals.add-features-modal', arguments: {proposalId: {{ $proposal->id }} }})">
-                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <x-phosphor-plus class="size-3.5" />
                     Add features
                 </x-btn>
             </div>
@@ -100,7 +100,7 @@
             <livewire:admin.proposals.proposal-total-on-the-fly :proposal-id="$proposal->id" />
             <x-btn variant="accent" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">
                 Preview (client view)
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                <x-phosphor-arrow-square-out class="size-3.5" />
             </x-btn>
         </div>
     </x-card>

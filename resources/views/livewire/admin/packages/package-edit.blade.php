@@ -37,7 +37,7 @@
                 <button type="button"
                         wire:click="$dispatch('openModal', {component: 'admin.features.feature-modal'})"
                         class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate hover:bg-paper-2 hover:text-ink">
-                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <x-phosphor-plus class="size-3" />
                     New feature
                 </button>
             </x-card-header>

@@ -27,7 +27,7 @@
                 <x-btn variant="ghost" :href="route('dashboard.packages')">Cancel</x-btn>
                 <x-btn variant="accent" type="submit">
                     Create &amp; continue
-                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    <x-phosphor-arrow-right class="size-3.5" />
                 </x-btn>
             </div>
         </x-card>

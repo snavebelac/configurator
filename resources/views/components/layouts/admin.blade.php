@@ -41,37 +41,12 @@
         </a>
 
         <nav class="flex flex-col items-center gap-0.5">
-            <x-menu-item route="dashboard" title="Overview">
-                <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-                <rect x="13" y="3" width="8" height="5" rx="1.5"/>
-                <rect x="13" y="10" width="8" height="11" rx="1.5"/>
-                <rect x="3" y="13" width="8" height="8" rx="1.5"/>
-            </x-menu-item>
-            <x-menu-item route="dashboard.proposals" title="Proposals">
-                <path d="M5 3h9l5 5v13H5z"/>
-                <path d="M14 3v5h5"/>
-                <path d="M8 13h8M8 17h5"/>
-            </x-menu-item>
-            <x-menu-item route="dashboard.clients" title="Clients">
-                <circle cx="12" cy="7" r="3"/>
-                <circle cx="6" cy="11" r="2"/>
-                <circle cx="18" cy="11" r="2"/>
-                <path d="M3 19c0-2.5 4-4.5 9-4.5s9 2 9 4.5"/>
-            </x-menu-item>
-            <x-menu-item route="dashboard.features" title="Features">
-                <path d="M5 7l7-4 7 4-7 4z"/>
-                <path d="M5 12l7 4 7-4"/>
-                <path d="M5 17l7 4 7-4"/>
-            </x-menu-item>
-            <x-menu-item route="dashboard.packages" title="Packages">
-                <path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/>
-                <path d="M3.5 7.5 12 12l8.5-4.5"/>
-                <path d="M12 12v9"/>
-            </x-menu-item>
-            <x-menu-item route="dashboard.users" title="Team">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
-            </x-menu-item>
+            <x-menu-item route="dashboard" title="Overview" icon="squares-four" />
+            <x-menu-item route="dashboard.proposals" title="Proposals" icon="file-text" />
+            <x-menu-item route="dashboard.clients" title="Clients" icon="users-three" />
+            <x-menu-item route="dashboard.features" title="Features" icon="stack" />
+            <x-menu-item route="dashboard.packages" title="Packages" icon="cube" />
+            <x-menu-item route="dashboard.users" title="Team" icon="user-circle" />
         </nav>
 
         <div class="mt-auto flex flex-col items-center gap-2">
@@ -84,10 +59,7 @@
                 @csrf
                 <button type="submit" title="Sign out"
                         class="flex size-9 items-center justify-center rounded-[10px] text-slate-faint transition-colors hover:bg-white/5 hover:text-sage">
-                    <svg class="size-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15"/>
-                        <path d="m4 12 3-3m-3 3 3 3M4 12h11"/>
-                    </svg>
+                    <x-phosphor-sign-out class="size-[18px]" />
                 </button>
             </form>
         </div>
@@ -108,10 +80,7 @@
 
             <button type="button"
                     class="ml-auto flex w-[360px] items-center gap-3 rounded-[10px] border border-rule bg-paper-2 px-3.5 py-1.5 text-[13px] text-slate transition-colors hover:border-slate-faint hover:bg-white">
-                <svg class="size-[15px] opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <circle cx="11" cy="11" r="7"/>
-                    <path d="m20 20-3-3"/>
-                </svg>
+                <x-phosphor-magnifying-glass class="size-[15px] opacity-60" />
                 <span>Search anything…</span>
                 <span class="ml-auto flex gap-0.5">
                     <kbd class="rounded border border-b-2 border-rule bg-white px-1.5 py-0 font-mono text-[10.5px] font-medium leading-[18px] text-slate">⌘</kbd>
@@ -120,10 +89,7 @@
             </button>
 
             <button type="button" class="flex size-9 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-2 hover:text-ink" title="Notifications">
-                <svg class="size-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 10a6 6 0 0 1 12 0c0 4 2 6 2 6H4s2-2 2-6z"/>
-                    <path d="M10 20a2 2 0 0 0 4 0"/>
-                </svg>
+                <x-phosphor-bell class="size-[18px]" />
             </button>
         </header>
 

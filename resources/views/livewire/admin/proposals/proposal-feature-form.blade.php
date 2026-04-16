@@ -12,7 +12,7 @@
                     class="cursor-grab rounded p-1 text-slate-soft transition-colors hover:text-ink active:cursor-grabbing"
                     title="Drag to reorder"
                     aria-label="Drag to reorder">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>
+                <x-phosphor-dots-six-vertical class="size-3.5" />
             </button>
         @endunless
     </div>
@@ -20,7 +20,7 @@
     {{-- Name --}}
     <div @class(['flex min-w-0 items-center gap-2', 'pl-6' => $isChild])>
         @if ($isChild)
-            <svg class="size-3.5 shrink-0 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v10a3 3 0 0 0 3 3h9"/><path d="m16 13 3 4-3 4"/></svg>
+            <x-phosphor-arrow-elbow-down-right class="size-3.5 shrink-0 text-slate-soft" />
         @endif
         <input type="text"
                wire:model.blur="name"
@@ -74,7 +74,7 @@
                 wire:confirm="Remove {{ $name }} from this proposal?{{ $isChild ? '' : ' Any child features will be removed with it.' }}"
                 class="rounded-md p-1.5 text-slate-soft opacity-0 transition-all hover:bg-status-rejected-bg hover:text-status-rejected-fg group-hover:opacity-100"
                 aria-label="Remove {{ $name }}">
-            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M6 18 18 6"/></svg>
+            <x-phosphor-x class="size-3.5" />
         </button>
     </div>
 </div>

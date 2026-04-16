@@ -11,7 +11,7 @@
         :lede="$intro">
         <x-slot:actions>
             <x-btn variant="accent" :href="route('dashboard.package.create')">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                <x-phosphor-plus class="size-3.5" />
                 New package
             </x-btn>
         </x-slot:actions>
@@ -23,14 +23,14 @@
             <span class="text-xs text-slate">{{ $packages->total() }} {{ Str::plural('result', $packages->total()) }}</span>
 
             <div class="relative flex items-center">
-                <svg class="pointer-events-none absolute left-3 size-3.5 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+                <x-phosphor-magnifying-glass class="pointer-events-none absolute left-3 size-3.5 text-slate-soft" />
                 <input type="text"
                        wire:model.live.debounce.250ms="search"
                        placeholder="Filter by name…"
                        class="w-64 rounded-lg border border-rule bg-paper-2 py-[7px] pl-8 pr-3 text-[13px] text-ink placeholder:text-slate-soft focus:border-ink focus:outline-none focus:bg-white transition-colors">
                 @if ($search !== '')
                     <button type="button" wire:click="$set('search', '')" class="absolute right-2 rounded p-1 text-slate-soft hover:text-ink" aria-label="Clear search">
-                        <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M6 18 18 6"/></svg>
+                        <x-phosphor-x class="size-3" />
                     </button>
                 @endif
             </div>

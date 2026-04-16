@@ -14,15 +14,15 @@
         <x-slot:actions>
             <x-btn variant="ghost"
                    wire:click="$dispatch('openModal', {component: 'admin.features.feature-modal'})">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l7-4 7 4-7 4z"/><path d="M5 12l7 4 7-4"/><path d="M5 17l7 4 7-4"/></svg>
+                <x-phosphor-stack class="size-3.5" />
                 New feature
             </x-btn>
             <x-btn variant="ghost" :href="route('dashboard.package.create')">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5"/><path d="M12 12v9"/></svg>
+                <x-phosphor-cube class="size-3.5" />
                 New package
             </x-btn>
             <x-btn variant="accent" :href="route('dashboard.proposal.create')">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                <x-phosphor-plus class="size-3.5" />
                 New proposal
             </x-btn>
         </x-slot:actions>
@@ -163,26 +163,24 @@
                             'flex size-[26px] items-center justify-center rounded-full',
                             $iconWrapper,
                         ])>
-                            <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                @switch ($action)
-                                    @case (\App\Enums\ActivityAction::ProposalCreated)
-                                        <path d="M12 5v14M5 12h14"/>
-                                        @break
-                                    @case (\App\Enums\ActivityAction::ProposalStatusChanged)
-                                        @switch ($activity->payload['to'] ?? null)
-                                            @case (\App\Enums\Status::ACCEPTED->value) <path d="m5 12 5 5 9-11"/> @break
-                                            @case (\App\Enums\Status::REJECTED->value) <path d="M6 6l12 12M6 18 18 6"/> @break
-                                            @default <path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="1"/>
-                                        @endswitch
-                                        @break
-                                    @case (\App\Enums\ActivityAction::ClientCreated)
-                                        <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
-                                        @break
-                                    @case (\App\Enums\ActivityAction::PackageCreated)
-                                        <path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5"/><path d="M12 12v9"/>
-                                        @break
-                                @endswitch
-                            </svg>
+                            @switch ($action)
+                                @case (\App\Enums\ActivityAction::ProposalCreated)
+                                    <x-phosphor-plus class="size-3" />
+                                    @break
+                                @case (\App\Enums\ActivityAction::ProposalStatusChanged)
+                                    @switch ($activity->payload['to'] ?? null)
+                                        @case (\App\Enums\Status::ACCEPTED->value) <x-phosphor-check class="size-3" /> @break
+                                        @case (\App\Enums\Status::REJECTED->value) <x-phosphor-x class="size-3" /> @break
+                                        @default <x-phosphor-envelope class="size-3" />
+                                    @endswitch
+                                    @break
+                                @case (\App\Enums\ActivityAction::ClientCreated)
+                                    <x-phosphor-user class="size-3" />
+                                    @break
+                                @case (\App\Enums\ActivityAction::PackageCreated)
+                                    <x-phosphor-cube class="size-3" />
+                                    @break
+                            @endswitch
                         </span>
                         <div class="text-[13.5px] leading-snug text-ink">
                             <div class="font-medium">{{ $activity->headline() }}</div>

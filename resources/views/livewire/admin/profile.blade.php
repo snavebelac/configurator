@@ -11,7 +11,7 @@
 
                 @if (session('profile.updated'))
                     <div class="flex items-center gap-3 rounded-lg border border-status-accepted-dot/30 bg-status-accepted-bg px-4 py-2.5 text-[13px] text-status-accepted-fg">
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg>
+                        <x-phosphor-check class="size-4" />
                         {{ session('profile.updated') }}
                     </div>
                 @endif

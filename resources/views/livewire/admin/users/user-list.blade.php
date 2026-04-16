@@ -12,7 +12,7 @@
         lede="Invite teammates, manage their roles, and deactivate anyone who shouldn't be signing in.">
         <x-slot:actions>
             <x-btn variant="accent" wire:click="$dispatch('openModal', {component: 'admin.users.user-modal'})">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                <x-phosphor-plus class="size-3.5" />
                 Add user
             </x-btn>
         </x-slot:actions>

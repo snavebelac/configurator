@@ -15,7 +15,7 @@
     <div class="min-w-0">
         <div class="flex items-baseline gap-3">
             @if ($isChild)
-                <svg class="mt-1 size-3 shrink-0 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v10a3 3 0 0 0 3 3h9"/><path d="m16 13 3 4-3 4"/></svg>
+                <x-phosphor-arrow-elbow-down-right class="mt-1 size-3 shrink-0 text-slate-soft" />
             @endif
             <h3 class="font-display text-[18px] leading-[1.25] text-ink">{{ $feature->name }}</h3>
         </div>
@@ -53,7 +53,7 @@
             </p>
         @else
             <div class="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.2em] text-slate">
-                <svg class="size-3 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                <x-phosphor-lock-simple class="size-3 text-slate-soft" />
                 Included
             </div>
         @endif
