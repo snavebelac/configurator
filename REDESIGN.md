@@ -20,6 +20,26 @@ Everything is built on a shared set of Blade primitives —
 `<x-modal>` — so every form field, button, table, and card has a single
 source of truth.
 
+The feature library now supports **one level of parent/child nesting**:
+parents have their own base price and can own any number of children;
+children stack on top of the parent. Selecting a child in the proposal
+builder silently auto-attaches its parent; removing a parent
+cascade-removes its selected children. A standalone feature can be
+reparented freely; only a parent that already has children is locked (it
+would create grandchildren). The library itself is strictly alphabetical
+— customer-facing ordering lives on the `FinalFeature` snapshot, where
+parents can be drag-reordered on the proposal-edit screen via
+`@alpinejs/sort`. `FinalFeature` snapshots preserve the parent link and
+now carry a `source_feature_id` pointer so the "Add features" picker can
+de-dup against what's already on a proposal.
+
+A reusable `FeaturePicker` Livewire component drives the library-browse
+UI: `ProposalCreate` mounts it as its left pane, and `AddFeaturesModal`
+embeds it too so features can be added to an existing proposal without
+starting over. The old "Finalise" button has been dropped (a reversible
+ceremony we didn't need) in favour of an elevated "Preview (client
+view)" CTA.
+
 The static reference for the whole direction lives in `design-prototypes/`
 (`dashboard.html`, `proposals.html`, `present.html`). Open
 `design-prototypes/dashboard.html` in a browser before continuing.

@@ -1,3 +1,8 @@
+@php
+    $parentLockReason = $hasChildren
+        ? 'This feature has its own children, so it must stay at the top level.'
+        : null;
+@endphp
 <x-modal
     :title="$featureId ? 'Edit feature' : 'Add a feature'"
     subtitle="Features are the reusable building blocks you drag into proposals.">
@@ -29,6 +34,16 @@
                     type="number"
                     step="1"
                     min="1" />
+            </div>
+
+            <div class="border-t border-rule-soft pt-5">
+                <x-select-field
+                    label="Parent feature"
+                    name="parentId"
+                    :options="$parentOptions"
+                    placeholder="— Standalone / parent feature —"
+                    :disabled="$hasChildren"
+                    :hint="$parentLockReason" />
             </div>
 
             <div class="border-t border-rule-soft pt-5">

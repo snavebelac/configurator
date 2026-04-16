@@ -17,13 +17,19 @@ class ProposalFeatureForm extends Component
 
     public bool $optional = false;
 
-    public function mount(int $finalFeatureId): void
+    public bool $isChild = false;
+
+    public string $gridTemplate = '';
+
+    public function mount(int $finalFeatureId, bool $isChild = false, string $gridTemplate = ''): void
     {
         $this->finalFeature = FinalFeature::findOrFail($finalFeatureId);
         $this->name = $this->finalFeature->name;
         $this->price = $this->finalFeature->price;
         $this->quantity = $this->finalFeature->quantity;
         $this->optional = $this->finalFeature->optional;
+        $this->isChild = $isChild;
+        $this->gridTemplate = $gridTemplate;
     }
 
     public function updated($name, $value): void

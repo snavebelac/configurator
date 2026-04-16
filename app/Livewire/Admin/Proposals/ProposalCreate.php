@@ -9,19 +9,15 @@ use App\Models\Feature;
 use App\Models\FinalFeature;
 use App\Models\Proposal;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
-use Livewire\WithPagination;
 
 #[Title('Create a new proposal')]
 class ProposalCreate extends AdminComponent
 {
-    use WithPagination;
-
-    public string $featureSearch = '';
-
-    public int $pageLength = 12;
-
     /** @var array<int> */
     #[Validate('required|array|min:1')]
     public array $selectedFeatureIds = [];
@@ -39,21 +35,54 @@ class ProposalCreate extends AdminComponent
         'name.required' => 'Give this proposal a name',
     ];
 
-    public function updatedFeatureSearch(): void
+    #[On('feature-picked')]
+    public function handlePicked(int $featureId): void
     {
-        $this->resetPage(pageName: 'features-page');
+        $this->selectFeature($featureId);
     }
 
     public function selectFeature(int $featureId): void
     {
-        if (! in_array($featureId, $this->selectedFeatureIds, true)) {
-            $this->selectedFeatureIds[] = $featureId;
+        if (in_array($featureId, $this->selectedFeatureIds, true)) {
+            return;
         }
+
+        $feature = Feature::find($featureId);
+        if (! $feature) {
+            return;
+        }
+
+        if ($feature->parent_id && ! in_array($feature->parent_id, $this->selectedFeatureIds, true)) {
+            $this->selectedFeatureIds[] = $feature->parent_id;
+            $parent = $feature->parent;
+            if ($parent) {
+                $this->dispatch('toast', ...$this->success([
+                    'text' => "Added \"{$parent->name}\" — required for \"{$feature->name}\"",
+                ]));
+            }
+        }
+
+        $this->selectedFeatureIds[] = $featureId;
     }
 
     public function removeFeature(int $featureId): void
     {
-        $this->selectedFeatureIds = array_values(array_diff($this->selectedFeatureIds, [$featureId]));
+        $toRemove = [$featureId];
+
+        $childIds = Feature::where('parent_id', $featureId)
+            ->whereIn('id', $this->selectedFeatureIds)
+            ->pluck('id')
+            ->all();
+
+        if (! empty($childIds)) {
+            $toRemove = array_merge($toRemove, $childIds);
+            $count = count($childIds);
+            $this->dispatch('toast', ...$this->success([
+                'text' => "Also removed {$count} child ".Str::plural('feature', $count),
+            ]));
+        }
+
+        $this->selectedFeatureIds = array_values(array_diff($this->selectedFeatureIds, $toRemove));
     }
 
     public function createProposal()
@@ -70,17 +99,16 @@ class ProposalCreate extends AdminComponent
         $proposal->save();
 
         $features = Feature::whereIn('id', $this->selectedFeatureIds)->get();
-        foreach ($features as $feature) {
-            $ff = new FinalFeature([
-                'name' => $feature->name,
-                'description' => $feature->description,
-                'price' => $feature->price,
-                'quantity' => $feature->quantity,
-                'optional' => $feature->optional,
-                'order' => $feature->order,
-            ]);
-            $ff->proposal()->associate($proposal);
-            $ff->save();
+        $featureToFinal = [];
+
+        $roots = $features->whereNull('parent_id')->sortBy('name')->values();
+        foreach ($roots as $index => $feature) {
+            $featureToFinal[$feature->id] = $this->snapshotFeature($feature, $proposal, null, $index + 1)->id;
+        }
+
+        foreach ($features->whereNotNull('parent_id') as $feature) {
+            $parentFinalId = $featureToFinal[$feature->parent_id] ?? null;
+            $featureToFinal[$feature->id] = $this->snapshotFeature($feature, $proposal, $parentFinalId, 0)->id;
         }
 
         $this->dispatch('toast', ...$this->success(['text' => 'Proposal created — now fine-tune the details']));
@@ -88,25 +116,48 @@ class ProposalCreate extends AdminComponent
         return redirect()->route('dashboard.proposal.edit', ['proposal' => $proposal->id]);
     }
 
+    private function snapshotFeature(Feature $feature, Proposal $proposal, ?int $parentFinalId, int $order): FinalFeature
+    {
+        $finalFeature = new FinalFeature([
+            'name' => $feature->name,
+            'description' => $feature->description,
+            'price' => $feature->price,
+            'quantity' => $feature->quantity,
+            'optional' => $feature->optional,
+            'parent_id' => $parentFinalId,
+            'source_feature_id' => $feature->id,
+            'order' => $order,
+        ]);
+        $finalFeature->proposal()->associate($proposal);
+        $finalFeature->save();
+
+        return $finalFeature;
+    }
+
     public function render(): View
     {
         $clients = Client::orderBy('name')->get();
 
-        $selectedFeatures = Feature::whereIn('id', $this->selectedFeatureIds)
-            ->orderBy('name')
-            ->get();
-
+        $selectedFeatures = Feature::whereIn('id', $this->selectedFeatureIds)->get();
         $selectedTotal = $selectedFeatures->sum(fn ($feature) => $feature->price * $feature->quantity);
 
-        $features = Feature::when($this->featureSearch !== '', fn ($query) => $query->where('name', 'like', '%'.$this->featureSearch.'%'))
-            ->orderBy('name')
-            ->paginate($this->pageLength, pageName: 'features-page');
+        $selectedGroups = $this->groupFeaturesByParent($selectedFeatures);
 
         return view('livewire.admin.proposals.proposal-create', [
-            'features' => $features,
             'selectedFeatures' => $selectedFeatures,
+            'selectedGroups' => $selectedGroups,
             'selectedTotal' => $selectedTotal,
             'clients' => $clients,
+        ]);
+    }
+
+    private function groupFeaturesByParent(Collection $features): Collection
+    {
+        $roots = $features->whereNull('parent_id')->sortBy('name')->values();
+
+        return $roots->map(fn ($root) => [
+            'root' => $root,
+            'children' => $features->where('parent_id', $root->id)->sortBy('name')->values(),
         ]);
     }
 }

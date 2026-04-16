@@ -44,14 +44,26 @@ class FeaturesList extends AdminComponent
 
     public function render(): View
     {
-        $features = Feature::when($this->search !== '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
-            ->orderBy('name')
-            ->paginate($this->pageLength);
+        $searching = $this->search !== '';
+
+        if ($searching) {
+            $features = Feature::with('parent')
+                ->where('name', 'like', '%'.$this->search.'%')
+                ->orderBy('name')
+                ->paginate($this->pageLength);
+        } else {
+            $features = Feature::roots()
+                ->with(['children' => fn ($query) => $query->orderBy('name')])
+                ->orderBy('name')
+                ->paginate($this->pageLength);
+        }
 
         return view('livewire.admin.features.features-list', [
             'features' => $features,
+            'searching' => $searching,
             'total' => Feature::count(),
             'optionalCount' => Feature::where('optional', true)->count(),
+            'parentCount' => Feature::roots()->whereHas('children')->count(),
         ]);
     }
 }

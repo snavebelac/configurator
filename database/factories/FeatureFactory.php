@@ -30,4 +30,12 @@ class FeatureFactory extends Factory
             'tenant_id' => Tenant::factory()->create(),
         ];
     }
+
+    public function childOf(Feature $parent): static
+    {
+        return $this->state(fn () => [
+            'parent_id' => $parent->id,
+            'tenant_id' => $parent->tenant_id,
+        ]);
+    }
 }

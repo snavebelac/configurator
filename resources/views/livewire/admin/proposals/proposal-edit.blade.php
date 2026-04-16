@@ -1,3 +1,6 @@
+@php
+    $gridTemplate = 'grid-template-columns: 24px minmax(0,2fr) 80px 120px 130px 110px 40px;';
+@endphp
 <div class="mx-auto max-w-[1480px]" wire:key="proposal-edit-{{ $proposal->id }}">
 
     <x-page-header
@@ -33,43 +36,65 @@
     </div>
 
     <x-card>
-        <x-card-header
-            title="Features"
-            :meta="$proposal->features->count() . ' ' . Str::plural('line', $proposal->features->count())" />
+        <x-card-header>
+            <div class="flex items-baseline gap-3">
+                <h3 class="font-display text-[18px] text-ink">Features</h3>
+                <span class="text-xs text-slate">{{ $proposal->features->count() }} {{ Str::plural('line', $proposal->features->count()) }}</span>
+            </div>
+            <x-btn variant="accent"
+                   wire:click="$dispatch('openModal', {component: 'admin.proposals.add-features-modal', arguments: {proposalId: {{ $proposal->id }} }})">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Add features
+            </x-btn>
+        </x-card-header>
 
-        <table class="w-full">
-            <thead>
-                <tr>
-                    <x-th style="width:40%">Name</x-th>
-                    <x-th>Qty</x-th>
-                    <x-th>Unit price</x-th>
-                    <x-th>Type</x-th>
-                    <x-th>Line total</x-th>
-                    <x-th></x-th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($proposal->features as $feature)
-                    <livewire:admin.proposals.proposal-feature-form
-                        :final-feature-id="$feature->id"
-                        :key="'feature-'.$feature->id" />
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-16 text-center">
-                            <div class="font-display text-[18px] text-ink">This proposal has no features</div>
-                            <p class="mt-1.5 text-sm text-slate">Return to the list and start a new proposal to pick features from your library.</p>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        @if ($featureGroups->isNotEmpty())
+            <div class="grid items-center gap-3 border-b border-rule px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-slate"
+                 style="{{ $gridTemplate }}">
+                <div aria-hidden="true"></div>
+                <div>Name</div>
+                <div class="text-right">Qty</div>
+                <div class="text-right">Unit price</div>
+                <div>Type</div>
+                <div class="text-right">Line total</div>
+                <div aria-hidden="true"></div>
+            </div>
+
+            <ul x-sort="$wire.reorderParents($item, $position)"
+                x-sort:config="{ ghostClass: 'opacity-40' }"
+                class="flex flex-col">
+                @foreach ($featureGroups as $group)
+                    <li x-sort:item="{{ $group['root']->id }}"
+                        wire:key="group-{{ $group['root']->id }}"
+                        class="border-b border-rule-soft last:border-b-0">
+                        <livewire:admin.proposals.proposal-feature-form
+                            :final-feature-id="$group['root']->id"
+                            :is-child="false"
+                            :grid-template="$gridTemplate"
+                            :key="'feature-'.$group['root']->id" />
+                        @foreach ($group['children'] as $child)
+                            <livewire:admin.proposals.proposal-feature-form
+                                :final-feature-id="$child->id"
+                                :is-child="true"
+                                :grid-template="$gridTemplate"
+                                :key="'feature-'.$child->id" />
+                        @endforeach
+                    </li>
+                @endforeach
+            </ul>
+        @else
+            <div class="px-4 py-16 text-center">
+                <div class="font-display text-[18px] text-ink">This proposal has no features</div>
+                <p class="mt-1.5 text-sm text-slate">Return to the list and start a new proposal to pick features from your library.</p>
+            </div>
+        @endif
 
         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule-soft bg-paper-2 px-6 py-4">
             <livewire:admin.proposals.proposal-total-on-the-fly :proposal-id="$proposal->id" />
-            <div class="flex items-center gap-2">
-                <x-btn variant="ghost" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">Preview</x-btn>
-                <x-btn variant="accent">Finalise</x-btn>
-            </div>
+            <x-btn variant="accent" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">
+                Preview (client view)
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+            </x-btn>
         </div>
     </x-card>
 </div>

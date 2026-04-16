@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Features;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Feature;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\Rule;
 use LivewireUI\Modal\ModalComponent;
 
 class FeatureModal extends ModalComponent
@@ -26,15 +27,29 @@ class FeatureModal extends ModalComponent
 
     public bool $optional = false;
 
+    public ?int $parentId = null;
+
+    public bool $hasChildren = false;
+
     protected function rules(): array
     {
+        $parentRule = $this->hasChildren
+            ? ['nullable', 'prohibited']
+            : ['nullable', 'integer', Rule::exists('features', 'id')->whereNull('parent_id')];
+
         return [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|decimal:0,2',
             'quantity' => 'required|numeric|integer|min:1',
+            'parentId' => $parentRule,
         ];
     }
+
+    protected $messages = [
+        'parentId.exists' => 'The selected parent feature no longer exists or is itself a child.',
+        'parentId.prohibited' => 'This feature has its own children, so it can\'t be placed under another parent.',
+    ];
 
     public function mount(?int $featureId = null): void
     {
@@ -47,6 +62,8 @@ class FeatureModal extends ModalComponent
                 $this->price = $feature->price;
                 $this->quantity = $feature->quantity;
                 $this->optional = $feature->optional;
+                $this->parentId = $feature->parent_id;
+                $this->hasChildren = $feature->children()->exists();
             }
         }
     }
@@ -61,6 +78,7 @@ class FeatureModal extends ModalComponent
             'price' => $this->price,
             'quantity' => $this->quantity,
             'optional' => $this->optional,
+            'parent_id' => $this->parentId,
         ];
 
         if ($this->featureId) {
@@ -70,13 +88,21 @@ class FeatureModal extends ModalComponent
         }
 
         $this->dispatch('toast', ...AdminComponent::success(['text' => ($this->featureId ? 'Feature updated successfully' : 'Feature created successfully')]));
-        $this->dispatch('closeModal'); // Close modal after save
+        $this->dispatch('closeModal');
         $this->reset();
         $this->dispatch('refresh-features');
     }
 
     public function render(): View
     {
-        return view('livewire.admin.features.feature-modal');
+        $parentOptions = Feature::roots()
+            ->when($this->featureId, fn ($query) => $query->where('id', '!=', $this->featureId))
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+
+        return view('livewire.admin.features.feature-modal', [
+            'parentOptions' => $parentOptions,
+        ]);
     }
 }

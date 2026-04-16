@@ -36,12 +36,11 @@
         {{-- Two-pane feature picker --}}
         <div class="grid grid-cols-[1fr_1.6fr] gap-5">
 
-            {{-- Library --}}
+            {{-- Library (reusable FeaturePicker component) --}}
             <x-card>
                 <x-card-header>
                     <div class="flex items-baseline gap-3">
                         <h3 class="font-display text-[18px] text-ink">Feature library</h3>
-                        <span class="text-xs text-slate">{{ $features->total() }} available</span>
                     </div>
                     <button type="button"
                             wire:click="$dispatch('openModal', {component: 'admin.features.feature-modal'})"
@@ -51,57 +50,9 @@
                     </button>
                 </x-card-header>
 
-                <div class="border-b border-rule-soft px-5 py-3">
-                    <div class="relative flex items-center">
-                        <svg class="pointer-events-none absolute left-3 size-3.5 text-slate-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
-                        <input type="text"
-                               wire:model.live.debounce.250ms="featureSearch"
-                               placeholder="Filter by name…"
-                               class="w-full rounded-lg border border-rule bg-paper-2 py-[7px] pl-8 pr-3 text-[13px] text-ink placeholder:text-slate-soft focus:border-ink focus:outline-none focus:bg-white transition-colors">
-                    </div>
-                </div>
-
-                <div class="flex flex-col divide-y divide-rule-soft">
-                    @forelse ($features as $feature)
-                        @php $isSelected = in_array($feature->id, $selectedFeatureIds, true); @endphp
-                        <button type="button"
-                                wire:key="lib-{{ $feature->id }}"
-                                wire:click="selectFeature({{ $feature->id }})"
-                                @disabled($isSelected)
-                                @class([
-                                    'group flex items-center justify-between gap-3 px-5 py-3 text-left transition-colors',
-                                    'hover:bg-paper-2'         => ! $isSelected,
-                                    'bg-paper-2 cursor-default' => $isSelected,
-                                ])>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="truncate text-[13.5px] font-medium text-ink">{{ $feature->name }}</span>
-                                    @if ($feature->optional)
-                                        <span class="shrink-0 rounded-full bg-fox-soft px-1.5 py-0.5 text-[9.5px] font-medium uppercase tracking-wider text-ink">Opt</span>
-                                    @endif
-                                </div>
-                                <div class="mt-0.5 text-xs text-slate">
-                                    <span class="font-mono tnum">£{{ number_format($feature->price, 2) }}</span>
-                                    <span class="text-slate-soft">·</span>
-                                    <span>qty {{ $feature->quantity }}</span>
-                                </div>
-                            </div>
-                            @if ($isSelected)
-                                <svg class="size-4 text-status-accepted-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg>
-                            @else
-                                <svg class="size-4 text-slate-soft transition-transform group-hover:translate-x-0.5 group-hover:text-ink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                            @endif
-                        </button>
-                    @empty
-                        <div class="px-5 py-10 text-center text-sm text-slate">No features match "{{ $featureSearch }}".</div>
-                    @endforelse
-                </div>
-
-                @if ($features->hasPages())
-                    <div class="border-t border-rule-soft px-5 py-3">
-                        {{ $features->links() }}
-                    </div>
-                @endif
+                <livewire:admin.features.feature-picker
+                    :disabled-ids="$selectedFeatureIds"
+                    :key="'proposal-create-picker'" />
             </x-card>
 
             {{-- Selected features --}}
@@ -128,28 +79,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($selectedFeatures as $feature)
-                            <tr wire:key="sel-{{ $feature->id }}" class="group last:[&>td]:border-b-0">
-                                <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-medium">{{ $feature->name }}</span>
-                                        @if ($feature->optional)
-                                            <span class="rounded-full bg-fox-soft px-1.5 py-0.5 text-[9.5px] font-medium uppercase tracking-wider text-ink">Optional</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="border-b border-rule-soft px-4 py-3.5 align-middle font-mono text-[13px] text-ink tnum">{{ $feature->quantity }}</td>
-                                <td class="border-b border-rule-soft px-4 py-3.5 align-middle"><x-money :value="$feature->price" size="mono" :precise="true" /></td>
-                                <td class="border-b border-rule-soft px-4 py-3.5 align-middle"><x-money :value="$feature->price * $feature->quantity" size="mono" :precise="true" /></td>
-                                <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-right">
-                                    <button type="button"
-                                            wire:click="removeFeature({{ $feature->id }})"
-                                            class="rounded-md p-1.5 text-slate-soft opacity-0 transition-all hover:bg-status-rejected-bg hover:text-status-rejected-fg group-hover:opacity-100"
-                                            aria-label="Remove {{ $feature->name }}">
-                                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M6 18 18 6"/></svg>
-                                    </button>
-                                </td>
-                            </tr>
+                        @forelse ($selectedGroups as $group)
+                            @include('livewire.admin.proposals.partials.selected-row', [
+                                'feature' => $group['root'],
+                                'isChild' => false,
+                            ])
+                            @foreach ($group['children'] as $child)
+                                @include('livewire.admin.proposals.partials.selected-row', [
+                                    'feature' => $child,
+                                    'isChild' => true,
+                                ])
+                            @endforeach
                         @empty
                             <tr>
                                 <td colspan="5" class="px-4 py-16 text-center text-sm text-slate">

@@ -6,9 +6,12 @@ use App\Facades\Formatter;
 use App\Traits\BelongsToTenant;
 use App\Traits\Uuid;
 use Database\Factories\FeatureFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Feature extends Model
@@ -22,6 +25,7 @@ class Feature extends Model
         'price',
         'quantity',
         'optional',
+        'parent_id',
         'order',
         'final',
     ];
@@ -30,6 +34,13 @@ class Feature extends Model
         'optional' => 'boolean',
         'price' => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $feature) {
+            $feature->children()->get()->each->delete();
+        });
+    }
 
     protected function price(): Attribute
     {
@@ -51,5 +62,30 @@ class Feature extends Model
         return Attribute::make(
             get: fn (mixed $value, array $attributes) => Formatter::currency($attributes['price'] * $attributes['quantity'])
         );
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
+    public function isRoot(): bool
+    {
+        return $this->parent_id === null;
+    }
+
+    public function isChild(): bool
+    {
+        return $this->parent_id !== null;
+    }
+
+    public function scopeRoots(Builder $query): Builder
+    {
+        return $query->whereNull('parent_id');
     }
 }

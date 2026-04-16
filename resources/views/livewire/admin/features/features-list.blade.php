@@ -1,13 +1,16 @@
 @php
     $intro = $total === 0
         ? 'Your feature library is empty. Add your first feature — once it\'s here you can pull it into any proposal.'
-        : 'The building blocks you drag into proposals. Mark any one as optional to let the client toggle it at presentation time.';
+        : 'The building blocks you drag into proposals. Group related add-ons under a parent feature to let clients see their total change as they toggle them on.';
+    $eyebrow = $total.' '.Str::plural('feature', $total)
+        .' · '.$optionalCount.' optional'
+        .($parentCount > 0 ? ' · '.$parentCount.' with children' : '');
 @endphp
 <div class="mx-auto max-w-[1480px]">
 
     <x-page-header
         title="Features."
-        :eyebrow="$total . ' ' . Str::plural('feature', $total) . ' · ' . $optionalCount . ' optional'"
+        :eyebrow="$eyebrow"
         :lede="$intro">
         <x-slot:actions>
             <x-btn variant="accent" wire:click="$dispatch('openModal', {component: 'admin.features.feature-modal'})">
@@ -48,42 +51,21 @@
             </thead>
             <tbody>
                 @forelse ($features as $feature)
-                    <tr wire:key="feature-{{ $feature->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
-                            <div class="font-medium">{{ $feature->name }}</div>
-                            @if ($feature->description)
-                                <div class="mt-0.5 line-clamp-1 text-xs text-slate">{{ $feature->description }}</div>
-                            @endif
-                        </td>
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
-                            @if ($feature->optional)
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-fox-soft px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider leading-5 text-ink">
-                                    <span class="size-1.5 rounded-full bg-fox-deep"></span>
-                                    Optional
-                                </span>
-                            @else
-                                <span class="text-xs text-slate-soft">Required</span>
-                            @endif
-                        </td>
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
-                            <x-money :value="$feature->price" size="mono" :precise="true" />
-                        </td>
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle font-mono text-[13px] text-ink tnum">
-                            {{ $feature->quantity }}
-                        </td>
-                        <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
-                            <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">
-                                <x-btn variant="row" wire:click="$dispatch('openModal', {component: 'admin.features.feature-modal', arguments: {featureId: {{ $feature->id }} }})">
-                                    Edit
-                                </x-btn>
-                                <x-btn variant="row" class="text-status-rejected-fg hover:bg-status-rejected-bg"
-                                       wire:click="delete({{ $feature->id }})"
-                                       wire:confirm="Are you sure you wish to delete [{{ $feature->name }}]?">
-                                    Delete
-                                </x-btn>
-                            </div>
-                        </td>
-                    </tr>
+                    @include('livewire.admin.features.partials.row', [
+                        'feature' => $feature,
+                        'depth' => 0,
+                        'searching' => $searching,
+                    ])
+
+                    @if (! $searching)
+                        @foreach ($feature->children as $child)
+                            @include('livewire.admin.features.partials.row', [
+                                'feature' => $child,
+                                'depth' => 1,
+                                'searching' => $searching,
+                            ])
+                        @endforeach
+                    @endif
                 @empty
                     <tr>
                         <td colspan="5" class="px-4 py-14 text-center text-sm text-slate">
