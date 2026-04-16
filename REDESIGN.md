@@ -10,7 +10,9 @@ The entire back-office is now on the new design system: dashboard,
 proposals list, proposal builder (create + edit), clients, features,
 users, and the profile form. All four `wire-elements/modal` modals
 (client, feature, user, and the inline proposal-feature editor) have also
-been restyled.
+been restyled. The three public auth screens (login, forgotten-password,
+password-reset) share a brand `<x-auth-shell>` wrapper and use the same
+`<x-field>` / `<x-btn>` primitives.
 
 Everything is built on a shared set of Blade primitives —
 `<x-page-header>`, `<x-card>`, `<x-card-header>`, `<x-btn>`, `<x-money>`,
@@ -126,6 +128,22 @@ The static reference for the whole direction lives in `design-prototypes/`
   render, in-place feature edit, feature removal.
 - `tests/Feature/ModalTest.php` — 8 tests covering create, edit-load,
   validation for each of client / feature / user modals.
+- `resources/views/components/auth-shell.blade.php` — shared wrapper for
+  the public auth pages (logo mark, eyebrow, italic serif heading, lede,
+  bordered card, optional footer slot).
+- `resources/views/components/layouts/app.blade.php` — rewired to load
+  Libre Baskerville + Inter and set `bg-paper text-ink` on the body so
+  auth pages inherit brand typography.
+- `resources/views/livewire/{login,forgotten-password,password-reset}.blade.php`
+  — rebuilt against `<x-auth-shell>` + `<x-field>` + `<x-btn>` with
+  editorial status messages, `wire:loading` submit states, and
+  brand-consistent links.
+- `app/Livewire/Login.php` — swapped the `Request::session()` facade
+  call for the `session()` helper so the authenticate path is
+  exercisable through `Livewire::test` without request-session gymnastics.
+- `tests/Feature/{LoginTest,PasswordResetTest}.php` — 10 tests covering
+  render + brand copy, validation, invalid/inactive login,
+  happy-path redirect, reset-link dispatch, and password update.
 
 ## What's left, in rough priority
 

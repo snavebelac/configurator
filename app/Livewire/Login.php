@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
@@ -32,7 +31,7 @@ class Login extends Component
             'password' => $this->password,
             'active' => true,
         ], $this->remember)) {
-            Request::session()->regenerate();
+            session()->regenerate();
             $this->redirectIntended(route('dashboard'));
         } else {
             $this->loginMessage = 'Email or Password not recognised';
