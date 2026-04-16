@@ -11,6 +11,11 @@ use Spatie\Permission\Models\Role;
 
 class UserModal extends ModalComponent
 {
+    public static function modalMaxWidth(): string
+    {
+        return '3xl';
+    }
+
     public $roles = [];
 
     public ?User $user = null;

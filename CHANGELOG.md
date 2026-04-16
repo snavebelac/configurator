@@ -12,6 +12,27 @@ changes may occur in any minor release.
 
 ### Added
 
+- Toast notifications restyled to the brand UI: ink background, paper
+  text, colored status dot on the left (`status-accepted-dot` for success,
+  `status-rejected-dot` for the `.warning` variant). The JS dispatch
+  contract (`$this->dispatch('toast', ...)`) is unchanged.
+- Fixed wire-elements modal widths under Tailwind v4. The vendor's
+  responsive `sm:max-w-*` / `md:max-w-*` / `xl:max-w-*` classes only exist
+  as strings in `vendor/wire-elements/modal/src/ModalComponent.php`, which
+  Tailwind v4's content scanner doesn't traverse by default. Added an
+  `@source` directive for that file in `resources/css/app.css` so the
+  classes are preserved in the built CSS. Prior to this the modals
+  rendered full-width on wider screens — noticeable on the feature modal,
+  which was effectively unusable. Also picked per-modal widths (`2xl` for
+  client, `3xl` for feature and user) via `modalMaxWidth()` overrides,
+  instead of the blanket `5xl` default.
+- Reworked the feature modal layout so Name and Description each get
+  their own full-width row, Price and Quantity share a row, and the
+  Optional checkbox lives on its own full-width row under a rule — with
+  room for its description copy to stretch out.
+- Whimsical placeholders across modal + builder inputs. Tiny homage to a
+  certain 90s space-station show — swap them back to plain examples any
+  time if you'd rather they weren't there.
 - Proposal builder rebuilt against the Epic Fox brand UI:
     - `/dashboard/proposal/create` is now a two-pane builder — a searchable
       feature library on the left, a Selected features table with a

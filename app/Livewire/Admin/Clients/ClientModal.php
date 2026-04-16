@@ -9,6 +9,11 @@ use LivewireUI\Modal\ModalComponent;
 
 class ClientModal extends ModalComponent
 {
+    public static function modalMaxWidth(): string
+    {
+        return '2xl';
+    }
+
     #[Locked]
     public ?int $clientId = null;
 

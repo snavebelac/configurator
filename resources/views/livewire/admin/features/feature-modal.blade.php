@@ -2,41 +2,41 @@
     :title="$featureId ? 'Edit feature' : 'Add a feature'"
     subtitle="Features are the reusable building blocks you drag into proposals.">
     <form wire:submit.prevent="save">
-        <div class="grid grid-cols-1 gap-6 px-8 py-7 sm:grid-cols-6">
+        <div class="flex flex-col gap-6 px-8 py-7">
+
             <x-field
                 label="Name"
                 name="name"
-                placeholder="Brand identity system"
-                class="sm:col-span-6" />
+                placeholder="Hydroponics bay refit" />
 
             <x-field
                 label="Description"
                 name="description"
-                placeholder="What's included — one concise line."
-                class="sm:col-span-6" />
+                placeholder="Enough greens to keep Down Below fed for a month." />
 
-            <x-field
-                label="Price"
-                name="price"
-                type="number"
-                step="0.01"
-                min="0"
-                prefix="£"
-                class="sm:col-span-3" />
+            <div class="grid grid-cols-2 gap-6">
+                <x-field
+                    label="Price"
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    prefix="£" />
 
-            <x-field
-                label="Quantity"
-                name="quantity"
-                type="number"
-                step="1"
-                min="1"
-                class="sm:col-span-3" />
+                <x-field
+                    label="Quantity"
+                    name="quantity"
+                    type="number"
+                    step="1"
+                    min="1" />
+            </div>
 
-            <x-checkbox-field
-                label="Optional feature"
-                name="optional"
-                description="Clients can toggle this on or off during a live presentation."
-                class="sm:col-span-6" />
+            <div class="border-t border-rule-soft pt-5">
+                <x-checkbox-field
+                    label="Optional feature"
+                    name="optional"
+                    description="Clients can toggle this on or off during a live presentation, and the running total updates in real time." />
+            </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 border-t border-rule-soft bg-paper-2 px-8 py-4">

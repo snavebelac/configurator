@@ -2,6 +2,7 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/wire-elements/modal/resources/views/*.blade.php';
+@source '../../vendor/wire-elements/modal/src/ModalComponent.php';
 @source '../../storage/framework/views/*.php';
 @source "../**/*.blade.php";
 @source "../**/*.js";
@@ -126,28 +127,38 @@
     @apply bg-warning-600 hover:bg-warning-500;
 }
 
-/*Override all Toastify styles*/
+/* Toastify overrides — brand-aligned editorial toast */
 .toastify {
-    @apply p-4
-        bg-success-50 shadow-md
-        font-medium text-success-800
-        rounded-md fixed opacity-0 transition-all duration-250 ease-in-out
-        no-underline
-        flex items-center;
+    @apply fixed flex items-center gap-3
+        rounded-lg bg-ink px-4 py-3 shadow-lg
+        text-[13px] font-medium text-paper no-underline
+        opacity-0 transition-all duration-250 ease-in-out;
     max-width: calc(50% - 20px);
     z-index: 2147483647;
 }
 
-.toastify.warning {
-    @apply bg-warning-50 text-warning-800;
+.toastify::before {
+    content: '';
+    display: block;
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-status-accepted-dot);
+}
+
+.toastify.warning::before {
+    background-color: var(--color-status-rejected-dot);
 }
 
 .toastify.on {
-    @apply opacity-100 transition-all duration-250 ease-in-out
+    @apply opacity-100 transition-all duration-250 ease-in-out;
 }
 
 .toast-close {
-    @apply absolute -top-3 -right-3 cursor-pointer bg-gray-50 shadow-sm rounded-full border-0 text-xl size-6;
+    @apply absolute -top-2 -right-2 flex size-5 cursor-pointer items-center justify-center
+        rounded-full border-0 bg-paper text-[13px] font-semibold leading-none text-ink shadow
+        hover:bg-fox;
 }
 
 .toastify-right {

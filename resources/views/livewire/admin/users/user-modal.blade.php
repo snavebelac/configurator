@@ -9,18 +9,21 @@
             <x-field
                 label="First name"
                 name="name"
-                autocomplete="given-name" />
+                autocomplete="given-name"
+                placeholder="Michael" />
 
             <x-field
                 label="Last name"
                 name="lastName"
-                autocomplete="family-name" />
+                autocomplete="family-name"
+                placeholder="Garibaldi" />
 
             <x-field
                 label="Email address"
                 name="email"
                 type="email"
                 autocomplete="email"
+                placeholder="m.garibaldi@earthforce.mil"
                 class="sm:col-span-2" />
 
             <x-select-field

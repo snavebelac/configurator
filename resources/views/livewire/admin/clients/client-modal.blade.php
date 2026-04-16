@@ -7,28 +7,28 @@
                 label="Company name"
                 name="name"
                 autocomplete="organization"
-                placeholder="Halverson Studio"
+                placeholder="Zocalo Traders Ltd"
                 class="sm:col-span-2" />
 
             <x-field
                 label="Contact name"
                 name="contact"
                 autocomplete="name"
-                placeholder="Avery Halverson" />
+                placeholder="Susan Ivanova" />
 
             <x-field
                 label="Contact phone"
                 name="contactPhone"
                 type="tel"
                 autocomplete="tel"
-                placeholder="+44 20 7946 0958" />
+                placeholder="+44 20 7946 2258" />
 
             <x-field
                 label="Contact email"
                 name="contactEmail"
                 type="email"
                 autocomplete="email"
-                placeholder="avery@halverson.studio"
+                placeholder="s.ivanova@earthforce.mil"
                 class="sm:col-span-2" />
         </div>
 

@@ -28,7 +28,7 @@
                 <x-field
                     label="Proposal name"
                     name="name"
-                    placeholder="E.g. Brand identity system — Halverson Studio"
+                    placeholder="E.g. Zocalo market refresh — stage one"
                     class="sm:col-span-3" />
             </div>
         </x-card>

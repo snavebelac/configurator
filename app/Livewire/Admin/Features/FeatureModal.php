@@ -9,6 +9,11 @@ use LivewireUI\Modal\ModalComponent;
 
 class FeatureModal extends ModalComponent
 {
+    public static function modalMaxWidth(): string
+    {
+        return '3xl';
+    }
+
     public ?int $featureId = null;
 
     public string $name = '';
