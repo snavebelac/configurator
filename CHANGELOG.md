@@ -10,8 +10,124 @@ changes may occur in any minor release.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-16
+
+This release closes out the Epic Fox brand redesign, adds two substantial
+domain features (nested features and packages), turns the dashboard's
+"Lately" panel into a real activity feed, redesigns the client-facing
+proposal preview as an editorial document, and consolidates icons onto
+Phosphor.
+
 ### Added
 
+- Auth screens (`Login`, `ForgottenPassword`, `PasswordReset`) migrated to
+  the Epic Fox brand UI via a new shared `<x-auth-shell>` wrapper that
+  carries the fox-yellow logo mark, italic-serif masthead, lede, bordered
+  card, and optional footer slot. Inputs use the same `<x-field>` /
+  `<x-btn>` primitives as the back-office, so any future style change
+  reaches every form in the app. The `components.layouts.app` layout was
+  rewired to load Libre Baskerville + Inter and apply
+  `bg-paper text-ink` to the body. New `tests/Feature/{LoginTest,
+  PasswordResetTest}.php` cover render + brand copy, validation, invalid /
+  inactive sign-in, happy-path redirect, reset-link dispatch, and password
+  update. Small refactor on `Login.php`: swapped the
+  `Request::session()` facade for the `session()` helper so the
+  authenticate path is testable through `Livewire::test` without binding
+  a session to a fake request.
+- Nested features (parent → child, one level deep). Activated the
+  long-dormant `parent_id` columns on `features` + `final_features`
+  (originally schema'd but never wired into models, UI, or snapshotting)
+  with proper indexes. Parents have their own base price; children stack
+  on top. In the proposal builder, selecting a child auto-attaches its
+  parent (with a toast for visibility); removing a parent cascade-removes
+  any of its selected children (also toasted). A standalone feature can
+  be reparented freely; only a feature that already has children is
+  locked (it would create grandchildren). The library itself is strictly
+  alphabetical — customer-facing ordering lives exclusively on
+  `FinalFeature.order`, drag-reorderable on the proposal-edit page via
+  `@alpinejs/sort` (parents only; children stay alpha within their
+  parent). Added `source_feature_id` to `final_features` plus a one-time
+  backfill migration that matches existing snapshots to their source
+  Features by `(tenant_id, name)`, so the new "already on proposal"
+  de-dup logic works across both fresh and historical proposals.
+  Snapshot creation preserves the parent link so historical proposals
+  keep their structure even as the library evolves. 16 new tests in
+  `tests/Feature/NestedFeaturesTest.php` cover relationships, the
+  `roots()` scope, library cascade-on-delete, modal-level reparenting
+  rules, list grouping, auto-attach-on-pick, cascade-on-remove,
+  snapshot ordering, drag-to-reorder via `reorderParents`, and snapshot
+  cascade.
+- Reusable `FeaturePicker` Livewire component that owns the
+  library-browse side only — search, paginated grouped display, pick-row
+  rendering. Accepts a `disabledIds` prop (marked `#[Reactive]` so it
+  updates as the parent re-renders) and emits `feature-picked` events.
+  `ProposalCreate` now mounts the picker as its left pane (replacing the
+  inline implementation), and a new `AddFeaturesModal` embeds it on the
+  proposal-edit page so features can be added to an existing proposal
+  without starting over. The modal applies the same auto-attach-parent
+  rules as the create flow and reuses an existing parent snapshot when
+  one is already on the proposal. Dropped the Finalise button (a
+  reversible ceremony the system didn't actually need) in favour of an
+  elevated "Preview (client view)" CTA. 9 new tests in
+  `tests/Feature/{FeaturePickerTest,AddFeaturesModalTest}.php`.
+- Editorial redesign of the client preview at
+  `/dashboard/proposal/preview/{uuid}`. Rebuilt as a typeset document
+  rather than a data table — large italic-serif masthead with For /
+  Prepared by / Dated, parent features as serif section dividers with
+  children grouped beneath, and a sticky summary rail with a live total
+  in Office Code Pro tabular. Optional features toggle via Alpine; the
+  subtotal, optional sum, and VAT recompute in front of the client. All
+  toggling is ephemeral (client-side only) — no DB writes — so the page
+  works as a share-link preview without any session layer. Subtle
+  paper-grain noise texture (SVG-as-data-URL) sits under everything for
+  tactility. Fox-yellow is reserved for the "Live" pill on the summary
+  card. 3 new tests in `tests/Feature/ProposalPreviewTest.php`.
+- Packages — pre-curated sets of features that can be dropped onto a
+  proposal in bulk. New `Package` model (tenant-scoped via
+  `BelongsToTenant`, UUID, soft-deleted), many-to-many to `Feature` via
+  the `feature_package` pivot. Custom `FeaturePackage` Pivot model also
+  uses `BelongsToTenant`, so pivot rows are globally filtered by tenant
+  and `tenant_id` is auto-populated on attach. The pivot carries
+  per-package overrides on `quantity`, `optional`, and `price` — all
+  nullable; null means "inherit the feature's default." Price is stored
+  in integer-pence to match the `Feature` accessor convention, so
+  attaching with `'price' => 25.00` is treated as pounds and stored as
+  2500 pence. Full admin CRUD at `/dashboard/packages` with a list page
+  mirroring `FeaturesList` and a two-pane edit page that pairs the
+  shared `<x-feature-picker>` (left) with an editable members table
+  (right) carrying inline override inputs and a three-state "Inherit /
+  Force optional / Force required" select. On proposal-edit, a new
+  `AddPackageModal` bulk-snapshots a package's features with overrides
+  applied (auto-attach-parent + de-dup against `source_feature_id`
+  reused from the existing infrastructure). On proposal-create, a
+  separate event-based `PackagePickerModal` emits `package-picked`;
+  `ProposalCreate::handlePackagePicked` expands features into
+  `selectedFeatureIds` and stashes overrides in a `packageOverrides`
+  array that `snapshotFeature` consults at create time. New "Packages"
+  icon in the admin nav rail. 13 new tests in
+  `tests/Feature/PackagesTest.php` covering relationships, CRUD,
+  override persistence, bulk-snapshot with/without overrides,
+  auto-attach-parent on package-add, dedup, and tenant-scope on both
+  `Package` and the `FeaturePackage` pivot.
+- Real activity feed on the dashboard, replacing the previous
+  last-8-updated-proposals stand-in. New tenant-scoped `Activity` model
+  with a polymorphic `subject`, JSON `payload`, immutable storage (no
+  `updated_at`), and a `static log()` helper. New `ActivityAction` enum
+  covers `proposal.created`, `proposal.status_changed`,
+  `client.created`, `package.created`. Three model observers (Proposal,
+  Client, Package) write events on the relevant lifecycle moments —
+  the Proposal observer fires status-changed only on actual
+  `wasChanged('status')`, so a name-only edit doesn't pollute the
+  feed. Subject names are stashed into the payload at log-time so the
+  feed reads coherently even if the subject is later soft-deleted.
+  Headlines like "Caleb created Brand identity system" / "Caleb moved
+  X to Delivered" render in the dashboard panel with subject-type-
+  coloured icons (sage for client, fox-soft for package, status-
+  coloured for proposal status changes). 8 new tests in
+  `tests/Feature/ActivityTest.php`.
+- Quick-action buttons in the dashboard header: "New feature" (opens
+  the existing modal) and "New package" (links to the create page)
+  added alongside the existing "New proposal" accent button.
 - Swapped the admin typography stack from Fraunces + Geist + JetBrains
   Mono to Libre Baskerville (display) + Inter (body) + Office Code Pro
   (numerals), after prototyping the change in `design-prototypes/`.
@@ -172,6 +288,32 @@ changes may occur in any minor release.
 
 ### Changed
 
+- Replaced 50+ hand-rolled inline SVGs across the admin views with
+  `<x-phosphor-*>` components from `codeat3/blade-phosphor-icons` (built
+  on `blade-ui-kit/blade-icons`). Icons are still inline SVG at
+  template-render time, so client-side payload is unchanged — only the
+  icons referenced in templates ever reach the browser. The bespoke
+  `<x-logo>` brand mark and the SVG-as-data-URL paper-grain texture in
+  the client preview are kept as-is. The nav rail's `<x-menu-item>`
+  was refactored to take an `icon="..."` prop and render via
+  `<x-dynamic-component>`, replacing the previous slot-of-paths
+  pattern. Settled icon vocabulary: `phosphor-plus` for "add" CTAs,
+  `phosphor-x` for close/remove, `phosphor-check` for confirmations,
+  `phosphor-magnifying-glass` for search inputs, `phosphor-arrow-right`
+  for forward affordances, `phosphor-arrow-square-out` for "open in
+  new tab", `phosphor-arrow-elbow-down-right` for child-feature
+  indents, `phosphor-dots-six-vertical` for drag handles,
+  `phosphor-lock-simple` for required markers, plus subject-type icons
+  (cube, stack, file-text, user, user-circle, users-three, envelope,
+  squares-four, bell, sign-out).
+- Proposal-edit features list converted from `<table>` to a CSS-grid
+  layout so each parent+children group can be wrapped together as a
+  single sortable item. Children move with their parent visually
+  during drag. `proposal-feature-form` renders a div-based grid row
+  instead of a `<tr>`. The drag handle (`x-sort:handle`) lives only
+  on parent rows, so children can't be independently dragged.
+- `<x-select-field>` gained `modelLive`, `disabled`, and `hint` props
+  for parity with `<x-field>`.
 - Rewrote `README.md` for prospective users: dropped the original marketing
   copy in favour of a plain-English overview of the product concept (feature
   library → clients → interactive proposals with optional toggles and live
@@ -226,6 +368,17 @@ changes may occur in any minor release.
 
 ### Fixed
 
+- `FeaturePicker`'s `disabledIds` prop is marked `#[Reactive]`, so when
+  `AddFeaturesModal` adds a feature the picker shows it as
+  greyed-out / ticked immediately. Without the attribute, Livewire 4
+  only sets nested-component props at mount time, leaving the picker
+  visually stale until a full reload — a UX wart that would otherwise
+  let the user attempt to re-add a feature already on the proposal.
+- Wired the previously-orphaned `refreshFeatureProposalEdit` event:
+  `ProposalEdit` now listens for it and reloads features. Before this,
+  removing a parent FinalFeature would soft-delete its children at the
+  DB level (correct) but leave their stale Livewire row components in
+  the DOM until the page was reloaded.
 - Added explicit `#[Layout('components.layouts.app')]` to the four full-page
   Livewire components that previously relied on the Livewire 3 default
   (`Login`, `ForgottenPassword`, `PasswordReset`, and the public
@@ -289,5 +442,6 @@ configurators and generating digital proposals.
   because of this relationship mismatch. To be addressed after the dependency
   upgrade pass.
 
-[Unreleased]: https://github.com/snavebelac/configurator/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/snavebelac/configurator/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/snavebelac/configurator/releases/tag/v0.2.0
 [0.1.0]: https://github.com/snavebelac/configurator/releases/tag/v0.1.0
