@@ -6,11 +6,12 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 
 ## Where we are
 
-The dashboard (`/dashboard`) has been rebuilt against the new design system
-and the admin layout shell now matches the agreed direction. Other admin
-pages (proposals, clients, features, users, profile, settings) still use
-the legacy `primary/*` blue palette and will look visually inconsistent
-inside the new shell until they're migrated.
+The dashboard (`/dashboard`) and the proposals list (`/dashboard/proposals`)
+have been rebuilt against the new design system, and the admin layout shell
+matches the agreed direction. The remaining admin pages (proposal builder,
+clients, features, users, profile, settings) still use the legacy `primary/*`
+blue palette and will look visually inconsistent inside the new shell until
+they're migrated.
 
 The static reference for the whole direction lives in `design-prototypes/`
 (`dashboard.html`, `proposals.html`, `present.html`). Open
@@ -49,6 +50,14 @@ The static reference for the whole direction lives in `design-prototypes/`
   attention feed, recent feed, segmented table.
 - `tests/Feature/DashboardTest.php` — empty-state + populated-state
   coverage.
+- `app/Livewire/Admin/Proposals/ProposalsList.php` — URL-backed status
+  filter + debounced search across name/client fields, per-status counts,
+  eager-loaded totals.
+- `resources/views/livewire/admin/proposals/proposals-list.blade.php` —
+  brand header, segmented status control, clean table with `<x-pill>`,
+  owner column, value column, preserved delete action.
+- `tests/Feature/ProposalsListTest.php` — empty state, multi-status list,
+  status filter, name/client search, delete.
 
 ## What's left, in rough priority
 
@@ -58,10 +67,6 @@ Each page below currently renders in the new layout but with old `primary/*`
 classes. Rewrite to use brand tokens (`bg-paper`, `border-rule`, `text-ink`,
 `<x-pill>`, etc.) following the prototype patterns.
 
-- `resources/views/livewire/admin/proposals/proposals-list.blade.php` →
-  match the **`design-prototypes/proposals.html`** pattern: page header,
-  segmented control by status, single clean table, search + filter
-  toolbar. Component already loads what we need.
 - `resources/views/livewire/admin/proposals/proposal-create.blade.php` and
   `proposal-edit.blade.php` — the proposal builder. The biggest piece
   here. Worth its own session.

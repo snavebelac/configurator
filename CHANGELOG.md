@@ -12,6 +12,20 @@ changes may occur in any minor release.
 
 ### Added
 
+- Proposals list page (`/dashboard/proposals`) rebuilt against the new
+  design system, following the `design-prototypes/proposals.html` pattern:
+  serif page header with in-flight count, segmented status control (All /
+  Drafts / Delivered / Accepted / Rejected / Archived) with per-status
+  counts, debounced search across proposal name and client name / contact /
+  email, a single clean table with `<x-pill>` status badges, owner and
+  value columns, and row actions for Edit / Preview / Delete. Status and
+  search are persisted to the URL so filtered views can be shared.
+  `ProposalsList` now correctly scopes client-field search via `whereHas`
+  (the previous `orWhere('client.name', ...)` dot-notation was a silent
+  no-op) and eager-loads `client`, `user`, and `features` to avoid N+1
+  lookups when rendering totals. `tests/Feature/ProposalsListTest.php`
+  covers the empty state, multi-status render, status filter, search
+  filter, and delete action.
 - New brand UI baseline applied to the admin shell and dashboard, in line with
   the static reference in `design-prototypes/`:
     - Epic Fox brand palette and typography wired into `resources/css/app.css`

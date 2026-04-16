@@ -2,18 +2,35 @@
 
 namespace App\Livewire\Admin\Proposals;
 
+use App\Enums\Status;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Proposal;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
 class ProposalsList extends AdminComponent
 {
     use WithPagination;
 
-    public $search = '';
+    #[Url(as: 'q', except: '')]
+    public string $search = '';
 
-    private $pageLength = 6;
+    #[Url(as: 'status', except: 'all')]
+    public string $filter = 'all';
+
+    private int $pageLength = 12;
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilter(): void
+    {
+        $this->resetPage();
+    }
 
     #[On('refresh-proposals')]
     public function loadProposals(): void
@@ -34,20 +51,41 @@ class ProposalsList extends AdminComponent
         }
     }
 
-    public function render()
+    public function render(): View
     {
-        $proposals = Proposal::with(['client'])
-            ->when($this->search != '', fn ($query) => $query
-                ->where('name', 'like', '%'.$this->search.'%')
-                ->orWhere('client.name', 'like', '%'.$this->search.'%')
-                ->orWhere('client.contact', 'like', '%'.$this->search.'%')
-                ->orWhere('client.contact_email', 'like', '%'.$this->search.'%')
-            )
-            ->orderBy('name')
+        $counts = Proposal::query()
+            ->selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $statusCounts = [
+            'all' => (int) $counts->sum(),
+            'draft' => (int) ($counts[Status::DRAFT->value] ?? 0),
+            'delivered' => (int) ($counts[Status::DELIVERED->value] ?? 0),
+            'accepted' => (int) ($counts[Status::ACCEPTED->value] ?? 0),
+            'rejected' => (int) ($counts[Status::REJECTED->value] ?? 0),
+            'archived' => (int) ($counts[Status::ARCHIVED->value] ?? 0),
+        ];
+
+        $proposals = Proposal::with(['client', 'user', 'features'])
+            ->when($this->filter !== 'all', fn ($query) => $query->where('status', $this->filter))
+            ->when($this->search !== '', function ($query) {
+                $term = '%'.$this->search.'%';
+                $query->where(function ($inner) use ($term) {
+                    $inner->where('name', 'like', $term)
+                        ->orWhereHas('client', fn ($c) => $c
+                            ->where('name', 'like', $term)
+                            ->orWhere('contact', 'like', $term)
+                            ->orWhere('contact_email', 'like', $term)
+                        );
+                });
+            })
+            ->orderByDesc('updated_at')
             ->paginate($this->pageLength);
 
         return view('livewire.admin.proposals.proposals-list', [
             'proposals' => $proposals,
+            'statusCounts' => $statusCounts,
         ]);
     }
 }
