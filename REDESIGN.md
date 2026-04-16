@@ -4,6 +4,16 @@ This file tracks the multi-session refactor of the Configurator admin panel
 to the Epic Fox brand UI. Update it as work lands. Final, version-pinned
 descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 
+> **Pickup note (after v0.2.0, 2026-04-16):** The brand redesign is
+> functionally complete and the back-office now has nested features,
+> packages, a real activity feed, and an editorial client preview. The
+> next big-rock item is **Present mode**. Two smaller follow-ups worth
+> raising before that: (a) **make the client preview URL truly public**
+> — it's still under `auth` middleware, so admins can preview but
+> share-links don't actually work for clients; (b) the user mentioned a
+> **separate stand-alone Laravel "proposal system"** they want to fold
+> into Configurator at some point — worth scoping when ready.
+
 ## Where we are
 
 The entire back-office is now on the new design system: dashboard,
@@ -205,28 +215,82 @@ Things worth adding next:
 - Periodic purge of activities older than ~12 months once volume
   warrants it.
 
-### 3. Build "Present mode"
+### 3. Make the client preview URL truly public
 
-Once the back-office is consistent, build the live presentation experience:
+The route at `/dashboard/proposal/preview/{proposal:uuid}` is currently
+under `auth` middleware, so the editorial client preview only renders
+for logged-in admins. UUID is unguessable so the security model is
+fine — it just needs to be moved out of the `auth` group (or into a
+sibling route). Worth doing because share-link previews don't actually
+work for clients today. Open questions when we move it: should
+`Settings` (tax name/rate, currency) be resolved from the proposal's
+tenant_id rather than the session, since unauthenticated visitors have
+no session-tenant?
 
-- New route `dashboard.proposal.present` mounting a Livewire component on a
-  full-bleed layout (`components.layouts.present`, no rail/topbar).
-- Implement against `design-prototypes/present.html`: required vs. optional
-  features, fox-yellow toggle, sticky live total in mono.
-- Phase 2: a "client mirror" view at a public UUID URL that subscribes to
-  Livewire events from the operator — eventual real-time sync.
+### 4. Fold in the standalone proposal system
 
-### 4. Mobile / tablet support
+The user maintains a separate stand-alone Laravel app for "simpler"
+proposals (no configurator/optional-toggle behaviour). Direction is to
+unify it into Configurator. Need a scoping conversation before any code
+— what does that app currently model, and what's the import path?
 
-Deferred until the desktop pass is complete. The current rail will need a
-collapsible/off-canvas treatment at narrow widths.
+### 5. Build "Present mode"
 
-### 5. Drop the legacy `primary/*` palette
+The live presentation experience for in-the-room demos:
 
-Once every admin page uses brand tokens, remove the `primary/*`,
-`success/*`, `warning/*`, `gray/*` ramps from `resources/css/app.css` and
-the `.button*` / `.toastify*` classes that depend on them. Also revisit
-whether to keep Toastify + SweetAlert2 or replace with in-house components.
+- New route `dashboard.proposal.present` mounting a Livewire component
+  on a full-bleed layout (`components.layouts.present`, no rail/topbar).
+- Implement against `design-prototypes/present.html`: required vs.
+  optional features, fox-yellow toggle, sticky live total in mono.
+- Phase 2: a "client mirror" view at a public UUID URL that subscribes
+  to Livewire events from the operator — eventual real-time sync.
+
+### 6. Accept / Reject + persisted client toggles
+
+On the editorial client preview, optional toggles are currently
+ephemeral (client-side only). Two natural follow-ups:
+
+- An accept/reject affordance that posts the toggled-on optional IDs and
+  transitions the proposal to ACCEPTED/REJECTED.
+- A signed-URL or session-token flavour of the preview URL that lets
+  clients return and see their saved configuration.
+
+### 7. Wire the command palette
+
+Topbar's `⌘K` search trigger is still purely visual.
+
+- New Livewire component `App\Livewire\Admin\Shared\CommandPalette`
+  rendered inside the admin layout, listening for `⌘K` / `Ctrl+K` via
+  Alpine.
+- Items: navigate (proposals, clients, features, packages, settings),
+  create new (proposal, package, client, feature, user), and search
+  across proposals + clients + features + packages by name.
+- Match the visual pattern from `design-prototypes/dashboard.html`.
+
+### 8. Smaller cleanups
+
+- Description / additional-notes editing in the proposal admin (both
+  fields render beautifully on the client preview if set, but there's
+  no admin UI to edit them).
+- `feature.created` and `proposal.deleted` events for fuller activity
+  feed coverage.
+- A "View all activity" page if the 8-row dashboard panel feels
+  insufficient.
+- Bell icon in the topbar is purely visual — no notifications system
+  behind it.
+- Mobile / tablet support — the rail will need a collapsible/off-canvas
+  treatment. Deferred until desktop is locked in.
+- Drop the legacy `primary/*` / `success/*` / `warning/*` / `gray/*`
+  ramps from `resources/css/app.css` and the `.button*` / `.toastify*`
+  classes that depend on them, now that everything renders against
+  brand tokens. Also revisit whether to keep Toastify + SweetAlert2 or
+  replace with in-house components.
+- Periodic purge of activities older than ~12 months once volume
+  warrants it.
+- Three pre-redesign legacy components are still on disk but
+  unreferenced anywhere in views/PHP: `livewire/admin/shared/{progress,
+  select}.blade.php`, `components/{info,alert}.blade.php` (plus their
+  `App\Livewire\Admin\Shared\*` PHP). Safe to delete in a tidy-up pass.
 
 ## Where things live
 
