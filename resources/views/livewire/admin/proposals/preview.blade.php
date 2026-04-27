@@ -49,17 +49,10 @@
 
                 @forelse ($groups as $group)
                     <section class="mb-14" wire:key="group-{{ $group['root']->id }}">
-                        <div class="mb-7 flex items-baseline justify-between gap-6 border-b border-rule pb-3">
+                        <div class="mb-7 border-b border-rule pb-3">
                             <h2 class="font-display text-[24px] leading-[1.15] text-ink">
                                 {{ $group['root']->name }}
                             </h2>
-                            <p class="whitespace-nowrap text-[10.5px] font-medium uppercase tracking-[0.2em] text-slate-soft">
-                                @if ($group['children']->count())
-                                    {{ $group['children']->count() }} {{ Str::plural('add-on', $group['children']->count()) }}
-                                @else
-                                    Included
-                                @endif
-                            </p>
                         </div>
 
                         <div class="flex flex-col divide-y divide-rule-soft">

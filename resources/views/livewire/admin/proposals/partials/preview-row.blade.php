@@ -11,16 +11,19 @@
         'pl-8' => $isChild,
      ])>
 
-    {{-- Left: name + description + marker --}}
+    {{-- Left: name (children only — parent name lives in the section heading) + description + marker --}}
     <div class="min-w-0">
-        <div class="flex items-baseline gap-3">
-            @if ($isChild)
+        @if ($isChild)
+            <div class="flex items-baseline gap-3">
                 <x-phosphor-arrow-elbow-down-right class="mt-1 size-3 shrink-0 text-slate-soft" />
-            @endif
-            <h3 class="font-display text-[18px] leading-[1.25] text-ink">{{ $feature->name }}</h3>
-        </div>
+                <h3 class="font-display text-[18px] leading-[1.25] text-ink">{{ $feature->name }}</h3>
+            </div>
+        @endif
         @if ($feature->description)
-            <p class="mt-2 max-w-[52ch] text-[14px] leading-[1.55] text-slate">{{ $feature->description }}</p>
+            <p @class([
+                'max-w-[52ch] text-[14px] leading-[1.55] text-slate',
+                'mt-2' => $isChild,
+            ])>{{ $feature->description }}</p>
         @endif
         @if ($feature->quantity > 1)
             <p class="mt-2 text-[11.5px] uppercase tracking-[0.14em] text-slate-soft">

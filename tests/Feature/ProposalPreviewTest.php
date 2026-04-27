@@ -116,7 +116,6 @@ class ProposalPreviewTest extends TestCase
         $this->get(route('dashboard.proposal.preview', ['proposal' => $proposal->uuid]))
             ->assertOk()
             ->assertSeeText('Blog')
-            ->assertSeeText('Categories')
-            ->assertSeeText('1 add-on');
+            ->assertSeeText('Categories');
     }
 }
