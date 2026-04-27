@@ -265,7 +265,28 @@ ephemeral (client-side only). Two natural follow-ups:
 - A signed-URL or session-token flavour of the preview URL that lets
   clients return and see their saved configuration.
 
-### 3. Smaller cleanups
+### 3. View tracking on shared proposals
+
+Today the public preview at `/p/{uuid}` is read-only — there's no
+record of who has actually opened a share link or when. A simple "has
+the client seen this?" answer would be high-value on the
+proposal-edit page and the dashboard's "needs attention" feed.
+
+- New `proposal_views` table — `proposal_id`, `viewed_at`, hashed IP +
+  user-agent fingerprint (so we can roughly distinguish the client
+  from the salesperson clicking their own preview link).
+- `App\Livewire\Public\ProposalPreview::mount()` records a view when
+  it renders the unlocked preview state (not the gate / expired
+  states). Dedupe within a short window (e.g. 30 min) per
+  fingerprint to avoid re-counting refreshes.
+- Surface on the proposal-edit meta strip: "Last seen 2 days ago · 4
+  views" or "Not yet viewed".
+- Surface on the dashboard: "Stuck delivered" rows could show "Seen
+  X days ago" or "Never opened" — that's the truly stuck signal.
+- Open question: how granular do we want the dedupe window, and do
+  we surface raw view counts or just last-seen-at?
+
+### 4. Smaller cleanups
 
 - Description / additional-notes editing in the proposal admin (both
   fields render beautifully on the client preview if set, but there's
