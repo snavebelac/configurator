@@ -7,12 +7,10 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 > **Pickup note (after v0.2.0, 2026-04-16):** The brand redesign is
 > functionally complete and the back-office now has nested features,
 > packages, a real activity feed, and an editorial client preview. The
-> next big-rock item is **Present mode**. Two smaller follow-ups worth
-> raising before that: (a) **make the client preview URL truly public**
-> — it's still under `auth` middleware, so admins can preview but
-> share-links don't actually work for clients; (b) the user mentioned a
-> **separate stand-alone Laravel "proposal system"** they want to fold
-> into Configurator at some point — worth scoping when ready.
+> next big-rock item is **Present mode**. One smaller follow-up worth
+> raising before that: **make the client preview URL truly public** —
+> it's still under `auth` middleware, so admins can preview but
+> share-links don't actually work for clients.
 
 ## Where we are
 
@@ -183,39 +181,27 @@ The static reference for the whole direction lives in `design-prototypes/`
 - `tests/Feature/{LoginTest,PasswordResetTest}.php` — 10 tests covering
   render + brand copy, validation, invalid/inactive login,
   happy-path redirect, reset-link dispatch, and password update.
+- `app/Livewire/Admin/Shared/CommandPalette.php` +
+  `resources/views/livewire/admin/shared/command-palette.blade.php` —
+  ⌘K / Ctrl+K command palette mounted globally in the admin layout.
+  Suggested actions (new proposal / feature / package / teammate),
+  recent proposals on empty query, and live-search across proposals,
+  clients, features and packages via Laravel Scout. Tenant-scoped via
+  Scout `where('tenant_id', ...)` plus the existing global scope.
+  Shipping with `SCOUT_DRIVER=database` so there's no external
+  dependency; the same code runs against Algolia once credentials are
+  in `.env`. Algolia was chosen over Meilisearch / Typesense because
+  it's the only one of the three with a permanent free Cloud tier
+  ("Build" — 1M records + 10k searches/mo, no credit card). Index
+  settings live in `config/scout.php` with `filterOnly(tenant_id)` in
+  `attributesForFaceting` for each model so the where-clause filter
+  applies. 8 Pest tests in `tests/Feature/CommandPaletteTest.php`
+  cover open/close, suggested actions, search across all four models,
+  and tenant isolation.
 
 ## What's left, in rough priority
 
-### 1. Wire the command palette
-
-Today the topbar's search trigger is purely visual.
-
-- New Livewire component `App\Livewire\Admin\Shared\CommandPalette` rendered
-  inside the admin layout, listening for `⌘K` / `Ctrl+K` via Alpine.
-- Items: navigate (proposals, clients, features, settings), create new
-  (proposal, client, feature, user), and search across proposals + clients
-  + features by name.
-- Match the visual pattern from `design-prototypes/dashboard.html` (search
-  input top, grouped sections, focused-item ink-on-fox highlight, footer
-  hints).
-
-### 2. Extend the activity feed coverage
-
-The Lately panel now reads from a real `Activity` event store
-(tenant-scoped, polymorphic `subject`, action enum, JSON payload). Model
-observers on `Proposal`, `Client` and `Package` write events for create
-+ status-changed lifecycle moments. Headlines like "Caleb created Brand
-identity system" / "Caleb moved X to Delivered" render in the dashboard
-panel with subject-type-coloured icons. The dashboard also gained
-"New feature" + "New package" quick-action buttons in the page header.
-
-Things worth adding next:
-- `feature.created` and `proposal.deleted` events for fuller coverage.
-- A "View all activity" page if the 8-row panel feels insufficient.
-- Periodic purge of activities older than ~12 months once volume
-  warrants it.
-
-### 3. Make the client preview URL truly public
+### 1. Make the client preview URL truly public
 
 The route at `/dashboard/proposal/preview/{proposal:uuid}` is currently
 under `auth` middleware, so the editorial client preview only renders
@@ -227,16 +213,10 @@ work for clients today. Open questions when we move it: should
 tenant_id rather than the session, since unauthenticated visitors have
 no session-tenant?
 
-### 4. Fold in the standalone proposal system
+### 2. Build "Present mode"
 
-The user maintains a separate stand-alone Laravel app for "simpler"
-proposals (no configurator/optional-toggle behaviour). Direction is to
-unify it into Configurator. Need a scoping conversation before any code
-— what does that app currently model, and what's the import path?
-
-### 5. Build "Present mode"
-
-The live presentation experience for in-the-room demos:
+The live presentation experience for in-the-room demos. This is the
+next big-rock item.
 
 - New route `dashboard.proposal.present` mounting a Livewire component
   on a full-bleed layout (`components.layouts.present`, no rail/topbar).
@@ -245,7 +225,7 @@ The live presentation experience for in-the-room demos:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 6. Accept / Reject + persisted client toggles
+### 3. Accept / Reject + persisted client toggles
 
 On the editorial client preview, optional toggles are currently
 ephemeral (client-side only). Two natural follow-ups:
@@ -255,19 +235,7 @@ ephemeral (client-side only). Two natural follow-ups:
 - A signed-URL or session-token flavour of the preview URL that lets
   clients return and see their saved configuration.
 
-### 7. Wire the command palette
-
-Topbar's `⌘K` search trigger is still purely visual.
-
-- New Livewire component `App\Livewire\Admin\Shared\CommandPalette`
-  rendered inside the admin layout, listening for `⌘K` / `Ctrl+K` via
-  Alpine.
-- Items: navigate (proposals, clients, features, packages, settings),
-  create new (proposal, package, client, feature, user), and search
-  across proposals + clients + features + packages by name.
-- Match the visual pattern from `design-prototypes/dashboard.html`.
-
-### 8. Smaller cleanups
+### 4. Smaller cleanups
 
 - Description / additional-notes editing in the proposal admin (both
   fields render beautifully on the client preview if set, but there's
@@ -276,6 +244,8 @@ Topbar's `⌘K` search trigger is still purely visual.
   feed coverage.
 - A "View all activity" page if the 8-row dashboard panel feels
   insufficient.
+- Periodic purge of activities older than ~12 months once volume
+  warrants it.
 - Bell icon in the topbar is purely visual — no notifications system
   behind it.
 - Mobile / tablet support — the rail will need a collapsible/off-canvas
@@ -285,12 +255,16 @@ Topbar's `⌘K` search trigger is still purely visual.
   classes that depend on them, now that everything renders against
   brand tokens. Also revisit whether to keep Toastify + SweetAlert2 or
   replace with in-house components.
-- Periodic purge of activities older than ~12 months once volume
-  warrants it.
 - Three pre-redesign legacy components are still on disk but
   unreferenced anywhere in views/PHP: `livewire/admin/shared/{progress,
   select}.blade.php`, `components/{info,alert}.blade.php` (plus their
   `App\Livewire\Admin\Shared\*` PHP). Safe to delete in a tidy-up pass.
+- Flip `SCOUT_DRIVER` to `algolia` once the Algolia "Build" project is
+  provisioned. Set `ALGOLIA_APP_ID` / `ALGOLIA_SECRET` in `.env`, then
+  `php artisan scout:sync-index-settings` (pushes the index settings
+  declared in `config/scout.php`, including `filterOnly(tenant_id)`),
+  followed by `php artisan scout:import "App\\Models\\Proposal"`
+  (repeat for `Client`, `Feature`, `Package`) to seed the indexes.
 
 ## Where things live
 

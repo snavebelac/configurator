@@ -13,11 +13,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
 class Proposal extends Model
 {
     /** @use HasFactory<ProposalFactory> */
-    use BelongsToTenant, HasFactory, HasStatus, Uuid;
+    use BelongsToTenant, HasFactory, HasStatus, Searchable, Uuid;
 
     protected $fillable = [
         'status',
@@ -80,5 +81,17 @@ class Proposal extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'tenant_id' => $this->tenant_id,
+            'name' => $this->name,
+        ];
     }
 }

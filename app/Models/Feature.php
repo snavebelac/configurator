@@ -14,11 +14,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Feature extends Model
 {
     /** @use HasFactory<FeatureFactory> */
-    use BelongsToTenant, HasFactory, SoftDeletes, Uuid;
+    use BelongsToTenant, HasFactory, Searchable, SoftDeletes, Uuid;
 
     protected $fillable = [
         'name',
@@ -96,5 +97,17 @@ class Feature extends Model
             ->using(FeaturePackage::class)
             ->withPivot(['quantity', 'optional', 'price'])
             ->withTimestamps();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'tenant_id' => $this->tenant_id,
+            'name' => $this->name,
+        ];
     }
 }
