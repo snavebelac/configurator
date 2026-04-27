@@ -286,34 +286,50 @@ proposal-edit page and the dashboard's "needs attention" feed.
 - Open question: how granular do we want the dedupe window, and do
   we surface raw view counts or just last-seen-at?
 
-### 4. Per-tenant branding on the customer preview
+### 4. Per-tenant identity on the customer preview
 
 The public proposal preview at `/p/{uuid}` currently uses the Epic Fox
-brand palette and typography. For a multi-tenant SaaS that's
-sub-optimal — every tenant's clients see the same look. v1 scope is
-**fonts, colours, and a logo only** (no full theme system).
+brand palette and typography, and shows nothing about the issuing
+tenant beyond the salesperson's name. For a multi-tenant SaaS that's
+sub-optimal — every tenant's clients see the same look and the same
+generic footer. v1 scope is **fonts, colours, logo, and contact
+details** (no full theme system).
 
 Schema is already partway there: `settings.logo` and
 `settings.company_name` columns exist in the migration but neither is
 read or written anywhere yet. Fill in the rest:
 
-- Add brand colour columns to `settings` (e.g. `brand_ink`,
-  `brand_accent`) — hex strings, validated as `/#[0-9a-f]{6}/i`.
-- Add font selection — most realistic shape is a small curated
-  enum/list (Libre Baskerville, Inter, Playfair Display, IBM Plex…)
-  rather than letting tenants paste arbitrary font names. Two slots:
-  display and body, or just display.
-- Logo upload in the tenant settings page — single image, stored on
-  Laravel's `public` disk. Display preview + replace + remove.
-  Reasonable size cap (e.g. 1MB) and content-type allowlist.
-- Render path: the customer preview layout (and only the customer
+- **Branding fields on `settings`**:
+  - Brand colour columns (e.g. `brand_ink`, `brand_accent`) — hex
+    strings, validated as `/#[0-9a-f]{6}/i`.
+  - Font selection — most realistic shape is a small curated
+    enum/list (Libre Baskerville, Inter, Playfair Display, IBM
+    Plex…) rather than letting tenants paste arbitrary font names.
+    Two slots: display and body, or just display.
+  - Logo upload — single image, stored on Laravel's `public` disk.
+    Display preview + replace + remove in the settings page.
+    Reasonable size cap (e.g. 1MB) and content-type allowlist.
+- **Contact fields on `settings`** (none of these exist yet):
+  - `company_email`, `company_phone`, `company_address` (single
+    multi-line string is fine for v1; can split into structured
+    fields later if needed). The user-account email belongs to the
+    salesperson and isn't the right thing to render in a customer
+    proposal — the company contact is a tenant-level fact.
+- **Settings form**: a new "Brand & company" section on the settings
+  page with the logo uploader, colour pickers, font selector, and
+  the four contact fields. Existing tax/currency section stays as it
+  is.
+- **Render path**: the customer preview layout (and only the customer
   preview — not the admin chrome) emits an inline `<style>` block
   that overrides the relevant CSS custom properties on `<body>`:
   `--color-ink`, `--color-fox`, `--font-display`, `--font-sans`.
-  Logo replaces the existing fox mark in the masthead.
-- Public route + public-preview component need to pull settings via
-  the proposal's tenant (the existing `Setting::forTenant()` helper
-  already does this for tax/currency).
+  Logo replaces the existing fox mark in the masthead. Contact
+  details render in the document footer or sidebar (replacing the
+  current generic "All prices in GBP…" copy).
+- **Tenant resolution**: the existing `Setting::forTenant()` helper
+  already covers fetching the proposal's tenant settings without a
+  session — extend `SettingsHelper` to expose the new fields the
+  same way it currently exposes tax/currency.
 
 Open questions:
 - Curated font list vs. free-text? Curated is safer (consistent
@@ -323,6 +339,9 @@ Open questions:
 - How does the access-code gate look when the tenant has rebranded —
   does the gate inherit the brand, or stay neutral so it reads as a
   Configurator-issued auth screen?
+- Address: single textarea (good enough for footer rendering) or
+  structured (line 1, line 2, city, postcode, country)? Structured
+  scales better but is more form to fill in.
 
 ### 5. Smaller cleanups
 
