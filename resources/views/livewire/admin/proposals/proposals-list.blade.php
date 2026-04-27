@@ -13,7 +13,7 @@
         ? 'Nothing here yet. Start your first proposal and it will land in this list.'
         : 'Every quote you\'ve sent and every draft you\'ve started. Open any row to keep editing or hand it to a client.';
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         title="Proposals."

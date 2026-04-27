@@ -2,7 +2,7 @@
     $clientOptions = $clients->mapWithKeys(fn ($client) => [$client->id => $client->name])->all();
     $selectedCount = count($selectedFeatureIds);
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         title="New proposal."

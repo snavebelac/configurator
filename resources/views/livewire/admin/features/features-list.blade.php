@@ -6,7 +6,7 @@
         .' · '.$optionalCount.' optional'
         .($parentCount > 0 ? ' · '.$parentCount.' with children' : '');
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         title="Features."

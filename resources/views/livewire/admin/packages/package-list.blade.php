@@ -3,7 +3,7 @@
         ? 'Packages are pre-curated sets of features you can drop onto a proposal in one go. Create one to get started.'
         : 'Preset bundles of features. Drop any package onto a proposal to add all of its features at once.';
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         title="Packages."

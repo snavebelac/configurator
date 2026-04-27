@@ -1,7 +1,7 @@
 @php
     $gridTemplate = 'grid-template-columns: 24px minmax(0,2fr) 80px 120px 130px 110px 40px;';
 @endphp
-<div class="mx-auto max-w-[1480px]" wire:key="proposal-edit-{{ $proposal->id }}">
+<div class="max-w-[1480px]" wire:key="proposal-edit-{{ $proposal->id }}">
 
     <x-page-header
         :title="$proposal->name ?: 'Untitled proposal'"

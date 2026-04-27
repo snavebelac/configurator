@@ -5,7 +5,7 @@
         ? trans_choice(':count item is waiting on you|:count items are waiting on you', $needsAttention->count(), ['count' => $needsAttention->count()])
         : 'Nothing waiting on you — a clean slate.';
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         :title="$greeting . ', ' . $user->name . '.'"
