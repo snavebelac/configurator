@@ -41,6 +41,7 @@
             <section class="border-t border-rule-soft pt-6">
                 <x-checkbox-field
                     name="codeRequired"
+                    modelLive="codeRequired"
                     label="Require a 6-digit access code"
                     description="Adds a code-entry step before the proposal can be viewed. Share the code with your client through a different channel (text, voice) for an extra layer." />
 

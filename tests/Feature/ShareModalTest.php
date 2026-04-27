@@ -112,4 +112,63 @@ class ShareModalTest extends TestCase
             ->call('save')
             ->assertHasErrors(['expiresAtDate']);
     }
+
+    #[Test]
+    public function ticking_code_required_immediately_generates_a_code(): void
+    {
+        [, , $proposal] = $this->signInAndCreateProposal();
+
+        $component = Livewire::test(ShareModal::class, ['proposalId' => $proposal->id])
+            ->assertSet('codeRequired', false)
+            ->assertSet('generatedCode', null)
+            ->set('codeRequired', true);
+
+        $this->assertNotNull($component->get('generatedCode'));
+        $this->assertMatchesRegularExpression('/^\d{6}$/', $component->get('generatedCode'));
+    }
+
+    #[Test]
+    public function ticking_code_required_does_not_overwrite_an_already_generated_code(): void
+    {
+        [, , $proposal] = $this->signInAndCreateProposal();
+
+        $component = Livewire::test(ShareModal::class, ['proposalId' => $proposal->id])
+            ->call('generateCode');
+        $original = $component->get('generatedCode');
+
+        $component->set('codeRequired', false)
+            ->set('codeRequired', true);
+
+        $this->assertSame($original, $component->get('generatedCode'));
+    }
+
+    #[Test]
+    public function ticking_code_required_does_not_clobber_an_existing_persisted_code(): void
+    {
+        [, , $proposal] = $this->signInAndCreateProposal(['access_code_hash' => Hash::make('999999')]);
+
+        $component = Livewire::test(ShareModal::class, ['proposalId' => $proposal->id])
+            ->assertSet('codeRequired', true)
+            ->assertSet('generatedCode', null)
+            ->set('codeRequired', false)
+            ->set('codeRequired', true);
+
+        // Still null — the admin sees the "regenerate" button instead.
+        $this->assertNull($component->get('generatedCode'));
+    }
+
+    #[Test]
+    public function saving_with_code_required_but_no_generated_code_still_locks_the_proposal(): void
+    {
+        [, , $proposal] = $this->signInAndCreateProposal();
+
+        // Simulates a malformed flow where the live binding never fired
+        // (e.g. an admin scripting the component or a future regression).
+        Livewire::test(ShareModal::class, ['proposalId' => $proposal->id])
+            ->set('codeRequired', true, false)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertNotNull($proposal->fresh()->access_code_hash);
+    }
 }

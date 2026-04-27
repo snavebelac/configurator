@@ -48,6 +48,26 @@ class ShareModal extends ModalComponent
         $this->codeRequired = $proposal->requiresCode();
     }
 
+    /**
+     * Triggered as soon as the "require code" checkbox is ticked. If the
+     * proposal doesn't already have a stored code and we haven't already
+     * queued a fresh one this session, mint one immediately so the modal
+     * never sits in a "code required but no code anywhere" state.
+     */
+    public function updatedCodeRequired(bool $value): void
+    {
+        if (! $value || $this->generatedCode !== null) {
+            return;
+        }
+
+        $proposal = Proposal::findOrFail($this->proposalId);
+        if ($proposal->requiresCode()) {
+            return;
+        }
+
+        $this->generateCode();
+    }
+
     public function save(): void
     {
         $this->validate();
@@ -62,6 +82,12 @@ class ShareModal extends ModalComponent
         if (! $this->codeRequired) {
             $updates['access_code_hash'] = null;
         } elseif ($this->generatedCode !== null) {
+            $updates['access_code_hash'] = Hash::make($this->generatedCode);
+        } elseif ($proposal->access_code_hash === null) {
+            // Belt-and-braces: code-required ticked but nothing's been
+            // generated and the proposal has no existing code. Mint one
+            // now so we never persist "requires a code" without one.
+            $this->generateCode();
             $updates['access_code_hash'] = Hash::make($this->generatedCode);
         }
 
