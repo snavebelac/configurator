@@ -28,6 +28,14 @@ class FinalFeature extends Model
         'final',
     ];
 
+    /**
+     * Bumps the parent proposal's `updated_at` whenever a line item is
+     * created, updated, or deleted — so the dashboard's "needs your
+     * attention" feed and any other recency-based logic reflect line
+     * edits, not just edits to the proposal record itself.
+     */
+    protected $touches = ['proposal'];
+
     protected $casts = [
         'optional' => 'boolean',
         'price' => 'integer',
