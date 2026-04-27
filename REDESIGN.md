@@ -255,17 +255,55 @@ next big-rock item.
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 2. Accept / Reject + persisted client toggles
+### 2. Accept / Reject — acceptance form + persisted client toggles
 
 On the editorial client preview, optional toggles are currently
-ephemeral (client-side only). Two natural follow-ups:
+ephemeral (client-side only) and there's no way for the client to
+actually act on the proposal. Three threads of work, all of which
+hang together:
 
-- An accept/reject affordance that posts the toggled-on optional IDs and
-  transitions the proposal to ACCEPTED/REJECTED.
-- A signed-URL or session-token flavour of the preview URL that lets
-  clients return and see their saved configuration.
+- **Acceptance form**: a small form on the customer preview that
+  captures the visitor's typed name, the IP address (server-side,
+  not asked for), the timestamp, and the toggled-on optional IDs.
+  On submit, the proposal transitions to `ACCEPTED` automatically.
+  Probably wants its own `proposal_acceptances` table for the audit
+  trail (one row per acceptance event), so we have a defensible
+  record of who accepted what and when. A reject path captures the
+  same envelope minus the optional IDs and transitions to
+  `REJECTED`.
+- **Persisted client toggles**: a signed-URL or session-token
+  flavour of the preview URL that lets a client return mid-decision
+  and see their saved configuration, rather than starting from
+  scratch each visit.
+- **T&Cs checkbox** alongside the accept button — see #3 below for
+  where the T&Cs themselves live.
 
-### 3. View tracking on shared proposals
+### 3. Terms and conditions link
+
+Today there's nowhere on the customer preview that links to terms.
+For most tenants that's a non-starter for actual acceptance flows.
+
+The shape isn't decided — three plausible options:
+
+- A **per-tenant Markdown page** stored in the database and rendered
+  at a public URL like `/t/{tenantUuid}/terms`. Lives inside the
+  app, easy to keep in sync.
+- An **uploaded PDF** per tenant, served from a private disk with
+  a signed URL. Probably the closest to what tenants do today
+  (their lawyer hands them a PDF).
+- A **free-text URL** field per tenant — link out to whatever they
+  already publish on their marketing site.
+
+Storage probably belongs in tenant settings (alongside the brand /
+contact fields in #5). The link itself surfaces at the foot of the
+customer preview and immediately above the accept button. The
+acceptance form (#2) gains a "I have read and agree to the terms"
+checkbox that's required for accept-but-not-reject.
+
+Open question: do we need to record _which version_ of the T&Cs the
+client agreed to? (Probably yes if the tenant ever amends them.)
+
+### 4. View tracking on shared proposals
 
 Today the public preview at `/p/{uuid}` is read-only — there's no
 record of who has actually opened a share link or when. A simple "has
@@ -286,7 +324,7 @@ proposal-edit page and the dashboard's "needs attention" feed.
 - Open question: how granular do we want the dedupe window, and do
   we surface raw view counts or just last-seen-at?
 
-### 4. Per-tenant identity on the customer preview
+### 5. Per-tenant identity on the customer preview
 
 The public proposal preview at `/p/{uuid}` currently uses the Epic Fox
 brand palette and typography, and shows nothing about the issuing
@@ -343,7 +381,7 @@ Open questions:
   structured (line 1, line 2, city, postcode, country)? Structured
   scales better but is more form to fill in.
 
-### 5. Attachments on proposals (documents + images)
+### 6. Attachments on proposals (documents + images)
 
 Allow proposals to carry uploaded documents and images. Primary use
 case is **site maps** — sketches or diagrams that contextualise the
@@ -367,7 +405,70 @@ Open questions worth banging out before any code:
 - Admin UX — a single drop-zone on the proposal-edit page, or a
   modal flow? Reorder / caption?
 
-### 6. Smaller cleanups
+### 7. Ongoing costs section on proposals
+
+Today every feature contributes a one-shot price. Most real proposals
+have an **ongoing-cost** dimension too — hosting, monthly retainers,
+licence fees. v1 needs a way to capture and render those, with the
+shape of "ongoing" features themselves still up in the air.
+
+Two design routes worth weighing:
+
+- **Mixed in with features**: every feature gains a "frequency"
+  enum (one-time, monthly, annual) and an `ongoing` flag. The
+  customer preview renders the features as today but groups
+  ongoing items into a separate "Ongoing costs" section
+  automatically. The library carries both kinds, distinguished by
+  the same flag.
+- **Separate first-class section**: a distinct concept on a
+  proposal — `ProposalOngoingCost` — with its own library
+  (`OngoingFeature`?), its own management UI, its own customer-
+  preview block. More work, cleaner mental model.
+
+Open question: how does this interact with the configurator
+toggles? An optional ongoing item ("Premium support — £50/mo")
+toggling on shouldn't lump into the one-time total.
+
+Also affects: the editorial preview's totals sidebar (likely needs
+"One-time total" and "Monthly recurring" lines side by side); the
+package model (does a package bundle ongoing items too?); the
+acceptance form (does the client accept the ongoing commitment
+explicitly?).
+
+Worth a scoping conversation before any code.
+
+### 8. Help / inline documentation around the admin
+
+There's currently no in-product explanation of how the system
+behaves, and some of the model is non-obvious to a first-time admin.
+The most acute case: when an admin edits a feature **on a proposal**,
+they're editing the snapshot (`FinalFeature`) — the original library
+feature is untouched. Without that being said anywhere in the UI,
+it's easy to assume edits propagate back to the library.
+
+What this looks like:
+
+- Small `<x-help>` Blade primitive (info icon → click reveals
+  popover) that can be dropped next to any action or section
+  heading.
+- Targeted callouts at known confusion points:
+  - The proposal-edit features table — clarify that line edits
+    only affect this proposal's snapshot, not the library.
+  - The share modal — clarify that regenerating the access code
+    immediately locks out anyone who's already authenticated, and
+    that expiry kicks in at the end of the chosen day.
+  - The packages screen — clarify that pivot overrides only apply
+    when the package is *added* to a proposal; later library edits
+    don't ripple into existing proposals.
+- A lightweight "what's new" or onboarding pane could grow out of
+  the same primitive later, but the immediate need is the
+  reassurance copy described above.
+
+Open question: do we want all this rendered inline, or also a
+dedicated `/dashboard/help` page that mirrors the same content for
+people who'd rather scroll-and-read than hunt-and-click?
+
+### 9. Smaller cleanups
 
 - Description / additional-notes editing in the proposal admin (both
   fields render beautifully on the client preview if set, but there's
