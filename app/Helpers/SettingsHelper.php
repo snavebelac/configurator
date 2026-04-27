@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use App\Enums\CurrencySymbol;
-use App\Models\Scopes\TenantScope;
 use App\Models\Setting;
 
 class SettingsHelper
@@ -22,7 +21,7 @@ class SettingsHelper
     {
         $setting = $tenantId === null
             ? Setting::first()
-            : Setting::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId)->first();
+            : Setting::withoutGlobalScope('tenant')->where('tenant_id', $tenantId)->first();
 
         $this->taxName = $setting->tax_name;
         $this->taxRate = $setting->tax_rate;

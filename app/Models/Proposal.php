@@ -23,10 +23,17 @@ class Proposal extends Model
     protected $fillable = [
         'status',
         'name',
+        'expires_at',
+        'access_code_hash',
     ];
 
     protected $casts = [
         'status' => Status::class,
+        'expires_at' => 'datetime',
+    ];
+
+    protected $hidden = [
+        'access_code_hash',
     ];
 
     public function user(): BelongsTo
@@ -81,6 +88,16 @@ class Proposal extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast();
+    }
+
+    public function requiresCode(): bool
+    {
+        return $this->access_code_hash !== null;
     }
 
     /**

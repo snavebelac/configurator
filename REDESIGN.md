@@ -6,11 +6,11 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 
 > **Pickup note (after v0.2.0, 2026-04-16):** The brand redesign is
 > functionally complete and the back-office now has nested features,
-> packages, a real activity feed, and an editorial client preview. The
-> next big-rock item is **Present mode**. One smaller follow-up worth
-> raising before that: **make the client preview URL truly public** —
-> it's still under `auth` middleware, so admins can preview but
-> share-links don't actually work for clients.
+> packages, a real activity feed, and an editorial client preview.
+> Since the v0.2.0 cut, the ⌘K command palette, a tenant settings
+> admin page, and a fully public proposal share link (with optional
+> expiry + 6-digit access code gating) have all landed. The next
+> big-rock item is **Present mode**.
 
 ## Where we are
 
@@ -198,22 +198,52 @@ The static reference for the whole direction lives in `design-prototypes/`
   applies. 8 Pest tests in `tests/Feature/CommandPaletteTest.php`
   cover open/close, suggested actions, search across all four models,
   and tenant isolation.
+- `app/Livewire/Admin/Settings.php` +
+  `resources/views/livewire/admin/settings.blade.php` — full tenant
+  settings admin page (currency, tax name/rate, tax-inclusive toggle,
+  default share-link expiry in days). Reachable from the nav rail via
+  the `gear-six` icon at `/dashboard/settings`. The new
+  `default_share_expiry_days` column on `settings` (nullable — null
+  means "never") is used by the share modal to pre-populate the
+  expiry date picker. `SettingsHelper` was extended to take an
+  optional `?int $tenantId` so the public preview can resolve a
+  proposal's settings from its own tenant rather than the session.
+- `app/Livewire/Public/ProposalPreview.php` + new public route
+  `/p/{uuid}` (named `proposal.share`) — the editorial client preview
+  is now genuinely public, with no `auth` middleware. The route is
+  rate-limited to 120 requests/minute and emits `X-Robots-Tag:
+  noindex, nofollow` via `App\Http\Middleware\NoIndex`. Both views
+  (admin and public) render the **same** Blade template
+  (`livewire/admin/proposals/preview.blade.php`) so design changes
+  flow to both surfaces without duplication. The component bypasses
+  the tenant scope explicitly (`Proposal::withoutGlobalScope('tenant')`)
+  and rebinds the `Settings` singleton to the proposal's own tenant
+  so currency / tax / etc. resolve correctly without a session
+  tenant. `proposals` gained `expires_at` and `access_code_hash`
+  columns: when set, the public preview renders an expired notice or
+  a 6-digit code-entry gate instead of the proposal. The unlock
+  cookie is an HMAC of `proposal_id|access_code_hash` keyed by
+  `app.key`, so regenerating the code changes the hash and
+  immediately invalidates every existing cookie on the next visit.
+  Code submissions are rate-limited to 5 attempts per
+  IP+proposal per 15 min. The admin in-app preview at
+  `/dashboard/proposal/preview/{uuid}` ignores expiry + code gates so
+  admins always see the proposal unfiltered.
+- `app/Livewire/Admin/Proposals/ShareModal.php` +
+  `resources/views/livewire/admin/proposals/share-modal.blade.php` —
+  a "Share" button on the proposal-edit header opens a modal with
+  the public URL (one-click copy), an expiry date picker (defaulting
+  to today + the tenant's `default_share_expiry_days` if set), and
+  an optional access-code section. Generating a code shows the plain
+  6-digit value once, and the bcrypt hash is only persisted on save.
+  Tests across `tests/Feature/{PublicProposalPreviewTest,ShareModalTest}.php`
+  (15 cases) cover unauth render, tenant isolation, the expiry / code
+  gates, code regeneration invalidating cookies, admin bypassing both
+  gates, and modal flows for expiry-only and code-only configurations.
 
 ## What's left, in rough priority
 
-### 1. Make the client preview URL truly public
-
-The route at `/dashboard/proposal/preview/{proposal:uuid}` is currently
-under `auth` middleware, so the editorial client preview only renders
-for logged-in admins. UUID is unguessable so the security model is
-fine — it just needs to be moved out of the `auth` group (or into a
-sibling route). Worth doing because share-link previews don't actually
-work for clients today. Open questions when we move it: should
-`Settings` (tax name/rate, currency) be resolved from the proposal's
-tenant_id rather than the session, since unauthenticated visitors have
-no session-tenant?
-
-### 2. Build "Present mode"
+### 1. Build "Present mode"
 
 The live presentation experience for in-the-room demos. This is the
 next big-rock item.
@@ -225,7 +255,7 @@ next big-rock item.
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 3. Accept / Reject + persisted client toggles
+### 2. Accept / Reject + persisted client toggles
 
 On the editorial client preview, optional toggles are currently
 ephemeral (client-side only). Two natural follow-ups:
@@ -235,7 +265,7 @@ ephemeral (client-side only). Two natural follow-ups:
 - A signed-URL or session-token flavour of the preview URL that lets
   clients return and see their saved configuration.
 
-### 4. Smaller cleanups
+### 3. Smaller cleanups
 
 - Description / additional-notes editing in the proposal admin (both
   fields render beautifully on the client preview if set, but there's

@@ -8,6 +8,11 @@
         :eyebrow="'Editing · ' . ucfirst($proposal->status->value)">
         <x-slot:actions>
             <x-btn variant="ghost" :href="route('dashboard.proposals')">Back to list</x-btn>
+            <x-btn variant="ghost"
+                   wire:click="$dispatch('openModal', {component: 'admin.proposals.share-modal', arguments: {proposalId: {{ $proposal->id }} }})">
+                <x-phosphor-share-network class="size-3.5" />
+                Share
+            </x-btn>
             <x-btn variant="ghost" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">
                 Preview
                 <x-phosphor-arrow-square-out class="size-3.5" />

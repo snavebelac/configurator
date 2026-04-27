@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\RequireActiveUser;
 use App\Livewire\Admin\Clients\ClientList;
 use App\Livewire\Admin\Dashboard;
@@ -17,6 +18,7 @@ use App\Livewire\Admin\Users\UserList;
 use App\Livewire\ForgottenPassword;
 use App\Livewire\Login;
 use App\Livewire\PasswordReset;
+use App\Livewire\Public\ProposalPreview as PublicProposalPreview;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -56,4 +58,7 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/package/edit/{package}', PackageEdit::class)->name('dashboard.package.edit');
 });
 
-// View Proposals
+// Public proposal share link — UUID-addressed, optional expiry/access-code, no auth required.
+Route::middleware(['throttle:120,1', NoIndex::class])
+    ->get('/p/{uuid}', PublicProposalPreview::class)
+    ->name('proposal.share');
