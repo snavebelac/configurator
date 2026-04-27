@@ -96,11 +96,13 @@
             <div class="py-1.5">
                 @forelse ($needsAttention as $item)
                     @php
-                        $days = $item->updated_at->diffInDays(now());
                         $isDraft = $item->status === \App\Enums\Status::DRAFT;
                         $label = $isDraft
-                            ? "Draft · {$days}d untouched"
-                            : "Delivered · {$days}d";
+                            ? 'Draft, untouched for '.$item->updated_at->diffForHumans([
+                                'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE,
+                                'parts' => 1,
+                            ])
+                            : 'Delivered '.$item->updated_at->diffForHumans();
                     @endphp
                     <a href="{{ route('dashboard.proposal.edit', ['proposal' => $item]) }}"
                        wire:key="attn-{{ $item->id }}"
