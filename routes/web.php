@@ -12,6 +12,7 @@ use App\Livewire\Admin\Proposals\Preview;
 use App\Livewire\Admin\Proposals\ProposalCreate;
 use App\Livewire\Admin\Proposals\ProposalEdit;
 use App\Livewire\Admin\Proposals\ProposalsList;
+use App\Livewire\Admin\Settings as SettingsPage;
 use App\Livewire\Admin\Users\UserList;
 use App\Livewire\ForgottenPassword;
 use App\Livewire\Login;
@@ -42,6 +43,7 @@ Route::post('/logout', function () {
 Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/profile', Profile::class)->name('dashboard.profile');
+    Route::get('/settings', SettingsPage::class)->name('dashboard.settings');
     Route::get('/users', UserList::class)->name('dashboard.users');
     Route::get('/features', FeaturesList::class)->name('dashboard.features');
     Route::get('/proposals', ProposalsList::class)->name('dashboard.proposals');

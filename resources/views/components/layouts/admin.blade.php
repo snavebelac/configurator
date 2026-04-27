@@ -12,6 +12,7 @@
         'dashboard.package.edit'     => 'Packages · Edit',
         'dashboard.users'            => 'Team',
         'dashboard.profile'          => 'Profile',
+        'dashboard.settings'         => 'Settings',
     ];
     $crumb = $crumbs[Route::currentRouteName()] ?? 'Dashboard';
 @endphp
@@ -47,6 +48,7 @@
             <x-menu-item route="dashboard.features" title="Features" icon="stack" />
             <x-menu-item route="dashboard.packages" title="Packages" icon="cube" />
             <x-menu-item route="dashboard.users" title="Team" icon="user-circle" />
+            <x-menu-item route="dashboard.settings" title="Settings" icon="gear-six" />
         </nav>
 
         <div class="mt-auto flex flex-col items-center gap-2">

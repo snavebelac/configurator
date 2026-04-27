@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Enums\CurrencySymbol;
+use App\Models\Scopes\TenantScope;
 use App\Models\Setting;
 
 class SettingsHelper
@@ -11,15 +12,23 @@ class SettingsHelper
 
     private float $taxRate;
 
+    private bool $taxInclusive;
+
     private CurrencySymbol $currency;
 
-    public function __construct()
+    private ?int $defaultShareExpiryDays;
+
+    public function __construct(?int $tenantId = null)
     {
-        // gets the setting values for the current tenant (utilising the global scope)
-        $setting = Setting::first();
+        $setting = $tenantId === null
+            ? Setting::first()
+            : Setting::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId)->first();
+
         $this->taxName = $setting->tax_name;
         $this->taxRate = $setting->tax_rate;
+        $this->taxInclusive = (bool) $setting->tax_inclusive;
         $this->currency = $setting->currency;
+        $this->defaultShareExpiryDays = $setting->default_share_expiry_days;
     }
 
     public function getTaxName(): string
@@ -32,8 +41,18 @@ class SettingsHelper
         return $this->taxRate;
     }
 
+    public function getTaxInclusive(): bool
+    {
+        return $this->taxInclusive;
+    }
+
     public function getCurrency(): CurrencySymbol
     {
         return $this->currency;
+    }
+
+    public function getDefaultShareExpiryDays(): ?int
+    {
+        return $this->defaultShareExpiryDays;
     }
 }
