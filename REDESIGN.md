@@ -343,7 +343,31 @@ Open questions:
   structured (line 1, line 2, city, postcode, country)? Structured
   scales better but is more form to fill in.
 
-### 5. Smaller cleanups
+### 5. Attachments on proposals (documents + images)
+
+Allow proposals to carry uploaded documents and images. Primary use
+case is **site maps** — sketches or diagrams that contextualise the
+proposed work — but the same primitive could carry contracts, mood
+boards, screenshots, signed agreements, etc. The shape is
+deliberately deferred until this is picked up.
+
+Open questions worth banging out before any code:
+
+- Where do attachments surface in the customer preview? Inline
+  within feature sections, a dedicated "Documents" group at the
+  bottom, or a side rail?
+- Allowed file types — images + PDF only, or broader (DWG, etc.)?
+  Size cap?
+- Does an attachment belong to the whole proposal, or can it be
+  attached to a specific feature?
+- Storage — Laravel `public` disk vs. a private disk with signed
+  URLs that respect the same expiry / access-code gates as the
+  share link itself? (Sensitive site maps probably want the same
+  gate as the proposal text.)
+- Admin UX — a single drop-zone on the proposal-edit page, or a
+  modal flow? Reorder / caption?
+
+### 6. Smaller cleanups
 
 - Description / additional-notes editing in the proposal admin (both
   fields render beautifully on the client preview if set, but there's
