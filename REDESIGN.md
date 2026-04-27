@@ -286,7 +286,45 @@ proposal-edit page and the dashboard's "needs attention" feed.
 - Open question: how granular do we want the dedupe window, and do
   we surface raw view counts or just last-seen-at?
 
-### 4. Smaller cleanups
+### 4. Per-tenant branding on the customer preview
+
+The public proposal preview at `/p/{uuid}` currently uses the Epic Fox
+brand palette and typography. For a multi-tenant SaaS that's
+sub-optimal — every tenant's clients see the same look. v1 scope is
+**fonts, colours, and a logo only** (no full theme system).
+
+Schema is already partway there: `settings.logo` and
+`settings.company_name` columns exist in the migration but neither is
+read or written anywhere yet. Fill in the rest:
+
+- Add brand colour columns to `settings` (e.g. `brand_ink`,
+  `brand_accent`) — hex strings, validated as `/#[0-9a-f]{6}/i`.
+- Add font selection — most realistic shape is a small curated
+  enum/list (Libre Baskerville, Inter, Playfair Display, IBM Plex…)
+  rather than letting tenants paste arbitrary font names. Two slots:
+  display and body, or just display.
+- Logo upload in the tenant settings page — single image, stored on
+  Laravel's `public` disk. Display preview + replace + remove.
+  Reasonable size cap (e.g. 1MB) and content-type allowlist.
+- Render path: the customer preview layout (and only the customer
+  preview — not the admin chrome) emits an inline `<style>` block
+  that overrides the relevant CSS custom properties on `<body>`:
+  `--color-ink`, `--color-fox`, `--font-display`, `--font-sans`.
+  Logo replaces the existing fox mark in the masthead.
+- Public route + public-preview component need to pull settings via
+  the proposal's tenant (the existing `Setting::forTenant()` helper
+  already does this for tax/currency).
+
+Open questions:
+- Curated font list vs. free-text? Curated is safer (consistent
+  rendering, no third-party leak through `<link rel="preconnect">`).
+- Do we offer a "preview your customer view" toggle on the settings
+  page so admins can sanity-check the palette before saving?
+- How does the access-code gate look when the tenant has rebranded —
+  does the gate inherit the brand, or stay neutral so it reads as a
+  Configurator-issued auth screen?
+
+### 5. Smaller cleanups
 
 - Description / additional-notes editing in the proposal admin (both
   fields render beautifully on the client preview if set, but there's
