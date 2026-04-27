@@ -21,7 +21,7 @@ class SettingsHelper
     {
         $setting = $tenantId === null
             ? Setting::first()
-            : Setting::withoutGlobalScope('tenant')->where('tenant_id', $tenantId)->first();
+            : Setting::forTenant($tenantId);
 
         $this->taxName = $setting->tax_name;
         $this->taxRate = $setting->tax_rate;

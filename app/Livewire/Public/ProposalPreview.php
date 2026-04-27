@@ -135,9 +135,7 @@ class ProposalPreview extends Component
     private function proposal(): Proposal
     {
         if ($this->proposalCache === null) {
-            $this->proposalCache = Proposal::withoutGlobalScope('tenant')
-                ->where('uuid', $this->uuid)
-                ->firstOrFail();
+            $this->proposalCache = Proposal::findByPublicShareUuid($this->uuid);
         }
 
         return $this->proposalCache;

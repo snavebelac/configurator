@@ -101,6 +101,27 @@ class Proposal extends Model
     }
 
     /**
+     * Look up a proposal by its public-share UUID, intentionally bypassing
+     * the tenant global scope.
+     *
+     * This is the ONLY place in the application where the tenant scope is
+     * bypassed for proposal lookups. The route at `/p/{uuid}` is designed
+     * to be cross-tenant — anyone with the unguessable UUID can view the
+     * proposal, subject to the optional expiry and access-code gates
+     * handled at a higher level. Do NOT use this from anywhere else; if
+     * you need a tenant-scoped lookup, use `Proposal::query()` or
+     * `Proposal::findByUuid()` from the `Uuid` trait.
+     *
+     * Throws `ModelNotFoundException` if no row matches the UUID.
+     */
+    public static function findByPublicShareUuid(string $uuid): self
+    {
+        return self::withoutGlobalScope('tenant')
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function toSearchableArray(): array
