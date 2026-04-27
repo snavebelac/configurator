@@ -82,8 +82,12 @@
                     <tr wire:key="row-{{ $proposal->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
                             <div class="font-medium">{{ $proposal->name }}</div>
-                            <div class="mt-0.5 text-xs text-slate">
-                                {{ $proposal->features->count() }} {{ Str::plural('feature', $proposal->features->count()) }}
+                            <div class="mt-0.5 flex items-center gap-2 text-xs text-slate">
+                                @if ($proposal->reference)
+                                    <span class="font-mono tnum text-slate-soft">{{ $proposal->reference }}</span>
+                                    <span class="text-slate-soft">·</span>
+                                @endif
+                                <span>{{ $proposal->features->count() }} {{ Str::plural('feature', $proposal->features->count()) }}</span>
                             </div>
                         </td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">

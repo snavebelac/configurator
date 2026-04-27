@@ -23,9 +23,48 @@ class Proposal extends Model
     protected $fillable = [
         'status',
         'name',
+        'reference',
         'expires_at',
         'access_code_hash',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $proposal): void {
+            if ($proposal->reference !== null) {
+                return;
+            }
+            $tenantId = $proposal->tenant_id ?? session('tenant_id');
+            if ($tenantId === null) {
+                return;
+            }
+            $proposal->reference = self::generateReference((int) $tenantId);
+        });
+    }
+
+    /**
+     * Build the next per-tenant, year-scoped reference of the form
+     * `YYYY/NNNN` (e.g. `2026/0027`). The numeric part resets at the
+     * start of each calendar year. Lex-ordering on the fixed-width
+     * reference is equivalent to numeric ordering, so we can find the
+     * latest one with a plain LIKE + ORDER BY DESC.
+     */
+    private static function generateReference(int $tenantId): string
+    {
+        $year = now()->format('Y');
+        $prefix = $year.'/';
+
+        $latest = self::withoutGlobalScope('tenant')
+            ->where('tenant_id', $tenantId)
+            ->where('reference', 'like', $prefix.'%')
+            ->orderByDesc('reference')
+            ->limit(1)
+            ->value('reference');
+
+        $next = $latest === null ? 1 : ((int) substr((string) $latest, 5)) + 1;
+
+        return $prefix.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+    }
 
     protected $casts = [
         'status' => Status::class,

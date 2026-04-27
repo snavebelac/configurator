@@ -5,7 +5,7 @@
 
     <x-page-header
         :title="$proposal->name ?: 'Untitled proposal'"
-        :eyebrow="'Editing · ' . ucfirst($proposal->status->value)">
+        :eyebrow="'Editing · '.ucfirst($proposal->status->value).($proposal->reference ? ' · '.$proposal->reference : '')">
         <x-slot:actions>
             <x-btn variant="ghost" :href="route('dashboard.proposals')">Back to list</x-btn>
             <x-btn variant="ghost"

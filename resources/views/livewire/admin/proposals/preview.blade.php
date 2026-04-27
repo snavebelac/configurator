@@ -14,7 +14,7 @@
                     <span class="inline-block size-1.5 -translate-y-[1px] rounded-full bg-fox-deep align-middle"></span>
                     <span class="ml-2 align-middle">A Configurator proposal</span>
                 </p>
-                <p class="font-mono text-[11px] tracking-wider text-slate-soft tnum">№ {{ str_pad((string) $proposal->id, 4, '0', STR_PAD_LEFT) }}</p>
+                <p class="font-mono text-[11px] tracking-wider text-slate-soft tnum">№ {{ $proposal->reference ?? str_pad((string) $proposal->id, 4, '0', STR_PAD_LEFT) }}</p>
             </div>
 
             <h1 class="mt-7 font-display text-[clamp(44px,5.4vw,64px)] italic leading-[0.95] tracking-[-0.042em] text-ink">
@@ -144,7 +144,7 @@
         <footer class="mt-24 flex items-center justify-between border-t border-ink/10 pt-6 text-[11px] tracking-wider text-slate-soft">
             <span class="font-medium uppercase">Configurator</span>
             <span class="font-mono tnum">
-                {{ $proposal->created_at->format('Y') }} · Proposal № {{ str_pad((string) $proposal->id, 4, '0', STR_PAD_LEFT) }}
+                Proposal № {{ $proposal->reference ?? str_pad((string) $proposal->id, 4, '0', STR_PAD_LEFT) }}
             </span>
             <span class="uppercase tracking-[0.18em]">End of document</span>
         </footer>
