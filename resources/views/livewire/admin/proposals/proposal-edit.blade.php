@@ -42,20 +42,20 @@
         </div>
     </div>
 
-    @if ($proposal->isPercentageOnly())
+    @if ($proposal->percentagesHaveNoBase())
         {{-- Percentage lines with nothing to be a percentage of. The proposal
              totals zero, so this needs saying before it reaches a client. --}}
         <div class="mb-6 flex items-start gap-3 rounded-2xl border border-status-rejected-dot/40 bg-status-rejected-bg px-6 py-4">
             <x-phosphor-warning class="mt-0.5 size-4 shrink-0 text-status-rejected-fg" />
             <div>
                 <p class="text-[13px] font-medium text-status-rejected-fg">
-                    This proposal comes to nothing
+                    The percentage lines here come to nothing
                 </p>
                 <p class="mt-1 text-[12.5px] leading-[1.5] text-slate">
-                    Every line on it is a percentage of the total, and there's no fixed-price work for
-                    them to be a percentage of — so the total is
-                    {{ $currencySymbol }}0. Add the work these apply to, and the percentages will
-                    calculate against it. It can't be delivered until then.
+                    There's no fixed-price work on this proposal for them to be a percentage of, so
+                    each one calculates to {{ $currencySymbol }}0. Add the work they apply to and
+                    they'll calculate against it. (Recurring costs don't count — a percentage takes
+                    its share of one-off work only.) It can't be delivered until then.
                 </p>
             </div>
         </div>
@@ -159,6 +159,20 @@
                         · {{ count($clientResponse->selected_feature_ids ?? []) }} of
                         {{ $proposal->features->where('optional', true)->count() }} optional items kept
                         · <span class="font-mono tnum">{!! $clientResponse->acceptedTotalForHumans !!}</span>
+                        @if ($clientResponse->hasRecurring())
+                            {{-- Kept visually separate: a one-off fee and an ongoing
+                                 commitment aren't the same kind of number. --}}
+                            <span class="text-slate-soft">one-off, then</span>
+                            @if ($clientResponse->accepted_monthly > 0)
+                                <span class="font-mono tnum">{{ $currencySymbol }}{{ number_format($clientResponse->accepted_monthly / 100, 2) }}</span>/month
+                            @endif
+                            @if ($clientResponse->accepted_monthly > 0 && $clientResponse->accepted_annually > 0)
+                                <span class="text-slate-soft">and</span>
+                            @endif
+                            @if ($clientResponse->accepted_annually > 0)
+                                <span class="font-mono tnum">{{ $currencySymbol }}{{ number_format($clientResponse->accepted_annually / 100, 2) }}</span>/year
+                            @endif
+                        @endif
                     @endif
                 </p>
             </div>

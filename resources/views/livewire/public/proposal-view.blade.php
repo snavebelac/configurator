@@ -158,6 +158,83 @@
                     </section>
                 @endif
 
+                @if ($recurringFeatures->isNotEmpty())
+                    {{-- Ongoing costs are a separate commitment from the
+                         one-off work, so they get their own section and their
+                         own totals — never folded into the headline figure. --}}
+                    <section class="mt-16 border-t border-ink/10 pt-10">
+                        <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate-soft">
+                            Ongoing costs
+                        </p>
+                        <p class="mt-3 max-w-[52ch] text-[13.5px] leading-[1.55] text-slate">
+                            Charged for as long as you keep them, separately from the one-off cost above.
+                        </p>
+
+                        <div class="mt-6 flex flex-col divide-y divide-rule-soft">
+                            @foreach ($recurringFeatures as $recurringFeature)
+                                @php $isOptional = (bool) $recurringFeature->optional; @endphp
+                                <div wire:key="rec-{{ $recurringFeature->id }}"
+                                     class="grid gap-6 py-5 transition-opacity duration-200 sm:grid-cols-[1fr_auto]"
+                                     @if ($isOptional)
+                                        x-bind:class="isOn({{ $recurringFeature->id }}) ? 'opacity-100' : 'opacity-45'"
+                                     @endif>
+
+                                    <div class="min-w-0">
+                                        <h3 class="font-display text-[24px] leading-[1.25] text-ink">
+                                            {{ $recurringFeature->name }}
+                                        </h3>
+                                        @if ($recurringFeature->description)
+                                            <p class="mt-2 max-w-[52ch] text-[14px] leading-[1.55] text-slate">
+                                                {{ $recurringFeature->description }}
+                                            </p>
+                                        @endif
+                                        <p class="mt-2 text-[11.5px] uppercase tracking-[0.14em] text-slate-soft">
+                                            Billed {{ strtolower($recurringFeature->billing_period?->label() ?? '') }}
+                                            @if ($recurringFeature->quantity > 1)
+                                                · <span class="font-mono text-ink tnum">× {{ $recurringFeature->quantity }}</span>
+                                            @endif
+                                        </p>
+                                    </div>
+
+                                    <div class="flex flex-col items-end gap-3">
+                                        <div class="flex items-baseline gap-1 font-mono leading-none tnum">
+                                            <span class="text-[14px] text-slate-soft">{{ $currency->toSymbol() }}</span>
+                                            <span class="text-[22px] text-ink">{{ number_format($recurringFeature->price * $recurringFeature->quantity, 0) }}</span>
+                                            <span class="text-[13px] text-slate-soft">{{ $recurringFeature->billingSuffix() }}</span>
+                                        </div>
+
+                                        @if ($isOptional)
+                                            <button type="button"
+                                                    x-on:click="toggle({{ $recurringFeature->id }})"
+                                                    x-bind:disabled="locked"
+                                                    x-bind:class="[
+                                                        isOn({{ $recurringFeature->id }}) ? 'bg-fox border-fox-deep' : 'bg-white border-rule',
+                                                        locked ? 'cursor-default opacity-70' : '',
+                                                    ]"
+                                                    class="relative h-7 w-[52px] rounded-full border transition-colors duration-200"
+                                                    x-bind:aria-pressed="isOn({{ $recurringFeature->id }})"
+                                                    aria-label="Toggle {{ $recurringFeature->name }}">
+                                                <span class="absolute top-[2px] left-[2px] size-[22px] rounded-full bg-ink shadow-sm transition-transform duration-200"
+                                                      x-bind:style="isOn({{ $recurringFeature->id }}) ? 'transform: translateX(24px)' : 'transform: translateX(0)'"></span>
+                                            </button>
+                                            <p class="text-[10.5px] font-medium uppercase tracking-[0.2em]"
+                                               x-bind:class="isOn({{ $recurringFeature->id }}) ? 'text-ink' : 'text-slate-soft'">
+                                                <span x-text="isOn({{ $recurringFeature->id }}) ? 'Included' : 'Excluded'"></span>
+                                                <span class="text-slate-soft"> · Optional</span>
+                                            </p>
+                                        @else
+                                            <div class="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.2em] text-slate">
+                                                <x-phosphor-lock-simple class="size-3 text-slate-soft" />
+                                                Included
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
                 @if ($proposal->additional)
                     <section class="mt-20 border-t border-ink/10 pt-10">
                         <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate-soft">Notes</p>
@@ -259,6 +336,32 @@
                         </dl>
                     </div>
 
+                    @if ($recurringFeatures->isNotEmpty())
+                        {{-- Its own block, below the one-off figures and
+                             visually separated, so the two are never read as
+                             one number. --}}
+                        <div class="border-t border-rule-soft bg-paper-2/40 px-7 py-5">
+                            <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate">Then, ongoing</p>
+                            <dl class="mt-3 flex flex-col gap-2 text-[13px]">
+                                @foreach ($recurringPeriods as $period)
+                                    <div class="flex items-baseline justify-between"
+                                         x-show="recurringTotal('{{ $period->value }}') > 0"
+                                         x-cloak>
+                                        <dt class="text-slate">{{ $period->totalLabel() }}</dt>
+                                        <dd class="font-mono tnum text-ink">
+                                            {{ $currency->toSymbol() }}<span x-text="formatWhole(recurringTotal('{{ $period->value }}'))"></span>
+                                        </dd>
+                                    </div>
+                                @endforeach
+                                <p class="text-[11.5px] leading-[1.5] text-slate-soft"
+                                   x-show="recurringTotal('monthly') === 0 && recurringTotal('annually') === 0"
+                                   x-cloak>
+                                    None selected.
+                                </p>
+                            </dl>
+                        </div>
+                    @endif
+
                     @if ($response)
                         {{-- Already answered: show what was recorded, no controls. --}}
                         <div class="border-t border-rule-soft px-7 py-5">
@@ -340,11 +443,12 @@
                 taxRate: {{ $taxRate }} / 100,
                 optionals: @js($optionalInitial),
                 percentages: @js($percentageInitial),
+                recurrings: @js($recurringInitial),
                 locked: @js((bool) $response),
 
                 toggle(id) {
                     if (this.locked) return;
-                    const line = this.optionals[id] ?? this.percentages[id];
+                    const line = this.optionals[id] ?? this.percentages[id] ?? this.recurrings[id];
                     if (line) line.on = ! line.on;
                 },
                 // The payload sent on accept: ids only, fixed and percentage
@@ -358,10 +462,13 @@
                     for (const [id, p] of Object.entries(this.percentages)) {
                         if (p.optional && p.on) ids.push(id);
                     }
+                    for (const [id, r] of Object.entries(this.recurrings)) {
+                        if (r.optional && r.on) ids.push(id);
+                    }
                     return ids;
                 },
                 isOn(id) {
-                    return (this.optionals[id] ?? this.percentages[id])?.on ?? false;
+                    return (this.optionals[id] ?? this.percentages[id] ?? this.recurrings[id])?.on ?? false;
                 },
                 get optionalSum() {
                     let sum = 0;
@@ -373,6 +480,7 @@
                 get optionalOnCount() {
                     let n = Object.values(this.optionals).filter(o => o.on).length;
                     n += Object.values(this.percentages).filter(p => p.optional && p.on).length;
+                    n += Object.values(this.recurrings).filter(r => r.optional && r.on).length;
                     return n;
                 },
                 // What the percentages are a proportion of: the fixed lines
@@ -402,6 +510,15 @@
                 },
                 get total() {
                     return this.subtotal + this.tax;
+                },
+                // Totalled per period and never added to the one-off figure:
+                // a build fee and a monthly fee are different commitments.
+                recurringTotal(period) {
+                    let sum = 0;
+                    for (const r of Object.values(this.recurrings)) {
+                        if (r.on && r.period === period) sum += Number(r.amount);
+                    }
+                    return sum;
                 },
                 // Pence in, whole currency units out.
                 formatWhole(pence) {

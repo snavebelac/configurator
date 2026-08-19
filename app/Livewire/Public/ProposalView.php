@@ -3,6 +3,7 @@
 namespace App\Livewire\Public;
 
 use App\Enums\ActivityAction;
+use App\Enums\BillingPeriod;
 use App\Enums\Status;
 use App\Facades\Settings;
 use App\Helpers\ProposalPricing;
@@ -141,7 +142,7 @@ class ProposalView extends Component
         // client kept.
         $pricing = app(ProposalPricing::class)->calculate($features, $selectedIds);
 
-        $this->storeResponse(Status::ACCEPTED, $selectedIds, $pricing['subtotal']);
+        $this->storeResponse(Status::ACCEPTED, $selectedIds, $pricing['subtotal'], $pricing['recurring']);
     }
 
     public function reject(): void
@@ -150,19 +151,25 @@ class ProposalView extends Component
             return;
         }
 
-        $this->storeResponse(Status::REJECTED, [], 0);
+        $this->storeResponse(Status::REJECTED, [], 0, []);
     }
 
     /**
      * @param  array<int, int>  $selectedFeatureIds
+     * @param  array<string, int>  $recurring  per-period totals, in pence
      */
-    private function storeResponse(Status $status, array $selectedFeatureIds, int $total): void
+    private function storeResponse(Status $status, array $selectedFeatureIds, int $total, array $recurring): void
     {
-        DB::transaction(function () use ($status, $selectedFeatureIds, $total) {
+        DB::transaction(function () use ($status, $selectedFeatureIds, $total, $recurring) {
             $response = new ProposalResponse([
                 'status' => $status,
                 'selected_feature_ids' => $selectedFeatureIds,
                 'accepted_total' => $total,
+                // Kept apart from accepted_total on purpose: a build fee and a
+                // monthly fee are different commitments and summing them would
+                // misstate what was agreed.
+                'accepted_monthly' => $recurring[BillingPeriod::Monthly->value] ?? 0,
+                'accepted_annually' => $recurring[BillingPeriod::Annually->value] ?? 0,
                 // Recorded separately from the proposal: reopening and
                 // re-sending against newer terms must not move what this
                 // client actually agreed to.
@@ -219,6 +226,9 @@ class ProposalView extends Component
         $percentageFeatures = $features->filter(fn ($f) => $f->isPercentage())
             ->sortBy([['order', 'asc'], ['name', 'asc']])
             ->values();
+        $recurringFeatures = $features->filter(fn ($f) => $f->isRecurring())
+            ->sortBy([['billing_period', 'asc'], ['order', 'asc'], ['name', 'asc']])
+            ->values();
 
         $roots = $fixed->whereNull('parent_id')
             ->sortBy([['order', 'asc'], ['name', 'asc']])
@@ -260,14 +270,27 @@ class ProposalView extends Component
             ]])
             ->all();
 
+        $recurringInitial = $recurringFeatures
+            ->mapWithKeys(fn ($f) => [(string) $f->id => [
+                'on' => $isOn($f),
+                'optional' => (bool) $f->optional,
+                'period' => $f->billing_period?->value,
+                'amount' => (int) ($f->getAttributes()['price'] ?? 0) * (int) $f->quantity,
+            ]])
+            ->all();
+
         return view('livewire.public.proposal-view', [
             'groups' => $groups,
             'percentageFeatures' => $percentageFeatures,
+            'recurringFeatures' => $recurringFeatures,
+            'recurringPeriods' => BillingPeriod::cases(),
             'requiredBase' => $requiredBase,
             'optionalCount' => $fixed->where('optional', true)->count()
-                + $percentageFeatures->where('optional', true)->count(),
+                + $percentageFeatures->where('optional', true)->count()
+                + $recurringFeatures->where('optional', true)->count(),
             'optionalInitial' => $optionalInitial,
             'percentageInitial' => $percentageInitial,
+            'recurringInitial' => $recurringInitial,
             'response' => $response,
             'canRespond' => $this->canRespond(),
             'taxName' => Settings::getTaxName(),
