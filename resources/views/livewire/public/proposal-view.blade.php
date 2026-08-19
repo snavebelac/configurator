@@ -10,10 +10,17 @@
         {{-- ====== Masthead ====== --}}
         <header class="mb-16 border-b border-ink/10 pb-12">
             <div class="flex items-center justify-between">
-                <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate">
-                    <span class="inline-block size-1.5 -translate-y-[1px] rounded-full bg-fox-deep align-middle"></span>
-                    <span class="ml-2 align-middle">A Configurator proposal</span>
-                </p>
+                @if ($logo)
+                    {{-- The tenant's own branding takes the masthead when set. --}}
+                    <img src="{{ Storage::disk('public')->url($logo) }}"
+                         alt="{{ $companyName ?? 'Logo' }}"
+                         class="max-h-10 max-w-[200px] object-contain object-left">
+                @else
+                    <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate">
+                        <span class="inline-block size-1.5 -translate-y-[1px] rounded-full bg-fox-deep align-middle"></span>
+                        <span class="ml-2 align-middle">{{ $companyName ? $companyName.' proposal' : 'A Configurator proposal' }}</span>
+                    </p>
+                @endif
                 <p class="font-mono text-[11px] tracking-wider text-slate-soft tnum">№ {{ str_pad((string) $proposal->id, 4, '0', STR_PAD_LEFT) }}</p>
             </div>
 

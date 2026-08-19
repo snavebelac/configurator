@@ -17,6 +17,52 @@
                         autocomplete="organization" />
                 </div>
 
+                <div>
+                    <p class="mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Logo</p>
+
+                    <div class="flex items-start gap-5">
+                        <div class="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-rule bg-paper-2">
+                            @if ($logo && $logo->isPreviewable())
+                                {{-- isPreviewable() guards the case where someone picks a
+                                     non-image: temporaryUrl() throws on those, which would
+                                     take the page down instead of showing the error. --}}
+                                <img src="{{ $logo->temporaryUrl() }}" alt="Logo preview" class="max-h-full max-w-full object-contain">
+                            @elseif ($storedLogo)
+                                <img src="{{ Storage::disk('public')->url($storedLogo) }}" alt="Your logo" class="max-h-full max-w-full object-contain">
+                            @else
+                                <x-phosphor-image class="size-6 text-slate-faint" />
+                            @endif
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <input type="file"
+                                   id="logo"
+                                   wire:model="logo"
+                                   accept="image/png,image/jpeg,image/webp"
+                                   class="block w-full text-[13px] text-slate file:mr-3 file:rounded-lg file:border file:border-rule file:bg-white file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-ink hover:file:bg-paper-2">
+
+                            <p class="mt-1.5 text-[12px] text-slate">
+                                PNG, JPG or WebP, up to 2&nbsp;MB. Applied when you save.
+                            </p>
+
+                            <div wire:loading wire:target="logo" class="mt-1.5 text-[12px] text-slate">Uploading…</div>
+
+                            @error('logo')
+                                <p class="mt-1.5 text-[12px] text-status-rejected-fg">{{ $message }}</p>
+                            @enderror
+
+                            @if ($storedLogo)
+                                <button type="button"
+                                        wire:click="removeLogo"
+                                        wire:confirm="Remove your logo?"
+                                        class="mt-2 text-[12.5px] font-medium text-status-rejected-fg underline-offset-4 hover:underline">
+                                    Remove logo
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
                 <div class="border-t border-rule-soft pt-8">
                     <h3 class="mb-1 font-display text-[16px] text-ink">Money</h3>
                     <p class="mb-5 text-[12.5px] text-slate">

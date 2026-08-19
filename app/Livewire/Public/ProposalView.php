@@ -253,6 +253,8 @@ class ProposalView extends Component
             'taxName' => Settings::getTaxName(),
             'taxRate' => (float) Settings::getTaxRate(),
             'currency' => Settings::getCurrency(),
+            'logo' => Settings::getLogo(),
+            'companyName' => Settings::getCompanyName(),
         ])->title($this->proposal->name.' — Proposal');
     }
 }
