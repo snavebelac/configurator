@@ -17,11 +17,13 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 >
 > **Versioned terms & conditions are done** (2026-08-19): named sets, draft →
 > publish versioning, pinned to a proposal on delivery and recorded again on
-> acceptance, rendered at the foot of the client proposal. Next up, in the
-> order agreed: **percentage-based features**, then **ongoing/recurring
-> costs**, then **Present mode** — the first two deliberately before Present
-> mode, since they change what a proposal contains and therefore what Present
-> mode has to show.
+> acceptance, rendered at the foot of the client proposal. **Percentage-based
+> features** followed: priced as a share of the selected fixed lines, flat
+> rather than compounding, in their own section on the client view. Proposal
+> maths now lives in one place, `App\Helpers\ProposalPricing`. Next:
+> **ongoing/recurring costs**, then **Present mode** — costs first, since it
+> changes what a proposal contains and therefore what Present mode has to
+> show.
 >
 > Folding in the user's separate stand-alone proposal app is **cancelled** —
 > the two have diverged too far to be worth porting anything; rebuild here
@@ -227,19 +229,7 @@ The live presentation experience for in-the-room demos:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 3. Percentage-based features
-
-Features priced as a **percentage of the proposal total** rather than a fixed
-amount — project management is the driving example, landing in its own section
-near the bottom and recalculating as other features are toggled.
-
-Two constraints are already clear: the calculation has to live on the same
-server-side path that `ProposalView::accept()` uses to recompute totals (the
-Alpine live-total alone isn't enough, or the recorded total will disagree with
-what the client saw), and a percentage must exclude other percentage features
-or the maths goes circular.
-
-### 4. Ongoing / recurring costs
+### 3. Ongoing / recurring costs
 
 Proposals need to carry ongoing costs (hosting, support, licences, retainers)
 alongside the one-off build price. Shape undecided — needs a scoping
@@ -249,7 +239,7 @@ separately, since mixing one-off and recurring money in one figure misleads).
 Note `proposal_responses.accepted_total` is a single one-off figure today; if
 ongoing costs are acceptable too, that snapshot needs extending.
 
-### 5. Wire the command palette
+### 4. Wire the command palette
 
 Topbar's `⌘K` search trigger is still purely visual.
 
@@ -261,7 +251,7 @@ Topbar's `⌘K` search trigger is still purely visual.
   across proposals + clients + features + packages by name.
 - Match the visual pattern from `design-prototypes/dashboard.html`.
 
-### 6. Activity retention
+### 5. Activity retention
 
 The `activities` table grows without bound. Promoted out of "smaller cleanups"
 because a purge that silently deletes history is a product decision, not a
@@ -270,7 +260,7 @@ settle first are the retention window, whether it's per-tenant configurable
 (which would put it on the settings screen), and whether anything needs
 exporting before deletion.
 
-### 7. Responsive page content
+### 6. Responsive page content
 
 The nav went responsive on 2026-08-19 — off-canvas drawer below `lg`, adaptive
 topbar — but page *content* is still built desktop-first, so this is a feature

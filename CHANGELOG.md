@@ -14,6 +14,16 @@ Work in progress — no version cut yet.
 
 ### Added
 
+- **Percentage-based features.** A library feature can now be priced as a
+  percentage of the proposal rather than a fixed amount — project management,
+  contingency, and anything else quoted as a proportion. The percentage is
+  taken from the fixed-price lines the client currently has selected, so it
+  moves live as they toggle optional items. Percentage lines can themselves be
+  optional and declined. Multiple percentage lines are flat, never compound:
+  each takes its share of the same fixed base, so the result can't depend on
+  line order and can't become circular. They render in their own "Applied to
+  the total" section after the itemised work, since they only make sense once
+  the reader has seen what they're a share of.
 - **Versioned terms and conditions.** A tenant keeps any number of named sets
   ("Standard build", "Retainer"), each independently versioned, with one marked
   as the default. Editing happens on an unpublished draft; publishing freezes
@@ -95,6 +105,13 @@ Work in progress — no version cut yet.
 
 ### Changed
 
+- Proposal maths moved into a single `App\Helpers\ProposalPricing`, used by
+  the accept flow, the admin running total and `Proposal::total()` alike. The
+  client-facing view runs a mirror of it in Alpine so the figure updates
+  without a round trip, but that copy is display-only — everything recorded is
+  computed server-side. Both sides now work in integer pence rather than the
+  view working in pounds, so the number on screen and the number stored agree
+  exactly instead of drifting by rounding.
 - Terms bodies are authored in a rich-text editor (TipTap) and run through an
   allowlist sanitiser (`symfony/html-sanitizer`) on every save, since they
   render on a public, unauthenticated page. Only headings, emphasis, lists,
