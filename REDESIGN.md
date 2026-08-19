@@ -85,8 +85,8 @@ The static reference for the whole direction lives in `design-prototypes/`
 - **Shell** — 64px slim icon rail (ink, fox-yellow active accent, tooltip on
   hover) + 60px sticky topbar with workspace breadcrumb and a `⌘K` search
   trigger.
-- **Audience scope** — desktop / laptop only for now. Mobile responsiveness
-  is deferred.
+- **Audience scope** — desktop / laptop first. The nav is responsive as of
+  2026-08-19 (off-canvas drawer below `lg`); page content is not yet.
 - **Command palette** — agreed feature, not yet wired (visual trigger only).
 - **Present mode** — agreed direction, prototype only. Real implementation
   comes after the back-office is consistent.
@@ -276,11 +276,11 @@ exporting before deletion.
 
 ### 8. Smaller cleanups
 
-- Mobile / tablet support — the rail collapses now, but still needs an
-  off-canvas treatment at narrow widths. Deferred until desktop is locked in.
-- `ProposalFactory` still creates its tenant eagerly. Unlike the others this
-  is load-bearing — the client it builds has to share the proposal's tenant —
-  so it needs a closure-based fix rather than a one-line change.
+- Mobile / tablet support beyond the nav. The rail is now an off-canvas
+  drawer below `lg` and the topbar adapts, but the *content* is still built
+  for desktop — wide tables, the two-pane proposal builder and the proposal
+  preview's summary rail all need attention before this is genuinely usable
+  on a small screen.
 - The topbar `⌘K` trigger is still visual only (see item 6).
 
 ## Where things live

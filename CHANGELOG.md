@@ -14,6 +14,13 @@ Work in progress — no version cut yet.
 
 ### Added
 
+- **The nav rail is now an off-canvas drawer below `lg`.** A trigger in the
+  topbar slides it in over a backdrop; it closes on the backdrop, on Escape,
+  on its own close control, and on following any link inside it. The
+  expanded/collapsed preference is a desktop concern, so the drawer always
+  shows labels regardless of it — you opened it deliberately and there is
+  room. The topbar adapts too: the workspace crumb collapses to the page name,
+  and the ⌘K hint is dropped on devices with no ⌘ key.
 - **Workspace logo.** Uploadable from the settings screen (PNG/JPG/WebP, 2 MB
   cap, stored on the `public` disk) and shown in the masthead of the
   client-facing proposal, replacing the generic "A Configurator proposal"
@@ -90,11 +97,14 @@ Work in progress — no version cut yet.
   13.3.0 by an explicit Pest conflict. No code changes were needed for any of
   the major bumps.
 - `Tenant` gained a `$fillable`; it had none, so nothing was mass-assignable.
-- `UserFactory`, `SettingFactory`, `ClientFactory`, `FeatureFactory` and
-  `PackageFactory` resolved `Tenant::factory()->create()` eagerly, so every
-  call left an orphan tenant behind even when `tenant_id` was overridden. Now
-  lazy. `ProposalFactory` keeps its eager tenant deliberately — the client it
-  builds has to share the proposal's tenant.
+- Every factory resolved `Tenant::factory()->create()` eagerly, so each call
+  left an orphan tenant behind even when `tenant_id` was overridden. Now lazy.
+  `ProposalFactory` needed more than a one-line change, since the owner and
+  client it builds both have to sit in the proposal's tenant: closures get the
+  same guarantee, because Laravel expands attributes in declaration order and
+  passes the already-resolved ones in. A side effect is that a bare
+  `Proposal::factory()` is now internally consistent — previously its user got
+  a tenant of its own, different from the proposal's.
 - `tel-link` / `email-link` restyled onto brand tokens; they were the last two
   views still using the legacy `primary-500`.
 
