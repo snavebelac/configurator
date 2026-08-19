@@ -1,2 +1,3 @@
 @props(['number'])
-<a href="tel:{{$number}}" class="text-primary-500 underline">{{$number}}</a>
+<a href="tel:{{ $number }}"
+   class="text-ink underline decoration-slate-faint underline-offset-[3px] transition-colors hover:decoration-ink">{{ $number }}</a>
