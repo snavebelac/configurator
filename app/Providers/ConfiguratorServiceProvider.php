@@ -14,11 +14,7 @@ class ConfiguratorServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(FormatHelper::class, fn () => new FormatHelper);
-        $this->app->singleton(SettingsHelper::class, function () {
-            $settingsHelper = new SettingsHelper;
-
-            return $settingsHelper;
-        });
+        $this->app->singleton(SettingsHelper::class, fn () => new SettingsHelper);
     }
 
     /**
