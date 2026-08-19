@@ -44,10 +44,21 @@
         @endif
     </td>
     <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
-        <x-money :value="$feature->price" size="mono" :precise="true" />
+        @if ($feature->isPercentage())
+            {{-- A percentage has no price of its own; showing £0.00 would read
+                 as free rather than as proportional. --}}
+            <span class="font-mono text-[13px] text-ink tnum">{{ $feature->percentageForHumans() }}</span>
+            <span class="ml-1 text-[11px] uppercase tracking-wider text-slate-soft">of total</span>
+        @else
+            <x-money :value="$feature->price" size="mono" :precise="true" />
+        @endif
     </td>
     <td class="border-b border-rule-soft px-4 py-3.5 align-middle font-mono text-[13px] text-ink tnum">
-        {{ $feature->quantity }}
+        @if ($feature->isPercentage())
+            <span class="text-slate-soft">—</span>
+        @else
+            {{ $feature->quantity }}
+        @endif
     </td>
     <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
         <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">

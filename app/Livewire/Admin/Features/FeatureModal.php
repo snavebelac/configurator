@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Features;
 
+use App\Enums\PricingType;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Feature;
 use Illuminate\Contracts\View\View;
@@ -21,7 +22,11 @@ class FeatureModal extends ModalComponent
 
     public string $description = '';
 
+    public string $pricingType = PricingType::Fixed->value;
+
     public string $price = '';
+
+    public string $percentage = '';
 
     public string $quantity = '';
 
@@ -33,22 +38,32 @@ class FeatureModal extends ModalComponent
 
     protected function rules(): array
     {
-        $parentRule = $this->hasChildren
+        $isPercentage = $this->pricingType === PricingType::Percentage->value;
+
+        // A percentage is a share of the whole proposal, so it can't sit under
+        // a parent or carry a quantity — "10% x 3" means nothing.
+        $parentRule = ($this->hasChildren || $isPercentage)
             ? ['nullable', 'prohibited']
             : ['nullable', 'integer', Rule::exists('features', 'id')->whereNull('parent_id')];
 
         return [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric|decimal:0,2',
-            'quantity' => 'required|numeric|integer|min:1',
+            'pricingType' => ['required', Rule::enum(PricingType::class)],
+            'price' => $isPercentage ? ['nullable'] : ['required', 'numeric', 'decimal:0,2'],
+            'percentage' => $isPercentage
+                ? ['required', 'numeric', 'gt:0', 'max:100']
+                : ['nullable'],
+            'quantity' => $isPercentage ? ['nullable'] : ['required', 'numeric', 'integer', 'min:1'],
             'parentId' => $parentRule,
         ];
     }
 
     protected $messages = [
         'parentId.exists' => 'The selected parent feature no longer exists or is itself a child.',
-        'parentId.prohibited' => 'This feature has its own children, so it can\'t be placed under another parent.',
+        'parentId.prohibited' => 'This feature can\'t be placed under another parent.',
+        'percentage.gt' => 'Enter a percentage greater than zero.',
+        'percentage.max' => 'A percentage can\'t be more than 100%.',
     ];
 
     public function mount(?int $featureId = null): void
@@ -59,8 +74,10 @@ class FeatureModal extends ModalComponent
             if ($feature) {
                 $this->name = $feature->name;
                 $this->description = $feature->description;
-                $this->price = $feature->price;
-                $this->quantity = $feature->quantity;
+                $this->pricingType = $feature->pricing_type->value;
+                $this->price = (string) $feature->price;
+                $this->percentage = $feature->isPercentage() ? (string) $feature->percentage : '';
+                $this->quantity = (string) $feature->quantity;
                 $this->optional = $feature->optional;
                 $this->parentId = $feature->parent_id;
                 $this->hasChildren = $feature->children()->exists();
@@ -72,13 +89,20 @@ class FeatureModal extends ModalComponent
     {
         $this->validate();
 
+        $isPercentage = $this->pricingType === PricingType::Percentage->value;
+
         $updateData = [
             'name' => $this->name,
             'description' => $this->description,
-            'price' => $this->price,
-            'quantity' => $this->quantity,
+            'pricing_type' => $this->pricingType,
+            // A percentage line has no fixed price, no quantity and no parent.
+            // Zeroing them here rather than leaving stale values behind keeps
+            // the pricing calculation from ever seeing a contradiction.
+            'price' => $isPercentage ? 0 : $this->price,
+            'percentage_rate' => $isPercentage ? (int) round(((float) $this->percentage) * 100) : 0,
+            'quantity' => $isPercentage ? 1 : $this->quantity,
             'optional' => $this->optional,
-            'parent_id' => $this->parentId,
+            'parent_id' => $isPercentage ? null : $this->parentId,
         ];
 
         if ($this->featureId) {
@@ -103,6 +127,7 @@ class FeatureModal extends ModalComponent
 
         return view('livewire.admin.features.feature-modal', [
             'parentOptions' => $parentOptions,
+            'pricingTypes' => PricingType::cases(),
         ]);
     }
 }

@@ -19,32 +19,67 @@
                 name="description"
                 placeholder="Enough greens to keep Down Below fed for a month." />
 
-            <div class="grid grid-cols-2 gap-6">
+            {{-- How this line is priced. A percentage is a share of the rest
+                 of the proposal, so it hides price, quantity and parent. --}}
+            <div class="border-t border-rule-soft pt-5">
+                <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Pricing</p>
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach ($pricingTypes as $type)
+                        <button type="button"
+                                wire:click="$set('pricingType', '{{ $type->value }}')"
+                                @class([
+                                    'rounded-lg border px-3.5 py-2.5 text-left text-[13px] transition-colors',
+                                    'border-ink bg-paper-2 text-ink' => $pricingType === $type->value,
+                                    'border-rule text-slate hover:border-slate-faint hover:bg-paper-2' => $pricingType !== $type->value,
+                                ])>
+                            <span class="block font-medium">{{ $type->label() }}</span>
+                            <span class="mt-0.5 block text-[11.5px] text-slate">
+                                {{ $type->isPercentage()
+                                    ? 'A share of everything else on the proposal'
+                                    : 'A set amount, optionally times a quantity' }}
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            @if ($pricingType === \App\Enums\PricingType::Percentage->value)
                 <x-field
-                    label="Price"
-                    name="price"
+                    label="Percentage"
+                    name="percentage"
                     type="number"
                     step="0.01"
                     min="0"
-                    prefix="£" />
+                    hint="Of the fixed-price lines the client has selected. Other percentage lines are excluded, so two of these never compound."
+                    prefix="%" />
+            @else
+                <div class="grid grid-cols-2 gap-6">
+                    <x-field
+                        label="Price"
+                        name="price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        prefix="£" />
 
-                <x-field
-                    label="Quantity"
-                    name="quantity"
-                    type="number"
-                    step="1"
-                    min="1" />
-            </div>
+                    <x-field
+                        label="Quantity"
+                        name="quantity"
+                        type="number"
+                        step="1"
+                        min="1" />
+                </div>
 
-            <div class="border-t border-rule-soft pt-5">
-                <x-select-field
-                    label="Parent feature"
-                    name="parentId"
-                    :options="$parentOptions"
-                    placeholder="— Standalone / parent feature —"
-                    :disabled="$hasChildren"
-                    :hint="$parentLockReason" />
-            </div>
+                <div class="border-t border-rule-soft pt-5">
+                    <x-select-field
+                        label="Parent feature"
+                        name="parentId"
+                        :options="$parentOptions"
+                        placeholder="— Standalone / parent feature —"
+                        :disabled="$hasChildren"
+                        :hint="$parentLockReason" />
+                </div>
+            @endif
 
             <div class="border-t border-rule-soft pt-5">
                 <x-checkbox-field
