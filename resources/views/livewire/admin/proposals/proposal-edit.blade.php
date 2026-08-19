@@ -151,6 +151,43 @@
         </div>
     @endif
 
+    {{-- Proposal copy — all three of these render on the client-facing view --}}
+    <div class="mt-6 max-w-[640px]">
+        <x-card>
+            <x-card-header title="Proposal copy" />
+            <form wire:submit="saveDetails">
+                <div class="space-y-6 px-[22px] py-6">
+                    <x-field
+                        label="Title"
+                        name="name"
+                        hint="The heading your client sees at the top of the proposal."
+                        required />
+
+                    <x-textarea-field
+                        label="Introduction"
+                        name="description"
+                        rows="4"
+                        placeholder="Set the scene — what this piece of work is, and why."
+                        hint="Shown as the opening paragraph. Leave blank to omit it." />
+
+                    <x-textarea-field
+                        label="Closing notes"
+                        name="additional"
+                        rows="4"
+                        placeholder="Anything worth adding — assumptions, timings, what happens next."
+                        hint="Shown under a “Notes” heading at the end. Leave blank to omit it." />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 border-t border-rule-soft bg-paper-2 px-[22px] py-4">
+                    <x-btn variant="accent" type="submit">
+                        <span wire:loading.remove wire:target="saveDetails">Save details</span>
+                        <span wire:loading wire:target="saveDetails">Saving…</span>
+                    </x-btn>
+                </div>
+            </form>
+        </x-card>
+    </div>
+
     <div class="mt-6 max-w-[640px]">
         <livewire:admin.proposals.client-access :proposal="$proposal" :wire:key="'client-access-'.$proposal->id" />
     </div>

@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Validate;
 
 #[Title('Edit proposal')]
 class ProposalEdit extends AdminComponent
@@ -18,9 +19,38 @@ class ProposalEdit extends AdminComponent
 
     public Proposal $proposal;
 
+    #[Validate('required|string|max:255')]
+    public string $name = '';
+
+    #[Validate('nullable|string|max:4000')]
+    public ?string $description = null;
+
+    #[Validate('nullable|string|max:4000')]
+    public ?string $additional = null;
+
     public function mount(Proposal $proposal): void
     {
         $this->proposalId = $proposal->id;
+        $this->name = $proposal->name;
+        $this->description = $proposal->description;
+        $this->additional = $proposal->additional;
+    }
+
+    /**
+     * The proposal's own copy — the title, the opening paragraph and the
+     * closing notes. All three render on the client-facing view; until now
+     * none of them could be edited after creation.
+     */
+    public function saveDetails(): void
+    {
+        $this->validate();
+
+        $this->proposal->name = $this->name;
+        $this->proposal->description = $this->description ?: null;
+        $this->proposal->additional = $this->additional ?: null;
+        $this->proposal->save();
+
+        $this->dispatch('toast', ...$this->success(['text' => 'Proposal details saved']));
     }
 
     #[On('refreshFeatureProposalEdit')]
