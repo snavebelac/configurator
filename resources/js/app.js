@@ -1,4 +1,3 @@
-import './bootstrap';
 import Toastify from 'toastify-js';
 import sort from '@alpinejs/sort';
 
