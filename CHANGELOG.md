@@ -14,7 +14,18 @@ Work in progress — no version cut yet.
 
 ### Added
 
-- **Percentage-based features.** A library feature can now be priced as a
+- **Ongoing and recurring costs.** A third pricing type: a feature can be a
+  recurring charge billed monthly or annually — hosting, support, licences,
+  retainers. They total per period and are **never summed into the one-off
+  figure**: a build fee and a monthly fee are different commitments, and one
+  number covering both would misrepresent what is being agreed. Monthly and
+  annual totals are shown separately and never converted into one another,
+  since £600/yr and £50/mo read differently to a client. Recurring lines can be
+  optional and declined like anything else, and the acceptance records the
+  monthly and annual commitments alongside the one-off total rather than folded
+  into it. Percentage lines take their share of one-off work only, so a
+  retainer never inflates project management.
+- **Percentage-based features.** A library feature can be priced as a
   percentage of the proposal rather than a fixed amount — project management,
   contingency, and anything else quoted as a proportion. The percentage is
   taken from the fixed-price lines the client currently has selected, so it
@@ -145,6 +156,11 @@ Work in progress — no version cut yet.
   views still using the legacy `primary-500`.
 
 ### Fixed
+
+- A proposal whose percentage lines have no fixed-price work to apply to now
+  says so plainly on the edit screen and can't be delivered. Each percentage
+  computes to zero in that state, and a £0 line reaching a client is not a good
+  way to find out. Recurring costs deliberately don't count as a base.
 
 - **Settings leaked across tenants.** `SettingsHelper` resolved its row with
   `Setting::first()`, and `TenantScope` is a deliberate no-op for
