@@ -48,7 +48,7 @@
                 @forelse ($packages as $package)
                     <tr wire:key="package-{{ $package->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
-                            <div class="font-medium">{{ $package->name }}</div>
+                            <x-row-title :href="route('dashboard.package.edit', ['package' => $package->id])">{{ $package->name }}</x-row-title>
                             @if ($package->description)
                                 <div class="mt-0.5 line-clamp-1 text-xs text-slate">{{ $package->description }}</div>
                             @endif

@@ -37,7 +37,7 @@
                     ])>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
                             <div class="flex items-center gap-2.5">
-                                <span class="font-medium">{{ $user->full_name }}</span>
+                                <x-row-title click="$dispatch('openModal', {component: 'admin.users.user-modal', arguments: {userId: {{ $user->id }} }})">{{ $user->full_name }}</x-row-title>
                                 @if ($user->id === $currentUserId)
                                     <span class="rounded-full bg-sage px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-ink">You</span>
                                 @endif

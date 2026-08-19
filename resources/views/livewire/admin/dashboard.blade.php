@@ -230,7 +230,7 @@
                 @forelse ($recent as $item)
                     <tr wire:key="row-{{ $item->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
-                            <div class="font-medium">{{ $item->name }}</div>
+                            <x-row-title :href="route('dashboard.proposal.edit', ['proposal' => $item])">{{ $item->name }}</x-row-title>
                             <div class="mt-0.5 text-xs text-slate">{{ $item->features->count() }} {{ Str::plural('feature', $item->features->count()) }}</div>
                         </td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">{{ $item->client?->name ?? '—' }}</td>

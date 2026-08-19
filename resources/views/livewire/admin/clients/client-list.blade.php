@@ -50,7 +50,7 @@
                 @forelse ($clients as $client)
                     <tr wire:key="client-{{ $client->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
-                            <div class="font-medium">{{ $client->name }}</div>
+                            <x-row-title click="$dispatch('openModal', {component: 'admin.clients.client-modal', arguments: {clientId: {{ $client->id }} }})">{{ $client->name }}</x-row-title>
                         </td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
                             {{ $client->contact ?: '—' }}

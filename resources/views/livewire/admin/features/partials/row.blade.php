@@ -17,7 +17,7 @@
             @endif
             <div class="min-w-0">
                 <div class="flex items-center gap-2">
-                    <span class="font-medium">{{ $feature->name }}</span>
+                    <x-row-title click="$dispatch('openModal', {component: 'admin.features.feature-modal', arguments: {featureId: {{ $feature->id }} }})">{{ $feature->name }}</x-row-title>
                     @if (! $isChild && $feature->children->count())
                         <span class="rounded-full border border-rule bg-white px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate">
                             {{ $feature->children->count() }} {{ Str::plural('child', $feature->children->count()) }}
