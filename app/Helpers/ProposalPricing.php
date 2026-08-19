@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\BillingPeriod;
 use App\Models\FinalFeature;
 use Illuminate\Support\Collection;
 
@@ -18,6 +19,12 @@ use Illuminate\Support\Collection;
  * fixed lines that are currently included, and never of each other: making
  * them compound would make the result depend on line order and open the door
  * to circular definitions.
+ *
+ * Recurring lines are kept out of all of that. They total separately, per
+ * billing period, and are never summed into the one-off figure — a build fee
+ * and a monthly fee are different commitments, and one number covering both
+ * would misrepresent what is being agreed. For the same reason percentages
+ * take their share of the one-off work only.
  */
 class ProposalPricing
 {
@@ -28,7 +35,10 @@ class ProposalPricing
      *     fixedBase: int,
      *     percentageTotal: int,
      *     subtotal: int,
-     *     percentageLines: Collection<int, array{feature: FinalFeature, amount: int}>
+     *     percentageLines: Collection<int, array{feature: FinalFeature, amount: int}>,
+     *     recurring: array<string, int>,
+     *     recurringLines: Collection<int, array{feature: FinalFeature, amount: int}>,
+     *     hasRecurring: bool
      * }
      */
     public function calculate(Collection $features, array $selectedOptionalIds): array
@@ -41,7 +51,7 @@ class ProposalPricing
         );
 
         $fixedBase = (int) $included
-            ->reject(fn (FinalFeature $feature) => $feature->isPercentage())
+            ->filter(fn (FinalFeature $feature) => $feature->isFixed())
             ->sum(fn (FinalFeature $feature) => $this->lineAmount($feature, 0));
 
         $percentageLines = $included
@@ -54,11 +64,31 @@ class ProposalPricing
 
         $percentageTotal = (int) $percentageLines->sum('amount');
 
+        $recurringLines = $included
+            ->filter(fn (FinalFeature $feature) => $feature->isRecurring())
+            ->map(fn (FinalFeature $feature) => [
+                'feature' => $feature,
+                'amount' => $this->lineAmount($feature, 0),
+            ])
+            ->values();
+
+        // Keyed by period so a view can iterate BillingPeriod::cases() without
+        // worrying about which ones happen to be present.
+        $recurring = [];
+        foreach (BillingPeriod::cases() as $period) {
+            $recurring[$period->value] = (int) $recurringLines
+                ->filter(fn (array $line) => $line['feature']->billing_period === $period)
+                ->sum('amount');
+        }
+
         return [
             'fixedBase' => $fixedBase,
             'percentageTotal' => $percentageTotal,
             'subtotal' => $fixedBase + $percentageTotal,
             'percentageLines' => $percentageLines,
+            'recurring' => $recurring,
+            'recurringLines' => $recurringLines,
+            'hasRecurring' => $recurringLines->isNotEmpty(),
         ];
     }
 

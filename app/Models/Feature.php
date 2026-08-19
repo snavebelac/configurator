@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BillingPeriod;
 use App\Enums\PricingType;
 use App\Facades\Formatter;
 use App\Traits\BelongsToTenant;
@@ -27,6 +28,7 @@ class Feature extends Model
         'price',
         'pricing_type',
         'percentage_rate',
+        'billing_period',
         'quantity',
         'optional',
         'parent_id',
@@ -37,6 +39,7 @@ class Feature extends Model
         'optional' => 'boolean',
         'price' => 'integer',
         'pricing_type' => PricingType::class,
+        'billing_period' => BillingPeriod::class,
     ];
 
     protected static function booted(): void
@@ -106,9 +109,26 @@ class Feature extends Model
         return $this->pricing_type === PricingType::Percentage;
     }
 
+    public function isRecurring(): bool
+    {
+        return $this->pricing_type === PricingType::Recurring;
+    }
+
+    /**
+     * A one-off, set amount. Deliberately not "everything that isn't a
+     * percentage" — recurring lines are neither.
+     */
     public function isFixed(): bool
     {
-        return ! $this->isPercentage();
+        return $this->pricing_type === PricingType::Fixed;
+    }
+
+    /**
+     * "£50 / month", for anywhere a recurring line shows its price.
+     */
+    public function billingSuffix(): string
+    {
+        return $this->billing_period?->suffix() ?? '';
     }
 
     /**

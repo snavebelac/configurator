@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\BillingPeriod;
 use App\Enums\PricingType;
 use App\Helpers\ProposalPricing;
 use App\Models\FinalFeature;
@@ -49,6 +50,22 @@ class ProposalPricingTest extends TestCase
             'optional' => $optional,
             'pricing_type' => PricingType::Percentage,
             'percentage_rate' => (int) round($percent * 100),
+        ]);
+        $feature->id = $id;
+
+        return $feature;
+    }
+
+    private function recurring(int $id, float $pounds, string $period, bool $optional = false, int $quantity = 1): FinalFeature
+    {
+        $feature = new FinalFeature([
+            'name' => 'Recurring '.$id,
+            'description' => '',
+            'price' => $pounds,
+            'quantity' => $quantity,
+            'optional' => $optional,
+            'pricing_type' => PricingType::Recurring,
+            'billing_period' => $period,
         ]);
         $feature->id = $id;
 
@@ -187,6 +204,94 @@ class ProposalPricingTest extends TestCase
         $amounts = $result['percentageLines']->pluck('amount')->all();
 
         $this->assertSame([10000, 5000], $amounts);
+    }
+
+    #[Test]
+    public function recurring_lines_total_per_period_and_stay_out_of_the_one_off_figure()
+    {
+        $result = $this->calc([
+            $this->fixed(1, 1000),
+            $this->recurring(2, 50, BillingPeriod::Monthly->value),
+            $this->recurring(3, 600, BillingPeriod::Annually->value),
+        ]);
+
+        // The one-off figure is untouched by the ongoing costs.
+        $this->assertSame(100000, $result['fixedBase']);
+        $this->assertSame(100000, $result['subtotal']);
+
+        $this->assertSame(5000, $result['recurring'][BillingPeriod::Monthly->value]);
+        $this->assertSame(60000, $result['recurring'][BillingPeriod::Annually->value]);
+        $this->assertTrue($result['hasRecurring']);
+    }
+
+    #[Test]
+    public function periods_are_never_converted_into_one_another()
+    {
+        $result = $this->calc([
+            $this->fixed(1, 1000),
+            $this->recurring(2, 50, BillingPeriod::Monthly->value),
+        ]);
+
+        // £50/month is not silently reported as £600/year.
+        $this->assertSame(5000, $result['recurring'][BillingPeriod::Monthly->value]);
+        $this->assertSame(0, $result['recurring'][BillingPeriod::Annually->value]);
+    }
+
+    #[Test]
+    public function a_percentage_ignores_recurring_lines_entirely()
+    {
+        $result = $this->calc([
+            $this->fixed(1, 1000),
+            $this->recurring(2, 500, BillingPeriod::Monthly->value),
+            $this->percentage(3, 10),
+        ]);
+
+        // 10% of £1,000, not of £1,500 — the monthly charge is a separate
+        // commitment and isn't work to be managed.
+        $this->assertSame(10000, $result['percentageTotal']);
+    }
+
+    #[Test]
+    public function an_optional_recurring_line_only_counts_when_kept()
+    {
+        $features = [
+            $this->fixed(1, 1000),
+            $this->recurring(2, 50, BillingPeriod::Monthly->value, optional: true),
+        ];
+
+        $this->assertSame(0, $this->calc($features)['recurring'][BillingPeriod::Monthly->value]);
+        $this->assertSame(5000, $this->calc($features, [2])['recurring'][BillingPeriod::Monthly->value]);
+    }
+
+    #[Test]
+    public function recurring_lines_honour_quantity()
+    {
+        $result = $this->calc([
+            $this->recurring(1, 12, BillingPeriod::Monthly->value, quantity: 5),
+        ]);
+
+        $this->assertSame(6000, $result['recurring'][BillingPeriod::Monthly->value]);
+    }
+
+    #[Test]
+    public function several_lines_in_the_same_period_add_together()
+    {
+        $result = $this->calc([
+            $this->recurring(1, 50, BillingPeriod::Monthly->value),
+            $this->recurring(2, 200, BillingPeriod::Monthly->value),
+        ]);
+
+        $this->assertSame(25000, $result['recurring'][BillingPeriod::Monthly->value]);
+    }
+
+    #[Test]
+    public function a_proposal_with_no_recurring_lines_reports_none()
+    {
+        $result = $this->calc([$this->fixed(1, 1000)]);
+
+        $this->assertFalse($result['hasRecurring']);
+        $this->assertSame(0, $result['recurring'][BillingPeriod::Monthly->value]);
+        $this->assertSame(0, $result['recurring'][BillingPeriod::Annually->value]);
     }
 
     #[Test]

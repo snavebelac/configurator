@@ -22,6 +22,8 @@ class ProposalResponse extends Model
         'status',
         'selected_feature_ids',
         'accepted_total',
+        'accepted_monthly',
+        'accepted_annually',
         'terms_version_id',
         'note',
         'responded_at',
@@ -54,6 +56,11 @@ class ProposalResponse extends Model
     public function termsVersion(): BelongsTo
     {
         return $this->belongsTo(TermsVersion::class, 'terms_version_id');
+    }
+
+    public function hasRecurring(): bool
+    {
+        return $this->accepted_monthly > 0 || $this->accepted_annually > 0;
     }
 
     public function wasAccepted(): bool
