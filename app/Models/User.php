@@ -29,6 +29,7 @@ class User extends Authenticatable
         'email',
         'password',
         'active',
+        'nav_collapsed',
     ];
 
     /**
@@ -51,10 +52,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'active' => 'boolean',
+            'nav_collapsed' => 'boolean',
         ];
     }
-
-    protected $casts = ['full_name', 'gravatar'];
 
     public function fullName(): Attribute
     {

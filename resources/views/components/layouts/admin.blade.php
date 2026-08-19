@@ -30,46 +30,17 @@
 </head>
 <body class="h-full bg-paper text-ink antialiased">
 
-<div class="grid min-h-screen grid-cols-[64px_1fr]">
+<div class="flex min-h-screen">
 
     {{-- ============================================================
-         NAV RAIL
+         NAV RAIL — collapsible, width persisted per user
          ============================================================ --}}
-    <aside class="sticky top-0 flex h-screen flex-col border-r border-black bg-ink py-3.5 text-sage">
-        <a href="{{ route('dashboard') }}" class="mx-auto mb-4 flex h-12 w-16 items-center justify-center text-fox" title="Configurator">
-            <x-logo class="size-[22px]" />
-        </a>
-
-        <nav class="flex flex-col items-center gap-0.5">
-            <x-menu-item route="dashboard" title="Overview" icon="squares-four" />
-            <x-menu-item route="dashboard.proposals" title="Proposals" icon="file-text" />
-            <x-menu-item route="dashboard.clients" title="Clients" icon="users-three" />
-            <x-menu-item route="dashboard.features" title="Features" icon="stack" />
-            <x-menu-item route="dashboard.packages" title="Packages" icon="cube" />
-            <x-menu-item route="dashboard.users" title="Team" icon="user-circle" />
-        </nav>
-
-        <div class="mt-auto flex flex-col items-center gap-2">
-            <x-menu-item route="dashboard.settings" title="Settings" icon="gear" />
-            <div class="mx-3 my-1 h-px w-10 bg-white/5"></div>
-            <a href="{{ route('dashboard.profile') }}" title="{{ $user->full_name }}" class="block">
-                <img src="{{ $user->gravatar }}" alt="{{ $user->full_name }}"
-                     class="size-8 rounded-full ring-1 ring-white/10">
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" title="Sign out"
-                        class="flex size-9 items-center justify-center rounded-[10px] text-slate-faint transition-colors hover:bg-white/5 hover:text-sage">
-                    <x-phosphor-sign-out class="size-[18px]" />
-                </button>
-            </form>
-        </div>
-    </aside>
+    <livewire:admin.shared.nav-rail />
 
     {{-- ============================================================
          MAIN
          ============================================================ --}}
-    <main class="flex min-w-0 flex-col">
+    <main class="flex min-w-0 flex-1 flex-col">
 
         {{-- TOP BAR --}}
         <header class="sticky top-0 z-10 flex h-[60px] items-center gap-6 border-b border-rule bg-paper px-8">
