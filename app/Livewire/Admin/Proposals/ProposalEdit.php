@@ -70,8 +70,8 @@ class ProposalEdit extends AdminComponent
     {
         if (! $this->proposal->canBeDelivered()) {
             $this->dispatch('toast', ...$this->warning([
-                'text' => $this->proposal->isPercentageOnly()
-                    ? 'This proposal is only percentage lines, so it comes to nothing. Add the work they apply to first.'
+                'text' => $this->proposal->percentagesHaveNoBase()
+                    ? 'The percentage lines on this proposal have no work to apply to, so they come to nothing. Add some fixed-price work first.'
                     : 'Add at least one feature before marking this proposal as delivered.',
             ]));
 

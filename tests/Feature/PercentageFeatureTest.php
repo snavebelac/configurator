@@ -244,7 +244,7 @@ class PercentageFeatureTest extends TestCase
     }
 
     #[Test]
-    public function a_percentage_only_proposal_is_flagged_and_cannot_be_delivered()
+    public function percentage_lines_with_no_fixed_work_are_flagged_and_block_delivery()
     {
         $this->proposal->status = Status::DRAFT;
         $this->proposal->save();
@@ -256,7 +256,7 @@ class PercentageFeatureTest extends TestCase
 
         $proposal = $this->proposal->fresh();
 
-        $this->assertTrue($proposal->isPercentageOnly());
+        $this->assertTrue($proposal->percentagesHaveNoBase());
         $this->assertFalse($proposal->canBeDelivered());
 
         Livewire::test(ProposalEdit::class, ['proposal' => $proposal])
@@ -266,11 +266,11 @@ class PercentageFeatureTest extends TestCase
 
         $this->get(route('dashboard.proposal.edit', ['proposal' => $proposal]))
             ->assertOk()
-            ->assertSeeText('This proposal comes to nothing');
+            ->assertSeeText('The percentage lines here come to nothing');
     }
 
     #[Test]
-    public function adding_fixed_work_clears_the_percentage_only_warning()
+    public function adding_fixed_work_clears_the_warning()
     {
         $this->proposal->status = Status::DRAFT;
         $this->proposal->save();
@@ -283,19 +283,19 @@ class PercentageFeatureTest extends TestCase
 
         $proposal = $this->proposal->fresh();
 
-        $this->assertFalse($proposal->isPercentageOnly());
+        $this->assertFalse($proposal->percentagesHaveNoBase());
         $this->assertTrue($proposal->canBeDelivered());
 
         $this->get(route('dashboard.proposal.edit', ['proposal' => $proposal]))
             ->assertOk()
-            ->assertDontSeeText('This proposal comes to nothing');
+            ->assertDontSeeText('The percentage lines here come to nothing');
     }
 
     #[Test]
-    public function an_empty_proposal_is_not_reported_as_percentage_only()
+    public function an_empty_proposal_is_not_reported_as_lacking_a_base()
     {
         // No lines at all is a different problem with a different message.
-        $this->assertFalse($this->proposal->fresh()->isPercentageOnly());
+        $this->assertFalse($this->proposal->fresh()->percentagesHaveNoBase());
     }
 
     #[Test]

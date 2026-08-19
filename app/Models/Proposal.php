@@ -166,22 +166,26 @@ class Proposal extends Model
     {
         return $this->status === Status::DRAFT
             && $this->features()->exists()
-            && ! $this->isPercentageOnly();
+            && ! $this->percentagesHaveNoBase();
     }
 
     /**
-     * A proposal made up entirely of percentage lines, with nothing for them
-     * to be a percentage *of* — so it totals zero.
+     * Percentage lines with no fixed-price work to be a percentage *of*, so
+     * they all compute to zero.
      *
      * Not an error state as such: it's what a half-built proposal looks like
      * if you add project management before the work it manages. Worth catching
-     * before it reaches a client as a £0 quote.
+     * before it reaches a client as a £0 line.
+     *
+     * Deliberately about the missing *base*, not about being percentage-only:
+     * percentages sitting alongside recurring costs are just as meaningless,
+     * since a percentage takes its share of one-off work only.
      */
-    public function isPercentageOnly(): bool
+    public function percentagesHaveNoBase(): bool
     {
         $this->loadMissing('features');
 
-        return $this->features->isNotEmpty()
-            && $this->features->every(fn (FinalFeature $feature) => $feature->isPercentage());
+        return $this->features->contains(fn (FinalFeature $feature) => $feature->isPercentage())
+            && ! $this->features->contains(fn (FinalFeature $feature) => $feature->isFixed());
     }
 }
