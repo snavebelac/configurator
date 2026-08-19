@@ -15,8 +15,13 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 > SweetAlert2 and axios are gone. Tests run on in-memory SQLite; dev stays on
 > MySQL. All dependencies are current.
 >
-> **The cleanup list is empty.** Everything left is a feature, listed under
-> "What's left" below. Nothing is picked yet — the next move is choosing one.
+> **Versioned terms & conditions are done** (2026-08-19): named sets, draft →
+> publish versioning, pinned to a proposal on delivery and recorded again on
+> acceptance, rendered at the foot of the client proposal. Next up, in the
+> order agreed: **percentage-based features**, then **ongoing/recurring
+> costs**, then **Present mode** — the first two deliberately before Present
+> mode, since they change what a proposal contains and therefore what Present
+> mode has to show.
 >
 > Folding in the user's separate stand-alone proposal app is **cancelled** —
 > the two have diverged too far to be worth porting anything; rebuild here
@@ -222,16 +227,7 @@ The live presentation experience for in-the-room demos:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 3. Versioned terms & conditions
-
-Each tenant maintains their own T&Cs as versioned documents, and a
-proposal gets a specific version attached. The terms a client agreed to
-must stay pinned to what they actually saw, so editing a tenant's terms
-must not rewrite history on past proposals. Pairs with the settings
-screen; the acceptance flow should record which version was in force at
-the moment the client accepted.
-
-### 4. Percentage-based features
+### 3. Percentage-based features
 
 Features priced as a **percentage of the proposal total** rather than a fixed
 amount — project management is the driving example, landing in its own section
@@ -243,7 +239,7 @@ Alpine live-total alone isn't enough, or the recorded total will disagree with
 what the client saw), and a percentage must exclude other percentage features
 or the maths goes circular.
 
-### 5. Ongoing / recurring costs
+### 4. Ongoing / recurring costs
 
 Proposals need to carry ongoing costs (hosting, support, licences, retainers)
 alongside the one-off build price. Shape undecided — needs a scoping
@@ -253,7 +249,7 @@ separately, since mixing one-off and recurring money in one figure misleads).
 Note `proposal_responses.accepted_total` is a single one-off figure today; if
 ongoing costs are acceptable too, that snapshot needs extending.
 
-### 6. Wire the command palette
+### 5. Wire the command palette
 
 Topbar's `⌘K` search trigger is still purely visual.
 
@@ -265,7 +261,7 @@ Topbar's `⌘K` search trigger is still purely visual.
   across proposals + clients + features + packages by name.
 - Match the visual pattern from `design-prototypes/dashboard.html`.
 
-### 7. Activity retention
+### 6. Activity retention
 
 The `activities` table grows without bound. Promoted out of "smaller cleanups"
 because a purge that silently deletes history is a product decision, not a
@@ -274,7 +270,7 @@ settle first are the retention window, whether it's per-tenant configurable
 (which would put it on the settings screen), and whether anything needs
 exporting before deletion.
 
-### 8. Responsive page content
+### 7. Responsive page content
 
 The nav went responsive on 2026-08-19 — off-canvas drawer below `lg`, adaptive
 topbar — but page *content* is still built desktop-first, so this is a feature

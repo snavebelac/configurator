@@ -14,6 +14,16 @@ Work in progress — no version cut yet.
 
 ### Added
 
+- **Versioned terms and conditions.** A tenant keeps any number of named sets
+  ("Standard build", "Retainer"), each independently versioned, with one marked
+  as the default. Editing happens on an unpublished draft; publishing freezes
+  it as the next numbered version, and published bodies are never edited again.
+  A proposal is pinned to whichever version was current when it was marked
+  delivered — overridable per proposal — so editing your terms afterwards
+  cannot rewrite what a client was shown. The acceptance records the version
+  separately again, because a proposal can be reopened and re-sent under newer
+  terms and the answer already given must not move with it. The terms render at
+  the foot of the client-facing proposal, collapsed by default.
 - **The nav rail is now an off-canvas drawer below `lg`.** A trigger in the
   topbar slides it in over a backdrop; it closes on the backdrop, on Escape,
   on its own close control, and on following any link inside it. The
@@ -85,6 +95,15 @@ Work in progress — no version cut yet.
 
 ### Changed
 
+- Terms bodies are authored in a rich-text editor (TipTap) and run through an
+  allowlist sanitiser (`symfony/html-sanitizer`) on every save, since they
+  render on a public, unauthenticated page. Only headings, emphasis, lists,
+  quotes, rules and links survive; links are forced to
+  `rel="noopener noreferrer nofollow"` and limited to http/https/mailto. The
+  editor's enabled nodes and the sanitiser's allowlist deliberately mirror each
+  other. TipTap is ~380 kB, so it is dynamically imported and Vite emits it as
+  a separate chunk — the main bundle stays at 48 kB and the client-facing
+  proposal never loads the editor.
 - **Tests run on in-memory SQLite.** `phpunit.xml` previously hard-coded a
   MySQL `configurator_tests` database and credentials that had to exist
   locally. Nothing to create, no credentials, and the suite got roughly three
