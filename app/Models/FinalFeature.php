@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PricingType;
 use App\Facades\Formatter;
 use App\Traits\BelongsToTenant;
 use App\Traits\Uuid;
@@ -20,6 +21,8 @@ class FinalFeature extends Model
         'name',
         'description',
         'price',
+        'pricing_type',
+        'percentage_rate',
         'quantity',
         'optional',
         'parent_id',
@@ -30,6 +33,7 @@ class FinalFeature extends Model
     protected $casts = [
         'optional' => 'boolean',
         'price' => 'integer',
+        'pricing_type' => PricingType::class,
     ];
 
     protected static function booted(): void
@@ -89,5 +93,31 @@ class FinalFeature extends Model
     public function scopeRoots(Builder $query): Builder
     {
         return $query->whereNull('parent_id');
+    }
+
+    public function isPercentage(): bool
+    {
+        return $this->pricing_type === PricingType::Percentage;
+    }
+
+    public function isFixed(): bool
+    {
+        return ! $this->isPercentage();
+    }
+
+    /**
+     * The rate as a human percentage — 1250 basis points reads as 12.5.
+     */
+    protected function percentage(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => ($attributes['percentage_rate'] ?? 0) / 100,
+            set: fn ($value) => ['percentage_rate' => (int) round(((float) $value) * 100)],
+        );
+    }
+
+    public function percentageForHumans(): string
+    {
+        return rtrim(rtrim(number_format($this->percentage, 2), '0'), '.').'%';
     }
 }

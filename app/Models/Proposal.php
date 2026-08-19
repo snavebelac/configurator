@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Status;
 use App\Facades\Formatter;
+use App\Helpers\ProposalPricing;
 use App\Traits\BelongsToTenant;
 use App\Traits\HasStatus;
 use App\Traits\Uuid;
@@ -70,15 +71,24 @@ class Proposal extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * The proposal's full value, in currency units, with every optional line
+     * included. Percentage lines take their share of the fixed lines.
+     *
+     * This is the "everything on" figure the admin sees. What a client
+     * actually accepts is computed separately by ProposalPricing from their
+     * selection.
+     */
     public function total(): float|int
     {
-        $total = 0;
         $this->loadMissing('features');
-        foreach ($this->features as $feature) {
-            $total += $feature->price * $feature->quantity;
-        }
 
-        return $total;
+        $pricing = app(ProposalPricing::class)->calculate(
+            $this->features,
+            $this->features->where('optional', true)->pluck('id')->map(fn ($id) => (int) $id)->all(),
+        );
+
+        return $pricing['subtotal'] / 100;
     }
 
     public function totalPrice(): Attribute
