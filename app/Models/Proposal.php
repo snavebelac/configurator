@@ -125,6 +125,16 @@ class Proposal extends Model
     }
 
     /**
+     * The exact terms revision this proposal was sent under. Pinned when the
+     * proposal is marked delivered, so editing the tenant's terms afterwards
+     * can't rewrite what the client was shown.
+     */
+    public function termsVersion(): BelongsTo
+    {
+        return $this->belongsTo(TermsVersion::class, 'terms_version_id');
+    }
+
+    /**
      * Whether the client has already answered. Once they have, the public view
      * locks to what they chose rather than staying interactive.
      */

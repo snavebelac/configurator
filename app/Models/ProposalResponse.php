@@ -22,6 +22,7 @@ class ProposalResponse extends Model
         'status',
         'selected_feature_ids',
         'accepted_total',
+        'terms_version_id',
         'note',
         'responded_at',
         'ip_address',
@@ -43,6 +44,16 @@ class ProposalResponse extends Model
     public function proposal(): BelongsTo
     {
         return $this->belongsTo(Proposal::class);
+    }
+
+    /**
+     * The terms in force when the client answered — recorded here as well as
+     * on the proposal, because a proposal can be reopened and re-sent against
+     * newer terms and this record must not move with it.
+     */
+    public function termsVersion(): BelongsTo
+    {
+        return $this->belongsTo(TermsVersion::class, 'terms_version_id');
     }
 
     public function wasAccepted(): bool

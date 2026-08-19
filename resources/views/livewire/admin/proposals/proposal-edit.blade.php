@@ -188,6 +188,74 @@
         </x-card>
     </div>
 
+    {{-- Terms — pinned on delivery, overridable here --}}
+    <div class="mt-6 max-w-[640px]">
+        <x-card>
+            <x-card-header title="Terms &amp; conditions" />
+            <div class="px-[22px] py-6">
+                @if ($termsOptions->isEmpty())
+                    <p class="text-[13px] text-slate">
+                        No published terms yet.
+                        <a href="{{ route('dashboard.terms') }}" class="font-medium text-ink underline underline-offset-2">Create a set</a>
+                        and publish a version to attach terms to your proposals.
+                    </p>
+                @else
+                    @if ($proposal->termsVersion)
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-3 rounded-lg border border-rule bg-paper-2 px-4 py-3">
+                            <div>
+                                <p class="text-[13.5px] font-medium text-ink">{{ $proposal->termsVersion->terms->name }}</p>
+                                <p class="mt-0.5 text-[12px] text-slate">
+                                    <span class="font-mono tnum">{{ $proposal->termsVersion->label() }}</span>
+                                    · published {{ $proposal->termsVersion->published_at->format('j M Y') }}
+                                </p>
+                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-slate-soft">Pinned</span>
+                        </div>
+                    @else
+                        <p class="mb-5 text-[13px] text-slate">
+                            Nothing attached yet. The default set is pinned automatically when you mark this
+                            proposal delivered, or choose one now.
+                        </p>
+                    @endif
+
+                    <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate">
+                        {{ $proposal->termsVersion ? 'Change to' : 'Attach' }}
+                    </p>
+                    <div class="flex flex-col gap-1.5">
+                        @foreach ($termsOptions as $set)
+                            <button type="button"
+                                    wire:key="terms-option-{{ $set->id }}"
+                                    wire:click="setTermsVersion({{ $set->currentVersion->id }})"
+                                    @disabled($proposal->terms_version_id === $set->currentVersion->id)
+                                    @class([
+                                        'flex items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left text-[13px] transition-colors',
+                                        'border-ink bg-paper-2 text-ink' => $proposal->terms_version_id === $set->currentVersion->id,
+                                        'border-rule text-ink hover:border-slate-faint hover:bg-paper-2' => $proposal->terms_version_id !== $set->currentVersion->id,
+                                    ])>
+                                <span class="flex items-center gap-2">
+                                    {{ $set->name }}
+                                    @if ($set->is_default)
+                                        <span class="rounded-full bg-fox-soft px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-ink">Default</span>
+                                    @endif
+                                </span>
+                                <span class="font-mono text-[12px] text-slate tnum">{{ $set->currentVersion->label() }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+
+                    @if ($proposal->termsVersion)
+                        <button type="button"
+                                wire:click="setTermsVersion(null)"
+                                wire:confirm="Send this proposal without any terms attached?"
+                                class="mt-3 text-[12.5px] font-medium text-status-rejected-fg underline-offset-4 hover:underline">
+                            Remove terms
+                        </button>
+                    @endif
+                @endif
+            </div>
+        </x-card>
+    </div>
+
     <div class="mt-6 max-w-[640px]">
         <livewire:admin.proposals.client-access :proposal="$proposal" :wire:key="'client-access-'.$proposal->id" />
     </div>

@@ -6,6 +6,8 @@ use App\Enums\Status;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\FinalFeature;
 use App\Models\Proposal;
+use App\Models\Terms;
+use App\Models\TermsVersion;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
@@ -73,6 +75,17 @@ class ProposalEdit extends AdminComponent
             return;
         }
 
+        // Pin the terms as they stand right now. Doing it here rather than at
+        // creation means a proposal drafted in March and sent in July goes out
+        // under July's terms, and doing it at all means editing the tenant's
+        // terms afterwards can't rewrite what was sent.
+        if ($this->proposal->terms_version_id === null) {
+            $this->proposal->terms_version_id = Terms::query()
+                ->where('is_default', true)
+                ->first()
+                ?->currentVersion?->id;
+        }
+
         $this->proposal->status = Status::DELIVERED;
         $this->proposal->save();
 
@@ -94,6 +107,37 @@ class ProposalEdit extends AdminComponent
 
         $this->dispatch('toast', ...$this->success([
             'text' => 'Reopened. The client can respond again.',
+        ]));
+    }
+
+    /**
+     * Swap the terms a proposal goes out under. Only published versions are
+     * offered — a draft could still change under the client's feet.
+     */
+    public function setTermsVersion(?int $termsVersionId): void
+    {
+        if ($termsVersionId === null) {
+            $this->proposal->terms_version_id = null;
+            $this->proposal->save();
+
+            $this->dispatch('toast', ...$this->warning([
+                'text' => 'Terms removed from this proposal.',
+            ]));
+
+            return;
+        }
+
+        $version = TermsVersion::query()->published()->find($termsVersionId);
+
+        if ($version === null) {
+            return;
+        }
+
+        $this->proposal->terms_version_id = $version->id;
+        $this->proposal->save();
+
+        $this->dispatch('toast', ...$this->success([
+            'text' => "Now sending under {$version->terms->name} {$version->label()}.",
         ]));
     }
 
@@ -123,10 +167,16 @@ class ProposalEdit extends AdminComponent
 
     public function render(): View
     {
-        $this->proposal->load(['features', 'client', 'user', 'response']);
+        $this->proposal->load(['features', 'client', 'user', 'response', 'termsVersion.terms']);
 
         return view('livewire.admin.proposals.proposal-edit', [
             'featureGroups' => $this->groupFeatures($this->proposal->features),
+            'termsOptions' => Terms::query()
+                ->with('currentVersion')
+                ->orderByDesc('is_default')
+                ->orderBy('name')
+                ->get()
+                ->filter(fn (Terms $set) => $set->currentVersion !== null),
         ]);
     }
 

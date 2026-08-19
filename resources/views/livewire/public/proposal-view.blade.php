@@ -90,6 +90,40 @@
                         </p>
                     </section>
                 @endif
+
+                @if ($termsVersion?->body)
+                    {{-- The exact revision this proposal was sent under, frozen
+                         at delivery. Collapsed by default: it's long, and it
+                         shouldn't push the pricing off the page. --}}
+                    <section class="mt-20 border-t border-ink/10 pt-10" x-data="{ open: false }">
+                        <button type="button"
+                                x-on:click="open = ! open"
+                                class="flex w-full items-baseline justify-between gap-6 text-left">
+                            <span>
+                                <span class="block text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate-soft">
+                                    Terms &amp; conditions
+                                </span>
+                                <span class="mt-2 block font-display text-[20px] text-ink">
+                                    {{ $termsVersion->terms->name }}
+                                </span>
+                            </span>
+                            <span class="flex shrink-0 items-center gap-2 text-[11.5px] text-slate-soft">
+                                <span class="font-mono tnum">{{ $termsVersion->label() }}</span>
+                                <x-phosphor-caret-down class="size-3.5 transition-transform duration-200"
+                                                       x-bind:class="open && 'rotate-180'" />
+                            </span>
+                        </button>
+
+                        <div x-show="open" x-collapse x-cloak class="mt-6 max-w-[68ch]">
+                            <div class="prose-terms">{!! $termsVersion->body !!}</div>
+                        </div>
+
+                        <p class="mt-4 text-[11px] leading-[1.5] text-slate-soft" x-show="! open">
+                            Accepting this proposal accepts these terms.
+                            <button type="button" x-on:click="open = true" class="underline underline-offset-2 hover:text-slate">Read them</button>.
+                        </p>
+                    </section>
+                @endif
             </main>
 
             {{-- ====== Summary rail ====== --}}

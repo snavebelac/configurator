@@ -160,6 +160,10 @@ class ProposalView extends Component
                 'status' => $status,
                 'selected_feature_ids' => $selectedFeatureIds,
                 'accepted_total' => $total,
+                // Recorded separately from the proposal: reopening and
+                // re-sending against newer terms must not move what this
+                // client actually agreed to.
+                'terms_version_id' => $this->proposal->terms_version_id,
                 'responded_at' => now(),
                 'ip_address' => request()->ip(),
                 'user_agent' => substr((string) request()->userAgent(), 0, 512),
@@ -200,7 +204,7 @@ class ProposalView extends Component
                 ->title('Proposal');
         }
 
-        $this->proposal->loadMissing(['features', 'user', 'client']);
+        $this->proposal->loadMissing(['features', 'user', 'client', 'termsVersion.terms']);
 
         $features = $this->proposal->features;
 
@@ -255,6 +259,7 @@ class ProposalView extends Component
             'currency' => Settings::getCurrency(),
             'logo' => Settings::getLogo(),
             'companyName' => Settings::getCompanyName(),
+            'termsVersion' => $this->proposal->termsVersion,
         ])->title($this->proposal->name.' — Proposal');
     }
 }
