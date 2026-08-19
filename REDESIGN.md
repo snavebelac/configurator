@@ -223,14 +223,34 @@ Things worth adding next:
 
 ### 2. Build "Present mode"
 
-The live presentation experience for in-the-room demos:
+The live presentation experience for in-the-room and screen-shared demos: an
+operator screen with full controls, and a client screen showing a clean view of
+the same proposal that updates as the operator changes things. Static prototype
+at `design-prototypes/present.html`.
 
-- New route `dashboard.proposal.present` mounting a Livewire component
-  on a full-bleed layout (`components.layouts.present`, no rail/topbar).
-- Implement against `design-prototypes/present.html`: required vs.
-  optional features, fox-yellow toggle, sticky live total in mono.
-- Phase 2: a "client mirror" view at a public UUID URL that subscribes
-  to Livewire events from the operator — eventual real-time sync.
+Sketched shape: route `dashboard.proposal.present` mounting a Livewire
+component on a full-bleed `components.layouts.present` with no rail or topbar;
+required vs. optional features, fox-yellow toggle, sticky live total in mono.
+
+**Settle these before writing any code:**
+
+- Does the client screen mirror in real time, and over what? Livewire polling
+  is cheap; broadcasting needs a driver decision — `BROADCAST_CONNECTION` is
+  currently `log` with nothing configured.
+- Is the client screen the existing `/p/{uuid}` view or a separate presented
+  one? Reusing it keeps a single code path, but that view is built for solo
+  reading, not for being driven by someone else.
+- **Does presenting mutate the proposal, or is it a scratch session the
+  operator can walk away from?** The big one — it decides whether Present mode
+  writes to `final_features` or holds its state somewhere else entirely.
+- What does the operator see that the client doesn't? Margins and internal
+  notes came up early; `final_features.notes` exists and is still unused.
+- How does it end? If a client accepts in the room, does that reuse the accept
+  flow and its `ProposalResponse` record?
+
+Pricing is already solved and must be reused rather than reimplemented:
+`App\Helpers\ProposalPricing` in pence, mirrored in Alpine for live totals,
+covering fixed work, percentages and recurring costs.
 
 ### 3. Wire the command palette
 
