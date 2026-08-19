@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Features;
 
+use App\Enums\BillingPeriod;
 use App\Enums\PricingType;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\Feature;
@@ -28,6 +29,8 @@ class FeatureModal extends ModalComponent
 
     public string $percentage = '';
 
+    public ?string $billingPeriod = BillingPeriod::Monthly->value;
+
     public string $quantity = '';
 
     public bool $optional = false;
@@ -39,10 +42,13 @@ class FeatureModal extends ModalComponent
     protected function rules(): array
     {
         $isPercentage = $this->pricingType === PricingType::Percentage->value;
+        $isRecurring = $this->pricingType === PricingType::Recurring->value;
 
-        // A percentage is a share of the whole proposal, so it can't sit under
-        // a parent or carry a quantity — "10% x 3" means nothing.
-        $parentRule = ($this->hasChildren || $isPercentage)
+        // Neither a percentage nor a recurring charge belongs under a parent
+        // feature: one is a share of the whole proposal, the other is a
+        // separate ongoing commitment. And a percentage carries no quantity —
+        // "10% x 3" means nothing.
+        $parentRule = ($this->hasChildren || $isPercentage || $isRecurring)
             ? ['nullable', 'prohibited']
             : ['nullable', 'integer', Rule::exists('features', 'id')->whereNull('parent_id')];
 
@@ -53,6 +59,9 @@ class FeatureModal extends ModalComponent
             'price' => $isPercentage ? ['nullable'] : ['required', 'numeric', 'decimal:0,2'],
             'percentage' => $isPercentage
                 ? ['required', 'numeric', 'gt:0', 'max:100']
+                : ['nullable'],
+            'billingPeriod' => $isRecurring
+                ? ['required', Rule::enum(BillingPeriod::class)]
                 : ['nullable'],
             'quantity' => $isPercentage ? ['nullable'] : ['required', 'numeric', 'integer', 'min:1'],
             'parentId' => $parentRule,
@@ -77,6 +86,7 @@ class FeatureModal extends ModalComponent
                 $this->pricingType = $feature->pricing_type->value;
                 $this->price = (string) $feature->price;
                 $this->percentage = $feature->isPercentage() ? (string) $feature->percentage : '';
+                $this->billingPeriod = $feature->billing_period?->value ?? BillingPeriod::Monthly->value;
                 $this->quantity = (string) $feature->quantity;
                 $this->optional = $feature->optional;
                 $this->parentId = $feature->parent_id;
@@ -90,6 +100,7 @@ class FeatureModal extends ModalComponent
         $this->validate();
 
         $isPercentage = $this->pricingType === PricingType::Percentage->value;
+        $isRecurring = $this->pricingType === PricingType::Recurring->value;
 
         $updateData = [
             'name' => $this->name,
@@ -100,9 +111,10 @@ class FeatureModal extends ModalComponent
             // the pricing calculation from ever seeing a contradiction.
             'price' => $isPercentage ? 0 : $this->price,
             'percentage_rate' => $isPercentage ? (int) round(((float) $this->percentage) * 100) : 0,
+            'billing_period' => $isRecurring ? $this->billingPeriod : null,
             'quantity' => $isPercentage ? 1 : $this->quantity,
             'optional' => $this->optional,
-            'parent_id' => $isPercentage ? null : $this->parentId,
+            'parent_id' => ($isPercentage || $isRecurring) ? null : $this->parentId,
         ];
 
         if ($this->featureId) {
@@ -128,6 +140,7 @@ class FeatureModal extends ModalComponent
         return view('livewire.admin.features.feature-modal', [
             'parentOptions' => $parentOptions,
             'pricingTypes' => PricingType::cases(),
+            'billingPeriods' => BillingPeriod::cases(),
         ]);
     }
 }

@@ -51,6 +51,9 @@
             <span class="ml-1 text-[11px] uppercase tracking-wider text-slate-soft">of total</span>
         @else
             <x-money :value="$feature->price" size="mono" :precise="true" />
+            @if ($feature->isRecurring())
+                <span class="ml-1 text-[11px] text-slate-soft">{{ $feature->billingSuffix() }}</span>
+            @endif
         @endif
     </td>
     <td class="border-b border-rule-soft px-4 py-3.5 align-middle font-mono text-[13px] text-ink tnum">

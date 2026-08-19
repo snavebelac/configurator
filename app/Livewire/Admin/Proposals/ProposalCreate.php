@@ -184,6 +184,7 @@ class ProposalCreate extends AdminComponent
             'price' => $price,
             'pricing_type' => $feature->pricing_type,
             'percentage_rate' => $feature->percentage_rate,
+            'billing_period' => $feature->billing_period,
             'quantity' => $quantity,
             'optional' => $optional,
             'parent_id' => $parentFinalId,

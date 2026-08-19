@@ -23,7 +23,7 @@
                  of the proposal, so it hides price, quantity and parent. --}}
             <div class="border-t border-rule-soft pt-5">
                 <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Pricing</p>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     @foreach ($pricingTypes as $type)
                         <button type="button"
                                 wire:click="$set('pricingType', '{{ $type->value }}')"
@@ -33,17 +33,39 @@
                                     'border-rule text-slate hover:border-slate-faint hover:bg-paper-2' => $pricingType !== $type->value,
                                 ])>
                             <span class="block font-medium">{{ $type->label() }}</span>
-                            <span class="mt-0.5 block text-[11.5px] text-slate">
-                                {{ $type->isPercentage()
-                                    ? 'A share of everything else on the proposal'
-                                    : 'A set amount, optionally times a quantity' }}
-                            </span>
+                            <span class="mt-0.5 block text-[11.5px] text-slate">{{ $type->description() }}</span>
                         </button>
                     @endforeach
                 </div>
             </div>
 
-            @if ($pricingType === \App\Enums\PricingType::Percentage->value)
+            @if ($pricingType === \App\Enums\PricingType::Recurring->value)
+                <div class="grid grid-cols-2 gap-6">
+                    <x-field
+                        label="Amount per period"
+                        name="price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        prefix="£" />
+
+                    <x-select-field
+                        label="Billed"
+                        name="billingPeriod"
+                        :options="collect($billingPeriods)->mapWithKeys(fn ($p) => [$p->value => $p->label()])->all()"
+                        placeholder="— Choose a period —"
+                        required />
+                </div>
+
+                <x-field
+                    label="Quantity"
+                    name="quantity"
+                    type="number"
+                    step="1"
+                    min="1"
+                    hint="For per-seat or per-site charges. Leave at 1 otherwise." />
+
+            @elseif ($pricingType === \App\Enums\PricingType::Percentage->value)
                 <x-field
                     label="Percentage"
                     name="percentage"
