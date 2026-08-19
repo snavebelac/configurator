@@ -12,6 +12,7 @@
         'dashboard.package.edit'     => 'Packages · Edit',
         'dashboard.users'            => 'Team',
         'dashboard.profile'          => 'Profile',
+        'dashboard.settings'         => 'Settings',
     ];
     $crumb = $crumbs[Route::currentRouteName()] ?? 'Dashboard';
 @endphp
@@ -50,6 +51,7 @@
         </nav>
 
         <div class="mt-auto flex flex-col items-center gap-2">
+            <x-menu-item route="dashboard.settings" title="Settings" icon="gear" />
             <div class="mx-3 my-1 h-px w-10 bg-white/5"></div>
             <a href="{{ route('dashboard.profile') }}" title="{{ $user->full_name }}" class="block">
                 <img src="{{ $user->gravatar }}" alt="{{ $user->full_name }}"
