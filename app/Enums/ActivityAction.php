@@ -8,4 +8,6 @@ enum ActivityAction: string
     case ProposalStatusChanged = 'proposal.status_changed';
     case ClientCreated = 'client.created';
     case PackageCreated = 'package.created';
+    case ProposalAccepted = 'proposal.accepted';
+    case ProposalRejected = 'proposal.rejected';
 }

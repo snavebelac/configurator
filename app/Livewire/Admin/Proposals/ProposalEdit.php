@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Proposals;
 
+use App\Enums\Status;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\FinalFeature;
 use App\Models\Proposal;
@@ -26,6 +27,44 @@ class ProposalEdit extends AdminComponent
     public function refresh(): void
     {
         $this->proposal->load(['features', 'client', 'user']);
+    }
+
+    /**
+     * Send the proposal: move it out of draft so the client's public link can
+     * be answered. Until this happens accept/reject is not offered.
+     */
+    public function markAsDelivered(): void
+    {
+        if (! $this->proposal->canBeDelivered()) {
+            $this->dispatch('toast', ...$this->warning([
+                'text' => 'Add at least one feature before marking this proposal as delivered.',
+            ]));
+
+            return;
+        }
+
+        $this->proposal->status = Status::DELIVERED;
+        $this->proposal->save();
+
+        $this->dispatch('toast', ...$this->success([
+            'text' => 'Marked as delivered. Your client can now respond to the share link.',
+        ]));
+    }
+
+    /**
+     * Clear a client's response so they can answer again — the escape hatch for
+     * an accidental accept or decline.
+     */
+    public function reopen(): void
+    {
+        $this->proposal->response()->delete();
+
+        $this->proposal->status = Status::DELIVERED;
+        $this->proposal->save();
+
+        $this->dispatch('toast', ...$this->success([
+            'text' => 'Reopened. The client can respond again.',
+        ]));
     }
 
     public function reorderParents(int $finalFeatureId, int $position): void
@@ -54,7 +93,7 @@ class ProposalEdit extends AdminComponent
 
     public function render(): View
     {
-        $this->proposal->load(['features', 'client', 'user']);
+        $this->proposal->load(['features', 'client', 'user', 'response']);
 
         return view('livewire.admin.proposals.proposal-edit', [
             'featureGroups' => $this->groupFeatures($this->proposal->features),

@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\CurrencySymbol;
 use App\Enums\Status;
+use App\Facades\Settings;
 use App\Models\Client;
 use App\Models\FinalFeature;
 use App\Models\Proposal;
@@ -13,9 +15,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class ProposalPreviewTest extends TestCase
+class PublicProposalTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Settings::forget();
+
+        parent::tearDown();
+    }
 
     private function proposalFixture(): array
     {
@@ -64,7 +73,7 @@ class ProposalPreviewTest extends TestCase
         $optional->proposal()->associate($proposal);
         $optional->save();
 
-        $this->get(route('dashboard.proposal.preview', ['proposal' => $proposal->uuid]))
+        $this->get(route('proposal.view', ['proposal' => $proposal->uuid]))
             ->assertOk()
             ->assertSeeText('A Configurator proposal')
             ->assertSeeText('Brand identity system')
@@ -80,7 +89,7 @@ class ProposalPreviewTest extends TestCase
     {
         [, , $proposal] = $this->proposalFixture();
 
-        $this->get(route('dashboard.proposal.preview', ['proposal' => $proposal->uuid]))
+        $this->get(route('proposal.view', ['proposal' => $proposal->uuid]))
             ->assertOk()
             ->assertSeeText('Nothing to show yet.');
     }
@@ -113,10 +122,99 @@ class ProposalPreviewTest extends TestCase
         $child->proposal()->associate($proposal);
         $child->save();
 
-        $this->get(route('dashboard.proposal.preview', ['proposal' => $proposal->uuid]))
+        $this->get(route('proposal.view', ['proposal' => $proposal->uuid]))
             ->assertOk()
             ->assertSeeText('Blog')
             ->assertSeeText('Categories')
             ->assertSeeText('1 add-on');
+    }
+
+    #[Test]
+    public function the_proposal_renders_for_a_visitor_who_is_not_logged_in()
+    {
+        [, , $proposal] = $this->proposalFixture();
+
+        $feature = new FinalFeature([
+            'name' => 'Logo design',
+            'description' => 'Three rounds of exploration.',
+            'price' => 4800,
+            'quantity' => 1,
+            'optional' => false,
+            'order' => 1,
+        ]);
+        $feature->proposal()->associate($proposal);
+        $feature->save();
+
+        auth()->logout();
+        session()->flush();
+        Settings::forget();
+
+        $this->assertGuest();
+
+        $this->get(route('proposal.view', ['proposal' => $proposal->uuid]))
+            ->assertOk()
+            ->assertSeeText('Brand identity system')
+            ->assertSeeText('Logo design');
+    }
+
+    #[Test]
+    public function an_unknown_uuid_is_not_found()
+    {
+        $this->get(route('proposal.view', ['proposal' => '01900000-0000-7000-8000-000000000000']))
+            ->assertNotFound();
+    }
+
+    #[Test]
+    public function the_proposal_uses_its_own_tenants_currency_and_tax_not_another_tenants()
+    {
+        // Tenant A is created first, so anything falling back to "the first
+        // settings row" would render this proposal in GBP with VAT at 20%.
+        $tenantA = Tenant::factory()->create();
+        Setting::factory()->create([
+            'tenant_id' => $tenantA->id,
+            'tax_name' => 'VAT',
+            'tax_rate' => 20,
+            'currency' => CurrencySymbol::GBP,
+        ]);
+
+        $tenantB = Tenant::factory()->create();
+        Setting::factory()->create([
+            'tenant_id' => $tenantB->id,
+            'tax_name' => 'Sales Tax',
+            'tax_rate' => 8.5,
+            'currency' => CurrencySymbol::USD,
+        ]);
+
+        $user = User::factory()->create(['tenant_id' => $tenantB->id, 'active' => true]);
+        $client = Client::factory()->create(['tenant_id' => $tenantB->id]);
+        $proposal = Proposal::factory()->create([
+            'tenant_id' => $tenantB->id,
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'name' => 'Tenant B proposal',
+        ]);
+
+        $feature = new FinalFeature([
+            'name' => 'Discovery workshop',
+            'description' => 'Half a day.',
+            'price' => 1000,
+            'quantity' => 1,
+            'optional' => false,
+            'order' => 1,
+        ]);
+        $feature->tenant_id = $tenantB->id;
+        $feature->proposal()->associate($proposal);
+        $feature->save();
+
+        $this->assertGuest();
+
+        $response = $this->get(route('proposal.view', ['proposal' => $proposal->uuid]));
+
+        $response->assertOk()
+            ->assertSeeText('Sales Tax')
+            ->assertSeeText('All prices in USD')
+            ->assertDontSeeText('VAT');
+
+        $this->assertStringContainsString('$', $response->getContent());
     }
 }

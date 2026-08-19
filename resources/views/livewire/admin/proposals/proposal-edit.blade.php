@@ -8,10 +8,17 @@
         :eyebrow="'Editing · ' . ucfirst($proposal->status->value)">
         <x-slot:actions>
             <x-btn variant="ghost" :href="route('dashboard.proposals')">Back to list</x-btn>
-            <x-btn variant="ghost" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">
+            <x-btn variant="ghost" :href="route('proposal.view', ['proposal' => $proposal->uuid])" target="_blank">
                 Preview
                 <x-phosphor-arrow-square-out class="size-3.5" />
             </x-btn>
+            @if ($proposal->canBeDelivered())
+                <x-btn variant="accent" type="button"
+                       wire:click="markAsDelivered"
+                       wire:confirm="Mark this proposal as delivered? Your client will be able to accept or decline it from the share link.">
+                    Mark as delivered
+                </x-btn>
+            @endif
         </x-slot:actions>
     </x-page-header>
 
@@ -98,10 +105,53 @@
 
         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule-soft bg-paper-2 px-6 py-4">
             <livewire:admin.proposals.proposal-total-on-the-fly :proposal-id="$proposal->id" />
-            <x-btn variant="accent" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])" target="_blank">
+            <x-btn variant="accent" :href="route('proposal.view', ['proposal' => $proposal->uuid])" target="_blank">
                 Preview (client view)
                 <x-phosphor-arrow-square-out class="size-3.5" />
             </x-btn>
         </div>
     </x-card>
+
+    @if ($proposal->response)
+        {{-- The client has answered. --}}
+        @php $clientResponse = $proposal->response; @endphp
+        <div @class([
+            'mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-4',
+            'border-status-accepted-dot/40 bg-status-accepted-bg' => $clientResponse->wasAccepted(),
+            'border-status-rejected-dot/40 bg-status-rejected-bg' => ! $clientResponse->wasAccepted(),
+        ])>
+            <div>
+                <p @class([
+                    'flex items-center gap-2 text-[13px] font-medium',
+                    'text-status-accepted-fg' => $clientResponse->wasAccepted(),
+                    'text-status-rejected-fg' => ! $clientResponse->wasAccepted(),
+                ])>
+                    @if ($clientResponse->wasAccepted())
+                        <x-phosphor-check-circle class="size-4" />
+                        Client accepted this proposal
+                    @else
+                        <x-phosphor-x-circle class="size-4" />
+                        Client declined this proposal
+                    @endif
+                </p>
+                <p class="mt-1 text-[12.5px] text-slate">
+                    {{ $clientResponse->responded_at->format('j M Y, H:i') }}
+                    @if ($clientResponse->wasAccepted())
+                        · {{ count($clientResponse->selected_feature_ids ?? []) }} of
+                        {{ $proposal->features->where('optional', true)->count() }} optional items kept
+                        · <span class="font-mono tnum">{!! $clientResponse->acceptedTotalForHumans !!}</span>
+                    @endif
+                </p>
+            </div>
+            <x-btn variant="ghost" type="button"
+                   wire:click="reopen"
+                   wire:confirm="Reopen this proposal? The recorded response will be deleted and the client can answer again.">
+                Reopen
+            </x-btn>
+        </div>
+    @endif
+
+    <div class="mt-6 max-w-[640px]">
+        <livewire:admin.proposals.client-access :proposal="$proposal" :wire:key="'client-access-'.$proposal->id" />
+    </div>
 </div>

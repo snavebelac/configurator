@@ -34,6 +34,13 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->ip());
         });
 
+        // Public proposal links are unauthenticated, so cap how fast an IP can
+        // walk the UUID space. Generous enough that a client refreshing or
+        // toggling their way through a proposal never notices.
+        RateLimiter::for('public-proposal', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
         View::composer('components.layouts.admin', AdminComposer::class);
 
         Proposal::observe(ProposalObserver::class);

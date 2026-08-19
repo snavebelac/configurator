@@ -17,7 +17,18 @@
             @if ($isChild)
                 <x-phosphor-arrow-elbow-down-right class="mt-1 size-3 shrink-0 text-slate-soft" />
             @endif
-            <h3 class="font-display text-[18px] leading-[1.25] text-ink">{{ $feature->name }}</h3>
+            {{-- Root features carry the display size the old section heading
+                 used, so hierarchy survives without repeating the name. --}}
+            <h3 @class([
+                'font-display leading-[1.25] text-ink',
+                'text-[24px]' => ! $isChild,
+                'text-[17px]' => $isChild,
+            ])>{{ $feature->name }}</h3>
+            @if (($childCount ?? 0) > 0)
+                <span class="whitespace-nowrap text-[10.5px] font-medium uppercase tracking-[0.2em] text-slate-soft">
+                    {{ $childCount }} {{ Str::plural('add-on', $childCount) }}
+                </span>
+            @endif
         </div>
         @if ($feature->description)
             <p class="mt-2 max-w-[52ch] text-[14px] leading-[1.55] text-slate">{{ $feature->description }}</p>
@@ -32,14 +43,18 @@
     {{-- Right: price + toggle / marker --}}
     <div class="flex flex-col items-end gap-3">
         <div class="flex items-baseline gap-1 font-mono leading-none tnum">
-            <span class="text-[14px] text-slate-soft">£</span>
+            <span class="text-[14px] text-slate-soft">{{ $currency->toSymbol() }}</span>
             <span class="text-[22px] text-ink">{{ number_format($lineTotal, 0) }}</span>
         </div>
 
         @if ($isOptional)
             <button type="button"
                     x-on:click="toggle({{ $feature->id }})"
-                    x-bind:class="isOn({{ $feature->id }}) ? 'bg-fox border-fox-deep' : 'bg-white border-rule'"
+                    x-bind:disabled="locked"
+                    x-bind:class="[
+                        isOn({{ $feature->id }}) ? 'bg-fox border-fox-deep' : 'bg-white border-rule',
+                        locked ? 'cursor-default opacity-70' : '',
+                    ]"
                     class="relative h-7 w-[52px] rounded-full border transition-colors duration-200"
                     x-bind:aria-pressed="isOn({{ $feature->id }})"
                     aria-label="Toggle {{ $feature->name }}">

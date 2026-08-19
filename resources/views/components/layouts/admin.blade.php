@@ -4,7 +4,6 @@
         'dashboard.proposals'        => 'Proposals',
         'dashboard.proposal.create'  => 'Proposals · New',
         'dashboard.proposal.edit'    => 'Proposals · Edit',
-        'dashboard.proposal.preview' => 'Proposals · Preview',
         'dashboard.clients'          => 'Clients',
         'dashboard.features'         => 'Features',
         'dashboard.packages'         => 'Packages',

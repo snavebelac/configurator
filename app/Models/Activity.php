@@ -81,13 +81,21 @@ class Activity extends Model
             ActivityAction::ProposalStatusChanged => "{$actor} moved {$name} to ".ucfirst((string) ($this->payload['to'] ?? '')),
             ActivityAction::ClientCreated => "{$actor} added client {$name}",
             ActivityAction::PackageCreated => "{$actor} created package {$name}",
+            // Client responses have no authenticated actor, so these are
+            // voiced from the client's side rather than falling back to
+            // the generic "Someone" actor.
+            ActivityAction::ProposalAccepted => "The client accepted {$name}",
+            ActivityAction::ProposalRejected => "The client declined {$name}",
         };
     }
 
     public function subjectTypeLabel(): string
     {
         return match ($this->action) {
-            ActivityAction::ProposalCreated, ActivityAction::ProposalStatusChanged => 'Proposal',
+            ActivityAction::ProposalCreated,
+            ActivityAction::ProposalStatusChanged,
+            ActivityAction::ProposalAccepted,
+            ActivityAction::ProposalRejected => 'Proposal',
             ActivityAction::ClientCreated => 'Client',
             ActivityAction::PackageCreated => 'Package',
         };

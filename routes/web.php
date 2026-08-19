@@ -8,7 +8,6 @@ use App\Livewire\Admin\Packages\PackageCreate;
 use App\Livewire\Admin\Packages\PackageEdit;
 use App\Livewire\Admin\Packages\PackageList;
 use App\Livewire\Admin\Profile;
-use App\Livewire\Admin\Proposals\Preview;
 use App\Livewire\Admin\Proposals\ProposalCreate;
 use App\Livewire\Admin\Proposals\ProposalEdit;
 use App\Livewire\Admin\Proposals\ProposalsList;
@@ -17,15 +16,13 @@ use App\Livewire\Admin\Users\UserList;
 use App\Livewire\ForgottenPassword;
 use App\Livewire\Login;
 use App\Livewire\PasswordReset;
+use App\Livewire\Public\ProposalView;
 use App\Livewire\Signup;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome', [
-        'users_count' => User::count(),
-    ]);
+    return view('welcome');
 })->name('home');
 
 Route::middleware(['throttle:authentication'])->group(function () {
@@ -50,7 +47,6 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/features', FeaturesList::class)->name('dashboard.features');
     Route::get('/proposals', ProposalsList::class)->name('dashboard.proposals');
     Route::get('/proposal/create', ProposalCreate::class)->name('dashboard.proposal.create');
-    Route::get('/proposal/preview/{proposal:uuid}', Preview::class)->name('dashboard.proposal.preview');
     Route::get('/proposal/edit/{proposal}', ProposalEdit::class)->name('dashboard.proposal.edit');
     Route::get('/clients', ClientList::class)->name('dashboard.clients');
     Route::get('/packages', PackageList::class)->name('dashboard.packages');
@@ -58,4 +54,9 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
     Route::get('/package/edit/{package}', PackageEdit::class)->name('dashboard.package.edit');
 });
 
-// View Proposals
+// Client-facing proposal. Deliberately outside the auth group — this is the
+// link that gets shared with clients. Access is by unguessable UUID, with an
+// optional per-proposal passcode on top.
+Route::middleware(['throttle:public-proposal'])->group(function () {
+    Route::get('/p/{proposal:uuid}', ProposalView::class)->name('proposal.view');
+});

@@ -107,7 +107,7 @@
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
                             <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">
                                 <x-btn variant="row" :href="route('dashboard.proposal.edit', ['proposal' => $proposal->id])">Edit</x-btn>
-                                <x-btn variant="row" :href="route('dashboard.proposal.preview', ['proposal' => $proposal->uuid])">Preview</x-btn>
+                                <x-btn variant="row" :href="route('proposal.view', ['proposal' => $proposal->uuid])">Preview</x-btn>
                                 <x-btn variant="row"
                                        class="text-status-rejected-fg hover:bg-status-rejected-bg"
                                        wire:click="delete({{ $proposal->id }})"

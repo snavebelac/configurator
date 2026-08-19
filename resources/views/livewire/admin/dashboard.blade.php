@@ -241,7 +241,7 @@
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle">
                             <div class="flex justify-end gap-1.5 opacity-55 transition-opacity group-hover:opacity-100">
                                 <x-btn variant="row" :href="route('dashboard.proposal.edit', ['proposal' => $item])">Open</x-btn>
-                                <x-btn variant="row" :href="route('dashboard.proposal.preview', ['proposal' => $item->uuid])">Preview</x-btn>
+                                <x-btn variant="row" :href="route('proposal.view', ['proposal' => $item->uuid])">Preview</x-btn>
                             </div>
                         </td>
                     </tr>

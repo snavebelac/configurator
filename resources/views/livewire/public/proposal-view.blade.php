@@ -48,29 +48,22 @@
                 @endif
 
                 @forelse ($groups as $group)
-                    <section class="mb-14" wire:key="group-{{ $group['root']->id }}">
-                        <div class="mb-7 flex items-baseline justify-between gap-6 border-b border-rule pb-3">
-                            <h2 class="font-display text-[24px] leading-[1.15] text-ink">
-                                {{ $group['root']->name }}
-                            </h2>
-                            <p class="whitespace-nowrap text-[10.5px] font-medium uppercase tracking-[0.2em] text-slate-soft">
-                                @if ($group['children']->count())
-                                    {{ $group['children']->count() }} {{ Str::plural('add-on', $group['children']->count()) }}
-                                @else
-                                    Included
-                                @endif
-                            </p>
-                        </div>
-
+                    {{-- The root feature's own row carries its name, so there is
+                         deliberately no section heading above it — that only
+                         repeated the title, and its "Included" eyebrow repeated
+                         the marker on the row itself. --}}
+                    <section class="mb-12 border-t border-rule pt-1" wire:key="group-{{ $group['root']->id }}">
                         <div class="flex flex-col divide-y divide-rule-soft">
-                            @include('livewire.admin.proposals.partials.preview-row', [
+                            @include('livewire.public.partials.proposal-row', [
                                 'feature' => $group['root'],
                                 'isChild' => false,
+                                'childCount' => $group['children']->count(),
                             ])
                             @foreach ($group['children'] as $child)
-                                @include('livewire.admin.proposals.partials.preview-row', [
+                                @include('livewire.public.partials.proposal-row', [
                                     'feature' => $child,
                                     'isChild' => true,
+                                    'childCount' => 0,
                                 ])
                             @endforeach
                         </div>
@@ -105,7 +98,7 @@
                             </div>
                         </div>
                         <p class="mt-2 flex items-baseline gap-1 font-mono leading-none tnum">
-                            <span class="text-[22px] text-slate-soft">£</span>
+                            <span class="text-[22px] text-slate-soft">{{ $currency->toSymbol() }}</span>
                             <span class="text-[44px] text-ink" x-text="formatWhole(total)"></span>
                         </p>
                     </div>
@@ -114,7 +107,7 @@
                         <dl class="flex flex-col gap-3 text-[13px]">
                             <div class="flex items-baseline justify-between">
                                 <dt class="text-slate">Required</dt>
-                                <dd class="font-mono tnum text-ink">£{{ number_format($requiredTotal, 0) }}</dd>
+                                <dd class="font-mono tnum text-ink">{{ $currency->toSymbol() }}{{ number_format($requiredTotal, 0) }}</dd>
                             </div>
                             <div class="flex items-baseline justify-between">
                                 <dt class="text-slate">
@@ -124,25 +117,75 @@
                                     <span class="text-slate-soft">of {{ $optionalCount }}</span>
                                 </dt>
                                 <dd class="font-mono tnum text-ink">
-                                    £<span x-text="formatWhole(optionalSum)"></span>
+                                    {{ $currency->toSymbol() }}<span x-text="formatWhole(optionalSum)"></span>
                                 </dd>
                             </div>
                             <div class="flex items-baseline justify-between pt-2 text-slate-soft">
                                 <dt>{{ $taxName }} ({{ rtrim(rtrim(number_format($taxRate, 1), '0'), '.') }}%)</dt>
                                 <dd class="font-mono tnum">
-                                    £<span x-text="formatWhole(tax)"></span>
+                                    {{ $currency->toSymbol() }}<span x-text="formatWhole(tax)"></span>
                                 </dd>
                             </div>
                         </dl>
                     </div>
 
-                    <p class="border-t border-rule-soft bg-paper-2/30 px-7 py-4 text-[11.5px] leading-[1.5] text-slate">
-                        Toggle the optional items above to explore different configurations. Figures update as you go.
-                    </p>
+                    @if ($response)
+                        {{-- Already answered: show what was recorded, no controls. --}}
+                        <div class="border-t border-rule-soft px-7 py-5">
+                            @if ($response->wasAccepted())
+                                <div class="flex items-center gap-2 text-[13px] font-medium text-status-accepted-fg">
+                                    <x-phosphor-check-circle class="size-4" />
+                                    Accepted
+                                </div>
+                                <p class="mt-2 text-[12px] leading-[1.5] text-slate">
+                                    Confirmed on {{ $response->responded_at->format('j F Y') }} at
+                                    {{ $response->acceptedTotalForHumans }}. We'll be in touch to get started.
+                                </p>
+                            @else
+                                <div class="flex items-center gap-2 text-[13px] font-medium text-status-rejected-fg">
+                                    <x-phosphor-x-circle class="size-4" />
+                                    Declined
+                                </div>
+                                <p class="mt-2 text-[12px] leading-[1.5] text-slate">
+                                    Recorded on {{ $response->responded_at->format('j F Y') }}. If this was a
+                                    mistake, get in touch and we'll reopen it.
+                                </p>
+                            @endif
+                        </div>
+                    @elseif ($canRespond)
+                        <div class="border-t border-rule-soft px-7 py-5">
+                            <p class="mb-3.5 text-[11.5px] leading-[1.5] text-slate">
+                                Happy with this configuration? Accepting confirms the options you've selected above.
+                            </p>
+                            <div class="flex flex-col gap-2">
+                                <x-btn variant="accent" type="button"
+                                       class="w-full justify-center"
+                                       x-on:click="$wire.accept(selectedOptionalIds())"
+                                       wire:confirm="Accept this proposal with the options you've selected?"
+                                       wire:loading.attr="disabled"
+                                       wire:target="accept,reject">
+                                    <span wire:loading.remove wire:target="accept">Accept proposal</span>
+                                    <span wire:loading wire:target="accept">Confirming…</span>
+                                </x-btn>
+                                <button type="button"
+                                        wire:click="reject"
+                                        wire:confirm="Decline this proposal? You can always get back in touch."
+                                        wire:loading.attr="disabled"
+                                        wire:target="accept,reject"
+                                        class="w-full rounded-lg px-3 py-2 text-[12.5px] font-medium text-slate transition-colors hover:bg-paper-2 hover:text-ink">
+                                    Decline
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        <p class="border-t border-rule-soft bg-paper-2/30 px-7 py-4 text-[11.5px] leading-[1.5] text-slate">
+                            Toggle the optional items above to explore different configurations. Figures update as you go.
+                        </p>
+                    @endif
                 </div>
 
                 <p class="mt-6 px-1 text-[11px] leading-[1.5] text-slate-soft">
-                    All prices in GBP. {{ $taxName }} shown for reference. This proposal was prepared on
+                    All prices in {{ $currency->name }}. {{ $taxName }} shown for reference. This proposal was prepared on
                     {{ $proposal->created_at->format('j F Y') }} — reach out if anything needs to change.
                 </p>
             </aside>
@@ -163,9 +206,20 @@
                 required: {{ $requiredTotal }},
                 taxRate: {{ $taxRate }} / 100,
                 optionals: @js($optionalInitial),
+                // Frozen once the client has answered — the panel then shows
+                // what they chose rather than staying explorable.
+                locked: @js((bool) $response),
 
                 toggle(id) {
+                    if (this.locked) return;
                     this.optionals[id].on = ! this.optionals[id].on;
+                },
+                // The payload sent to the server on accept: ids only. Prices
+                // are recomputed server-side, so nothing here is trusted.
+                selectedOptionalIds() {
+                    return Object.entries(this.optionals)
+                        .filter(([, o]) => o.on)
+                        .map(([id]) => id);
                 },
                 isOn(id) {
                     return this.optionals[id]?.on ?? false;

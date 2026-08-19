@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Hash;
 
 class Proposal extends Model
 {
@@ -26,7 +28,42 @@ class Proposal extends Model
 
     protected $casts = [
         'status' => Status::class,
+        'access_password' => 'hashed',
+        'access_expires_at' => 'datetime',
     ];
+
+    /**
+     * Whether a passcode has to be entered before the client-facing view will
+     * render this proposal.
+     */
+    public function isPasscodeProtected(): bool
+    {
+        return filled($this->access_password);
+    }
+
+    public function hasExpired(): bool
+    {
+        return $this->access_expires_at !== null
+            && $this->access_expires_at->isPast();
+    }
+
+    public function matchesPasscode(string $passcode): bool
+    {
+        if (! $this->isPasscodeProtected()) {
+            return false;
+        }
+
+        return Hash::check($passcode, $this->access_password);
+    }
+
+    /**
+     * The session key marking this proposal as unlocked for the current
+     * visitor. Keyed on uuid rather than id so it means nothing if lifted.
+     */
+    public function unlockSessionKey(): string
+    {
+        return 'proposal_unlocked_'.$this->uuid;
+    }
 
     public function user(): BelongsTo
     {
@@ -80,5 +117,33 @@ class Proposal extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function response(): HasOne
+    {
+        return $this->hasOne(ProposalResponse::class);
+    }
+
+    /**
+     * Whether the client has already answered. Once they have, the public view
+     * locks to what they chose rather than staying interactive.
+     */
+    public function hasResponse(): bool
+    {
+        return $this->response()->exists();
+    }
+
+    /**
+     * A proposal can only be answered once it has actually been sent, and only
+     * while it is still awaiting an answer.
+     */
+    public function isOpenForResponse(): bool
+    {
+        return $this->status === Status::DELIVERED && ! $this->hasResponse();
+    }
+
+    public function canBeDelivered(): bool
+    {
+        return $this->status === Status::DRAFT && $this->features()->exists();
     }
 }
