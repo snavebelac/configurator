@@ -8,19 +8,19 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 > client-facing proposal now works as a real share link at `/p/{uuid}` — no
 > auth, optional passcode and expiry, and the client can accept or decline.
 > Tenants can be created from `/signup` or `php artisan tenant:create`, and
-> there is a settings screen. Two long-standing settings bugs are fixed (see
-> CHANGELOG [Unreleased]). The nav rail collapses, and table row titles open
-> their row. Tests run on in-memory SQLite; dev stays on MySQL. All
-> dependencies are current.
+> there is a settings screen with a workspace logo that brands the client
+> proposal. Two long-standing settings bugs are fixed (see CHANGELOG
+> [Unreleased]). The nav collapses on desktop and is an off-canvas drawer
+> below `lg`; table row titles open their row. The legacy colour ramps,
+> SweetAlert2 and axios are gone. Tests run on in-memory SQLite; dev stays on
+> MySQL. All dependencies are current.
 >
-> Next up, in rough order: **Present mode** (the big one, still prototype-only
-> in `design-prototypes/present.html`), **versioned terms & conditions**
-> (per-tenant, with a specific version pinned to each proposal and recorded
-> against the acceptance), **percentage-based features** (e.g. project
-> management as a % of the total) and **ongoing/recurring costs**, then the
-> **command palette**. Folding in the user's separate stand-alone proposal app
-> is **cancelled** — the two have diverged too far to be worth porting
-> anything; rebuild here instead.
+> **The cleanup list is empty.** Everything left is a feature, listed under
+> "What's left" below. Nothing is picked yet — the next move is choosing one.
+>
+> Folding in the user's separate stand-alone proposal app is **cancelled** —
+> the two have diverged too far to be worth porting anything; rebuild here
+> instead.
 
 ## Where we are
 
@@ -274,16 +274,31 @@ settle first are the retention window, whether it's per-tenant configurable
 (which would put it on the settings screen), and whether anything needs
 exporting before deletion.
 
-### 8. Smaller cleanups
+### 8. Responsive page content
 
-- Mobile / tablet support beyond the nav. The rail is now an off-canvas
-  drawer below `lg` and the topbar adapts, but the *content* is still built
-  for desktop — wide tables, the two-pane proposal builder and the proposal
-  preview's summary rail all need attention before this is genuinely usable
-  on a small screen.
-- The topbar `⌘K` trigger is still visual only (see item 6).
+The nav went responsive on 2026-08-19 — off-canvas drawer below `lg`, adaptive
+topbar — but page *content* is still built desktop-first, so this is a feature
+in its own right rather than a tidy-up. Best tackled once the feature set has
+settled, since every screen added before then is another screen to make
+responsive.
 
-## Where things live
+What needs attention:
+
+- Wide admin tables (proposals, clients, features, packages, users) — the
+  usual choices are horizontal scroll within the card, hiding low-value
+  columns at narrow widths, or reflowing rows into stacked cards.
+- The two-pane proposal builder (`ProposalCreate`) — library on the left,
+  selection on the right. Needs to become one pane at a time on a small
+  screen.
+- The proposal edit screen's feature table, which carries per-row inline
+  editing and drag-reorder.
+- The client-facing proposal's summary rail, currently `hidden lg:block` — a
+  client is *more* likely than an admin to open their proposal on a phone, so
+  the running total needs a small-screen home rather than disappearing.
+- The dashboard's four-column KPI strip and its `grid-cols-[1.3fr_1fr]` split.
+- The proposal builder and modals generally, which assume pointer input.
+
+## Where things live## Where things live
 
 - Static design reference: `design-prototypes/` (HTML/CSS only — not served).
 - Brand tokens: `resources/css/app.css` (top of `@theme` block).
