@@ -20,8 +20,8 @@ php artisan queue:listen --tries=1
 php artisan pail          # tail logs
 php artisan telescope     # http://localhost/telescope
 
-# Tests (Pest + PHPUnit). phpunit.xml hard-codes a MySQL test DB:
-#   configurator_tests / configurator_tests_user / chicken123 @ 127.0.0.1
+# Tests (Pest + PHPUnit). phpunit.xml pins an in-memory SQLite DB,
+# so there is nothing to create and no credentials to configure.
 php artisan test
 php artisan test --filter=TenantScopeTest
 ./vendor/bin/pest tests/Feature/UuidTest.php
@@ -30,7 +30,7 @@ php artisan test --filter=TenantScopeTest
 ./vendor/bin/pint
 ```
 
-The SQLite file at `database/database.sqlite` is used for local dev (per `.env`), but the test suite uses MySQL — that DB and user must exist locally for tests to run.
+Local dev runs against MySQL (`configurator`, per `.env`, served through Herd at `https://configurator.test`). The test suite runs against in-memory SQLite, configured in `phpunit.xml` — it needs no local database and no setup. Keep in mind when writing migrations that the two engines differ: anything MySQL-specific (raw SQL, `enum` columns, JSON path queries) may pass under SQLite and still fail in dev.
 
 ## Architecture
 
@@ -78,7 +78,11 @@ Vite + Tailwind v4 (via `@tailwindcss/vite`), SweetAlert2, and Toastify. No SPA 
 
 - When adding a new tenant-scoped model, apply `BelongsToTenant` (and usually `Uuid`) rather than manually wiring the scope or UUID generation.
 - New admin screens should extend `AdminComponent` (not `Livewire\Component`) to inherit the layout and toast helpers.
-- Public routes that expose tenant data by UUID (see `dashboard.proposal.preview`) rely on the tenant scope being bypassed when unauthenticated — lean on `findByUuid` / route-model-binding rather than re-implementing lookups.
+- **Row titles are clickable.** If a table row has a single primary "open" or
+  "edit" action, its title performs that same action via `<x-row-title>`
+  (`href` for a link, `click` for a Livewire expression). Nobody should have to
+  track across to a button at the far right to open the thing they just read.
+- Public routes that expose tenant data by UUID (see `proposal.view` at `/p/{uuid}`) rely on the tenant scope being bypassed when unauthenticated — lean on `findByUuid` / route-model-binding rather than re-implementing lookups. Because that scope is a no-op for guests, anything tenant-derived on a public page must name its tenant explicitly: `Settings::forTenant($model->tenant_id)`, not `Setting::first()`.
 
 ===
 

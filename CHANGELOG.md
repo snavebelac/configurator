@@ -10,6 +10,116 @@ changes may occur in any minor release.
 
 ## [Unreleased]
 
+Work in progress — no version cut yet.
+
+### Added
+
+- **Public proposal URLs.** The client-facing proposal now lives at
+  `/p/{uuid}`, outside the `auth` group. Previously it sat under `/dashboard`
+  and only rendered for logged-in admins, so share links didn't work at all —
+  the core pitch of the product was unreachable. The admin "Preview (client
+  view)" action points at the same URL, so what you preview is exactly what
+  the client sees. `App\Livewire\Admin\Proposals\Preview` moved to
+  `App\Livewire\Public\ProposalView`.
+- **Passcode-protected links.** An optional per-proposal passcode (hashed, via
+  the `hashed` cast) and an optional expiry date, both managed from a new
+  "Client access" card on the proposal edit screen alongside the shareable
+  link and a copy button. When a passcode is set, the proposal's content is
+  never sent to the browser until the passcode is accepted — the locked state
+  renders its own view rather than hiding content client-side, and says
+  nothing about the proposal's name, client or value. Unlock attempts are
+  throttled per IP *and* per proposal, inside the component rather than via
+  route middleware, since Livewire actions all arrive on one endpoint.
+- **Accept / reject.** Clients can accept or decline a delivered proposal from
+  the public link. Acceptance records the optional features they kept, the
+  total, and when. Crucially, only the *identity* of the selected features is
+  taken from the client — prices, and therefore the total, are recomputed
+  server-side from the database, so a tampered payload can't change what gets
+  recorded. Ids that aren't optional features of that proposal are discarded.
+  Once answered, the view locks to the recorded choice. New
+  `proposal_responses` table and `ProposalResponse` model.
+- **Mark as delivered.** There was previously no UI to change a proposal's
+  status at all — proposals were created `DRAFT` and nothing moved them on,
+  which made accept/reject unreachable. Draft proposals with at least one
+  feature can now be marked delivered from the edit screen, and a responded
+  proposal can be reopened (deleting the response) as an escape hatch for an
+  accidental accept or decline.
+- **Settings screen** at `/dashboard/settings`, with a gear item in the nav
+  rail. Surfaces company name, currency, tax name, tax rate and tax-inclusive
+  pricing — every one of which already existed as a column but had no UI. The
+  row is created on first visit if the tenant hasn't got one.
+- **Tenant signup.** An open `/signup` page creates a tenant, its settings
+  row, an active admin user and the owner role in one transaction, then logs
+  straight in. Also `php artisan tenant:create` for scripted setup, sharing
+  one code path via `App\Helpers\TenantProvisioner`. Previously a tenancy
+  could only be created through the seeder or tinker.
+- **A collapsible nav rail.** Expanded shows a text label beside each icon;
+  collapsed is the previous icons-only rail with hover tooltips. The choice is
+  stored per user on `users.nav_collapsed`, so it follows them across sessions
+  and machines, and **defaults to expanded** — icons alone are a guessing game
+  until you already know the app.
+- `<x-row-title>` component, and a house rule to go with it: if a table row has
+  a single primary "open" or "edit" action, its title performs that same
+  action. Applied to the dashboard proposals table and the proposals, clients,
+  features, packages and users lists.
+- `proposal.accepted` and `proposal.rejected` activity events, voiced from the
+  client's side since there is no authenticated actor.
+
+### Changed
+
+- **Tests run on in-memory SQLite.** `phpunit.xml` previously hard-coded a
+  MySQL `configurator_tests` database and credentials that had to exist
+  locally. Nothing to create, no credentials, and the suite got roughly three
+  times faster. Local dev stays on MySQL — note the engines differ, so
+  MySQL-specific schema behaviour can still pass under SQLite.
+- Dependencies brought current: Laravel 13.5 → 13.26, Livewire 4.2 → 4.4, Pest
+  4 → 5, PHPUnit 12 → 13, spatie/laravel-permission 7 → 8, plus pint,
+  telescope, boost, pail, sail, collision, mockery and the whole npm tree
+  (which also cleared 8 advisories, 2 of them critical). PHPUnit is held at
+  13.3.0 by an explicit Pest conflict. No code changes were needed for any of
+  the major bumps.
+- `Tenant` gained a `$fillable`; it had none, so nothing was mass-assignable.
+
+### Fixed
+
+- **Settings leaked across tenants.** `SettingsHelper` resolved its row with
+  `Setting::first()`, and `TenantScope` is a deliberate no-op for
+  unauthenticated requests — so on any public page it returned whichever
+  tenant's settings row came back first. A client viewing tenant B's proposal
+  could have been shown tenant A's currency and tax rate. The lookup now
+  bypasses the scope and filters on `tenant_id` explicitly, and can be bound
+  to a specific tenant with `Settings::forTenant()`, which the public proposal
+  view does on mount.
+- **Settings fatalled for tenants without a row.** The same helper read
+  properties straight off a possibly-null `Setting` in its constructor. It now
+  resolves lazily and falls back to model defaults, which live in a
+  `$attributes` array on `Setting` mirroring the migration's column defaults.
+- Currency was hardcoded to `£` in seven places across the client-facing
+  proposal, including the live Alpine total and the per-feature line prices, so
+  a USD or EUR tenant's client saw pounds. All now render the tenant's
+  currency, as does the "All prices in GBP" footnote.
+- The "Needs your attention" pills showed day counts to ~11 decimal places
+  (`Draft · 454.37500000068286d untouched`). Carbon 3 changed `diffInDays()` to
+  return a float where Carbon 2 returned an int; the value is now cast.
+- The client-facing proposal repeated itself badly: each feature's name
+  rendered twice — once as a section heading, once as the row's own title —
+  and "Included" appeared both as the section eyebrow and as the row marker.
+  The section heading is gone; root features now carry the display size it
+  used, so hierarchy survives without the repetition.
+- The public homepage was a dev stub that exposed a global, unscoped user
+  count. Replaced with a brand landing page.
+
+### Removed
+
+- Four unreferenced pre-redesign components: `livewire/admin/shared/{progress,
+  select}.blade.php`, `components/{info,alert}.blade.php` and their
+  `App\Livewire\Admin\Shared\*` classes.
+- A dead `'final'` entry from `Feature` and `FinalFeature`'s `$fillable` — no
+  such column exists on either table.
+- A malformed `$casts` property on `User` (`['full_name', 'gravatar']` — a
+  list, not a map, so it cast attributes named `0` and `1`). It was inert;
+  `$appends` was evidently what was meant.
+
 ## [0.2.0] - 2026-04-16
 
 This release closes out the Epic Fox brand redesign, adds two substantial

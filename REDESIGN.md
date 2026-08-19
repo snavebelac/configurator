@@ -4,15 +4,22 @@ This file tracks the multi-session refactor of the Configurator admin panel
 to the Epic Fox brand UI. Update it as work lands. Final, version-pinned
 descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 
-> **Pickup note (after v0.2.0, 2026-04-16):** The brand redesign is
-> functionally complete and the back-office now has nested features,
-> packages, a real activity feed, and an editorial client preview. The
-> next big-rock item is **Present mode**. Two smaller follow-ups worth
-> raising before that: (a) **make the client preview URL truly public**
-> — it's still under `auth` middleware, so admins can preview but
-> share-links don't actually work for clients; (b) the user mentioned a
-> **separate stand-alone Laravel "proposal system"** they want to fold
-> into Configurator at some point — worth scoping when ready.
+> **Pickup note (2026-08-19, unreleased — no version cut yet):** The
+> client-facing proposal now works as a real share link at `/p/{uuid}` — no
+> auth, optional passcode and expiry, and the client can accept or decline.
+> Tenants can be created from `/signup` or `php artisan tenant:create`, and
+> there is a settings screen. Two long-standing settings bugs are fixed (see
+> CHANGELOG [Unreleased]). The nav rail collapses, and table row titles open
+> their row. Tests run on in-memory SQLite; dev stays on MySQL. All
+> dependencies are current.
+>
+> Next up, in rough order: **Present mode** (the big one, still prototype-only
+> in `design-prototypes/present.html`), **versioned terms & conditions**
+> (per-tenant, with a specific version pinned to each proposal and recorded
+> against the acceptance), **percentage-based features** (e.g. project
+> management as a % of the total) and **ongoing/recurring costs**, then the
+> **command palette**. The user's separate stand-alone Laravel "proposal
+> system" still wants a scoping conversation before any code.
 
 ## Where we are
 
@@ -186,20 +193,7 @@ The static reference for the whole direction lives in `design-prototypes/`
 
 ## What's left, in rough priority
 
-### 1. Wire the command palette
-
-Today the topbar's search trigger is purely visual.
-
-- New Livewire component `App\Livewire\Admin\Shared\CommandPalette` rendered
-  inside the admin layout, listening for `⌘K` / `Ctrl+K` via Alpine.
-- Items: navigate (proposals, clients, features, settings), create new
-  (proposal, client, feature, user), and search across proposals + clients
-  + features by name.
-- Match the visual pattern from `design-prototypes/dashboard.html` (search
-  input top, grouped sections, focused-item ink-on-fox highlight, footer
-  hints).
-
-### 2. Extend the activity feed coverage
+### 1. Extend the activity feed coverage
 
 The Lately panel now reads from a real `Activity` event store
 (tenant-scoped, polymorphic `subject`, action enum, JSON payload). Model
@@ -215,26 +209,14 @@ Things worth adding next:
 - Periodic purge of activities older than ~12 months once volume
   warrants it.
 
-### 3. Make the client preview URL truly public
-
-The route at `/dashboard/proposal/preview/{proposal:uuid}` is currently
-under `auth` middleware, so the editorial client preview only renders
-for logged-in admins. UUID is unguessable so the security model is
-fine — it just needs to be moved out of the `auth` group (or into a
-sibling route). Worth doing because share-link previews don't actually
-work for clients today. Open questions when we move it: should
-`Settings` (tax name/rate, currency) be resolved from the proposal's
-tenant_id rather than the session, since unauthenticated visitors have
-no session-tenant?
-
-### 4. Fold in the standalone proposal system
+### 2. Fold in the standalone proposal system
 
 The user maintains a separate stand-alone Laravel app for "simpler"
 proposals (no configurator/optional-toggle behaviour). Direction is to
 unify it into Configurator. Need a scoping conversation before any code
 — what does that app currently model, and what's the import path?
 
-### 5. Build "Present mode"
+### 3. Build "Present mode"
 
 The live presentation experience for in-the-room demos:
 
@@ -245,15 +227,36 @@ The live presentation experience for in-the-room demos:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 6. Accept / Reject + persisted client toggles
+### 4. Versioned terms & conditions
 
-On the editorial client preview, optional toggles are currently
-ephemeral (client-side only). Two natural follow-ups:
+Each tenant maintains their own T&Cs as versioned documents, and a
+proposal gets a specific version attached. The terms a client agreed to
+must stay pinned to what they actually saw, so editing a tenant's terms
+must not rewrite history on past proposals. Pairs with the settings
+screen; the acceptance flow should record which version was in force at
+the moment the client accepted.
 
-- An accept/reject affordance that posts the toggled-on optional IDs and
-  transitions the proposal to ACCEPTED/REJECTED.
-- A signed-URL or session-token flavour of the preview URL that lets
-  clients return and see their saved configuration.
+### 5. Percentage-based features
+
+Features priced as a **percentage of the proposal total** rather than a fixed
+amount — project management is the driving example, landing in its own section
+near the bottom and recalculating as other features are toggled.
+
+Two constraints are already clear: the calculation has to live on the same
+server-side path that `ProposalView::accept()` uses to recompute totals (the
+Alpine live-total alone isn't enough, or the recorded total will disagree with
+what the client saw), and a percentage must exclude other percentage features
+or the maths goes circular.
+
+### 6. Ongoing / recurring costs
+
+Proposals need to carry ongoing costs (hosting, support, licences, retainers)
+alongside the one-off build price. Shape undecided — needs a scoping
+conversation. Open questions: which billing periods, whether ongoing items can
+be optional and client-toggleable, and how they're totalled (almost certainly
+separately, since mixing one-off and recurring money in one figure misleads).
+Note `proposal_responses.accepted_total` is a single one-off figure today; if
+ongoing costs are acceptable too, that snapshot needs extending.
 
 ### 7. Wire the command palette
 
@@ -278,8 +281,8 @@ Topbar's `⌘K` search trigger is still purely visual.
   insufficient.
 - Bell icon in the topbar is purely visual — no notifications system
   behind it.
-- Mobile / tablet support — the rail will need a collapsible/off-canvas
-  treatment. Deferred until desktop is locked in.
+- Mobile / tablet support — the rail now collapses, but still needs an
+  off-canvas treatment at narrow widths. Deferred until desktop is locked in.
 - Drop the legacy `primary/*` / `success/*` / `warning/*` / `gray/*`
   ramps from `resources/css/app.css` and the `.button*` / `.toastify*`
   classes that depend on them, now that everything renders against
@@ -287,10 +290,14 @@ Topbar's `⌘K` search trigger is still purely visual.
   replace with in-house components.
 - Periodic purge of activities older than ~12 months once volume
   warrants it.
-- Three pre-redesign legacy components are still on disk but
-  unreferenced anywhere in views/PHP: `livewire/admin/shared/{progress,
-  select}.blade.php`, `components/{info,alert}.blade.php` (plus their
-  `App\Livewire\Admin\Shared\*` PHP). Safe to delete in a tidy-up pass.
+- `UserFactory` and `SettingFactory` call `Tenant::factory()->create()`
+  eagerly in `definition()`, so every `User::factory()->create()` leaves an
+  orphan tenant behind even when `tenant_id` is overridden. Should be the
+  lazy `Tenant::factory()` instead — left alone for now to avoid churning the
+  suite mid-stream.
+- Logo upload on the settings screen. The `settings.logo` column exists and
+  would brand the client-facing proposal, but it needs a storage disk
+  decision and `php artisan storage:link`. Deliberately cut for now.
 
 ## Where things live
 
