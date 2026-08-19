@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Proposals;
 
 use App\Enums\Status;
+use App\Facades\Settings;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\FinalFeature;
 use App\Models\Proposal;
@@ -69,7 +70,9 @@ class ProposalEdit extends AdminComponent
     {
         if (! $this->proposal->canBeDelivered()) {
             $this->dispatch('toast', ...$this->warning([
-                'text' => 'Add at least one feature before marking this proposal as delivered.',
+                'text' => $this->proposal->isPercentageOnly()
+                    ? 'This proposal is only percentage lines, so it comes to nothing. Add the work they apply to first.'
+                    : 'Add at least one feature before marking this proposal as delivered.',
             ]));
 
             return;
@@ -171,6 +174,7 @@ class ProposalEdit extends AdminComponent
 
         return view('livewire.admin.proposals.proposal-edit', [
             'featureGroups' => $this->groupFeatures($this->proposal->features),
+            'currencySymbol' => Settings::getCurrency()->toSymbol(),
             'termsOptions' => Terms::query()
                 ->with('currentVersion')
                 ->orderByDesc('is_default')

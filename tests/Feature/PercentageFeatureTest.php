@@ -6,6 +6,7 @@ use App\Enums\PricingType;
 use App\Enums\Status;
 use App\Facades\Settings;
 use App\Livewire\Admin\Features\FeatureModal;
+use App\Livewire\Admin\Proposals\ProposalEdit;
 use App\Livewire\Public\ProposalView;
 use App\Models\Client;
 use App\Models\Feature;
@@ -240,6 +241,61 @@ class PercentageFeatureTest extends TestCase
         // It appears once in its own section and once in the summary rail,
         // but never as a group heading in the main document.
         $this->assertStringNotContainsString('group-'.$pm->id, $content);
+    }
+
+    #[Test]
+    public function a_percentage_only_proposal_is_flagged_and_cannot_be_delivered()
+    {
+        $this->proposal->status = Status::DRAFT;
+        $this->proposal->save();
+
+        $this->line('Project management', [
+            'pricing_type' => PricingType::Percentage,
+            'percentage_rate' => 1000,
+        ]);
+
+        $proposal = $this->proposal->fresh();
+
+        $this->assertTrue($proposal->isPercentageOnly());
+        $this->assertFalse($proposal->canBeDelivered());
+
+        Livewire::test(ProposalEdit::class, ['proposal' => $proposal])
+            ->call('markAsDelivered');
+
+        $this->assertSame(Status::DRAFT, $this->proposal->fresh()->status);
+
+        $this->get(route('dashboard.proposal.edit', ['proposal' => $proposal]))
+            ->assertOk()
+            ->assertSeeText('This proposal comes to nothing');
+    }
+
+    #[Test]
+    public function adding_fixed_work_clears_the_percentage_only_warning()
+    {
+        $this->proposal->status = Status::DRAFT;
+        $this->proposal->save();
+
+        $this->line('Project management', [
+            'pricing_type' => PricingType::Percentage,
+            'percentage_rate' => 1000,
+        ]);
+        $this->line('Core build', ['price' => 1000]);
+
+        $proposal = $this->proposal->fresh();
+
+        $this->assertFalse($proposal->isPercentageOnly());
+        $this->assertTrue($proposal->canBeDelivered());
+
+        $this->get(route('dashboard.proposal.edit', ['proposal' => $proposal]))
+            ->assertOk()
+            ->assertDontSeeText('This proposal comes to nothing');
+    }
+
+    #[Test]
+    public function an_empty_proposal_is_not_reported_as_percentage_only()
+    {
+        // No lines at all is a different problem with a different message.
+        $this->assertFalse($this->proposal->fresh()->isPercentageOnly());
     }
 
     #[Test]

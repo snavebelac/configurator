@@ -164,6 +164,24 @@ class Proposal extends Model
 
     public function canBeDelivered(): bool
     {
-        return $this->status === Status::DRAFT && $this->features()->exists();
+        return $this->status === Status::DRAFT
+            && $this->features()->exists()
+            && ! $this->isPercentageOnly();
+    }
+
+    /**
+     * A proposal made up entirely of percentage lines, with nothing for them
+     * to be a percentage *of* — so it totals zero.
+     *
+     * Not an error state as such: it's what a half-built proposal looks like
+     * if you add project management before the work it manages. Worth catching
+     * before it reaches a client as a £0 quote.
+     */
+    public function isPercentageOnly(): bool
+    {
+        $this->loadMissing('features');
+
+        return $this->features->isNotEmpty()
+            && $this->features->every(fn (FinalFeature $feature) => $feature->isPercentage());
     }
 }

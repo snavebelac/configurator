@@ -42,6 +42,25 @@
         </div>
     </div>
 
+    @if ($proposal->isPercentageOnly())
+        {{-- Percentage lines with nothing to be a percentage of. The proposal
+             totals zero, so this needs saying before it reaches a client. --}}
+        <div class="mb-6 flex items-start gap-3 rounded-2xl border border-status-rejected-dot/40 bg-status-rejected-bg px-6 py-4">
+            <x-phosphor-warning class="mt-0.5 size-4 shrink-0 text-status-rejected-fg" />
+            <div>
+                <p class="text-[13px] font-medium text-status-rejected-fg">
+                    This proposal comes to nothing
+                </p>
+                <p class="mt-1 text-[12.5px] leading-[1.5] text-slate">
+                    Every line on it is a percentage of the total, and there's no fixed-price work for
+                    them to be a percentage of — so the total is
+                    {{ $currencySymbol }}0. Add the work these apply to, and the percentages will
+                    calculate against it. It can't be delivered until then.
+                </p>
+            </div>
+        </div>
+    @endif
+
     <x-card>
         <x-card-header>
             <div class="flex items-baseline gap-3">
