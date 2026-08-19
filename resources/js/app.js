@@ -1,5 +1,6 @@
 import Toastify from 'toastify-js';
 import sort from '@alpinejs/sort';
+import registerRichTextEditor from './editor';
 
 window.addEventListener('toast', function (e) {
     Toastify(e.detail).showToast();
@@ -7,6 +8,7 @@ window.addEventListener('toast', function (e) {
 
 document.addEventListener('alpine:init', () => {
     window.Alpine.plugin(sort);
+    registerRichTextEditor(window.Alpine);
 
     // Off-canvas nav drawer state, shared between the topbar trigger and the
     // rail itself. A store rather than nested x-data because the rail is a

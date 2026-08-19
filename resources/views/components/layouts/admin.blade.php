@@ -12,6 +12,8 @@
         'dashboard.users'            => 'Team',
         'dashboard.profile'          => 'Profile',
         'dashboard.settings'         => 'Settings',
+        'dashboard.terms'            => 'Terms',
+        'dashboard.terms.edit'       => 'Terms · Edit',
     ];
     $crumb = $crumbs[Route::currentRouteName()] ?? 'Dashboard';
 @endphp

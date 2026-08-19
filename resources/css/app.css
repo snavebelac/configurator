@@ -136,6 +136,92 @@
     }
 }
 
+/* ----- Rendered terms & conditions -----
+   Used both inside the editor and on the client-facing proposal, so what an
+   author sees while writing matches what the client gets. Element selectors
+   rather than utility classes because this HTML comes from the editor and
+   carries no classes of its own (the sanitiser strips them). */
+.prose-terms {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-ink);
+}
+
+.prose-terms > * + * {
+    margin-top: 0.85em;
+}
+
+.prose-terms h2,
+.prose-terms h3,
+.prose-terms h4 {
+    font-family: var(--font-display);
+    line-height: 1.25;
+    color: var(--color-ink);
+}
+
+.prose-terms h2 { font-size: 20px; margin-top: 1.8em; }
+.prose-terms h3 { font-size: 17px; margin-top: 1.6em; }
+.prose-terms h4 { font-size: 15px; margin-top: 1.4em; }
+
+.prose-terms > :first-child {
+    margin-top: 0;
+}
+
+.prose-terms ul,
+.prose-terms ol {
+    padding-left: 1.35em;
+}
+
+.prose-terms ul { list-style: disc; }
+.prose-terms ol { list-style: decimal; }
+
+.prose-terms li + li {
+    margin-top: 0.3em;
+}
+
+.prose-terms li::marker {
+    color: var(--color-slate-soft);
+}
+
+.prose-terms strong { font-weight: 600; }
+.prose-terms em { font-style: italic; }
+
+.prose-terms a {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-slate-faint);
+}
+
+.prose-terms a:hover {
+    text-decoration-color: var(--color-ink);
+}
+
+.prose-terms blockquote {
+    border-left: 2px solid var(--color-rule);
+    padding-left: 1em;
+    color: var(--color-slate);
+}
+
+.prose-terms hr {
+    border: 0;
+    border-top: 1px solid var(--color-rule);
+    margin: 1.8em 0;
+}
+
+/* The editor's own surface — no chrome, the card around it provides that. */
+.prose-terms.ProseMirror:focus {
+    outline: none;
+}
+
+.prose-terms.ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    color: var(--color-slate-faint);
+}
+
 /* Alpine hasn't booted yet — keep cloaked elements out of the first paint.
    Without this the off-canvas nav drawer flashes on screen on every load. */
 [x-cloak] {

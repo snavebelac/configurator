@@ -77,6 +77,7 @@
             <x-menu-item route="dashboard.features" title="Features" icon="stack" :collapsed="$collapsed" />
             <x-menu-item route="dashboard.packages" title="Packages" icon="cube" :collapsed="$collapsed" />
             <x-menu-item route="dashboard.users" title="Team" icon="user-circle" :collapsed="$collapsed" />
+            <x-menu-item route="dashboard.terms" title="Terms" icon="scroll" :collapsed="$collapsed" />
         </nav>
 
         <div @class(['mt-auto flex flex-col gap-2', 'lg:items-center' => $collapsed])>
