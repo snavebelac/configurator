@@ -96,7 +96,8 @@
             <div class="py-1.5">
                 @forelse ($needsAttention as $item)
                     @php
-                        $days = $item->updated_at->diffInDays(now());
+                        // Carbon 3 returns a float from diffInDays; Carbon 2 returned an int.
+                        $days = (int) $item->updated_at->diffInDays(now());
                         $isDraft = $item->status === \App\Enums\Status::DRAFT;
                         $label = $isDraft
                             ? "Draft · {$days}d untouched"
