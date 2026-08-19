@@ -14,6 +14,17 @@ Work in progress — no version cut yet.
 
 ### Added
 
+- **Workspace logo.** Uploadable from the settings screen (PNG/JPG/WebP, 2 MB
+  cap, stored on the `public` disk) and shown in the masthead of the
+  client-facing proposal, replacing the generic "A Configurator proposal"
+  eyebrow. Without a logo the masthead falls back to the company name. SVG is
+  deliberately rejected: it can carry script, and the file is served from our
+  own origin on a public page. Replacing a logo deletes the file it replaces
+  rather than accumulating orphans.
+- **Editable proposal copy.** The title, introduction and closing notes all
+  render on the client-facing proposal but could only be set at creation (and
+  the notes not at all). A "Proposal copy" card on the edit screen now covers
+  all three, with a new `<x-textarea-field>` primitive.
 - **Public proposal URLs.** The client-facing proposal now lives at
   `/p/{uuid}`, outside the `auth` group. Previously it sat under `/dashboard`
   and only rendered for logged-in admins, so share links didn't work at all —
@@ -79,6 +90,13 @@ Work in progress — no version cut yet.
   13.3.0 by an explicit Pest conflict. No code changes were needed for any of
   the major bumps.
 - `Tenant` gained a `$fillable`; it had none, so nothing was mass-assignable.
+- `UserFactory`, `SettingFactory`, `ClientFactory`, `FeatureFactory` and
+  `PackageFactory` resolved `Tenant::factory()->create()` eagerly, so every
+  call left an orphan tenant behind even when `tenant_id` was overridden. Now
+  lazy. `ProposalFactory` keeps its eager tenant deliberately — the client it
+  builds has to share the proposal's tenant.
+- `tel-link` / `email-link` restyled onto brand tokens; they were the last two
+  views still using the legacy `primary-500`.
 
 ### Fixed
 
@@ -111,6 +129,19 @@ Work in progress — no version cut yet.
 
 ### Removed
 
+- **SweetAlert2 and axios**, neither of which was referenced anywhere.
+  SweetAlert2 was never imported; axios was only ever assigned to `window` by
+  `bootstrap.js` and never used, Livewire having its own transport. Dropping
+  both took the JS bundle from 93 kB to 45 kB (33 kB to 15 kB gzipped) and
+  `resources/js/bootstrap.js` with it. Toastify stays — it is genuinely wired
+  up, to the `toast` browser event.
+- The legacy `primary/*`, `success/*`, `warning/*` and `gray/*` colour ramps
+  and the `.button*` classes that depended on them, now that everything renders
+  against brand tokens. `resources/css/app.css` drops from 224 to 150 lines.
+  The `.toastify*` block stays: it is in use and already brand-token based.
+- Five unreferenced pre-redesign table components (`components/tables/*`).
+- The topbar notification bell. It had nothing behind it, and a control that
+  looks clickable but does nothing reads as broken rather than as forthcoming.
 - Four unreferenced pre-redesign components: `livewire/admin/shared/{progress,
   select}.blade.php`, `components/{info,alert}.blade.php` and their
   `App\Livewire\Admin\Shared\*` classes.

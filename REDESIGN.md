@@ -18,8 +18,9 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 > (per-tenant, with a specific version pinned to each proposal and recorded
 > against the acceptance), **percentage-based features** (e.g. project
 > management as a % of the total) and **ongoing/recurring costs**, then the
-> **command palette**. The user's separate stand-alone Laravel "proposal
-> system" still wants a scoping conversation before any code.
+> **command palette**. Folding in the user's separate stand-alone proposal app
+> is **cancelled** — the two have diverged too far to be worth porting
+> anything; rebuild here instead.
 
 ## Where we are
 
@@ -206,17 +207,11 @@ panel with subject-type-coloured icons. The dashboard also gained
 Things worth adding next:
 - `feature.created` and `proposal.deleted` events for fuller coverage.
 - A "View all activity" page if the 8-row panel feels insufficient.
-- Periodic purge of activities older than ~12 months once volume
-  warrants it.
+- Retention is now its own item (7) rather than a bullet here.
+- Note `proposal.accepted` / `proposal.rejected` already exist, added with
+  the public client view.
 
-### 2. Fold in the standalone proposal system
-
-The user maintains a separate stand-alone Laravel app for "simpler"
-proposals (no configurator/optional-toggle behaviour). Direction is to
-unify it into Configurator. Need a scoping conversation before any code
-— what does that app currently model, and what's the import path?
-
-### 3. Build "Present mode"
+### 2. Build "Present mode"
 
 The live presentation experience for in-the-room demos:
 
@@ -227,7 +222,7 @@ The live presentation experience for in-the-room demos:
 - Phase 2: a "client mirror" view at a public UUID URL that subscribes
   to Livewire events from the operator — eventual real-time sync.
 
-### 4. Versioned terms & conditions
+### 3. Versioned terms & conditions
 
 Each tenant maintains their own T&Cs as versioned documents, and a
 proposal gets a specific version attached. The terms a client agreed to
@@ -236,7 +231,7 @@ must not rewrite history on past proposals. Pairs with the settings
 screen; the acceptance flow should record which version was in force at
 the moment the client accepted.
 
-### 5. Percentage-based features
+### 4. Percentage-based features
 
 Features priced as a **percentage of the proposal total** rather than a fixed
 amount — project management is the driving example, landing in its own section
@@ -248,7 +243,7 @@ Alpine live-total alone isn't enough, or the recorded total will disagree with
 what the client saw), and a percentage must exclude other percentage features
 or the maths goes circular.
 
-### 6. Ongoing / recurring costs
+### 5. Ongoing / recurring costs
 
 Proposals need to carry ongoing costs (hosting, support, licences, retainers)
 alongside the one-off build price. Shape undecided — needs a scoping
@@ -258,7 +253,7 @@ separately, since mixing one-off and recurring money in one figure misleads).
 Note `proposal_responses.accepted_total` is a single one-off figure today; if
 ongoing costs are acceptable too, that snapshot needs extending.
 
-### 7. Wire the command palette
+### 6. Wire the command palette
 
 Topbar's `⌘K` search trigger is still purely visual.
 
@@ -270,34 +265,23 @@ Topbar's `⌘K` search trigger is still purely visual.
   across proposals + clients + features + packages by name.
 - Match the visual pattern from `design-prototypes/dashboard.html`.
 
+### 7. Activity retention
+
+The `activities` table grows without bound. Promoted out of "smaller cleanups"
+because a purge that silently deletes history is a product decision, not a
+chore. `Prunable` plus the scheduler is the obvious mechanism; the questions to
+settle first are the retention window, whether it's per-tenant configurable
+(which would put it on the settings screen), and whether anything needs
+exporting before deletion.
+
 ### 8. Smaller cleanups
 
-- Description / additional-notes editing in the proposal admin (both
-  fields render beautifully on the client preview if set, but there's
-  no admin UI to edit them).
-- `feature.created` and `proposal.deleted` events for fuller activity
-  feed coverage.
-- A "View all activity" page if the 8-row dashboard panel feels
-  insufficient.
-- Bell icon in the topbar is purely visual — no notifications system
-  behind it.
-- Mobile / tablet support — the rail now collapses, but still needs an
+- Mobile / tablet support — the rail collapses now, but still needs an
   off-canvas treatment at narrow widths. Deferred until desktop is locked in.
-- Drop the legacy `primary/*` / `success/*` / `warning/*` / `gray/*`
-  ramps from `resources/css/app.css` and the `.button*` / `.toastify*`
-  classes that depend on them, now that everything renders against
-  brand tokens. Also revisit whether to keep Toastify + SweetAlert2 or
-  replace with in-house components.
-- Periodic purge of activities older than ~12 months once volume
-  warrants it.
-- `UserFactory` and `SettingFactory` call `Tenant::factory()->create()`
-  eagerly in `definition()`, so every `User::factory()->create()` leaves an
-  orphan tenant behind even when `tenant_id` is overridden. Should be the
-  lazy `Tenant::factory()` instead — left alone for now to avoid churning the
-  suite mid-stream.
-- Logo upload on the settings screen. The `settings.logo` column exists and
-  would brand the client-facing proposal, but it needs a storage disk
-  decision and `php artisan storage:link`. Deliberately cut for now.
+- `ProposalFactory` still creates its tenant eagerly. Unlike the others this
+  is load-bearing — the client it builds has to share the proposal's tenant —
+  so it needs a closure-based fix rather than a one-line change.
+- The topbar `⌘K` trigger is still visual only (see item 6).
 
 ## Where things live
 
