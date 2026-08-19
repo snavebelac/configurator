@@ -27,7 +27,7 @@ class FeatureFactory extends Factory
             'optional' => $this->faker->boolean(),
             'parent_id' => null,
             'order' => $this->faker->numberBetween(1, 100),
-            'tenant_id' => Tenant::factory()->create(),
+            'tenant_id' => Tenant::factory(),
         ];
     }
 

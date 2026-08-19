@@ -32,7 +32,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'remember_token' => Str::random(10),
-            'tenant_id' => Tenant::factory()->create(),
+            'tenant_id' => Tenant::factory(),
         ];
     }
 

@@ -23,7 +23,7 @@ class ClientFactory extends Factory
             'contact' => $this->faker->name,
             'contact_email' => $this->faker->unique()->safeEmail(),
             'contact_phone' => $this->faker->unique()->phoneNumber(),
-            'tenant_id' => Tenant::factory()->create(),
+            'tenant_id' => Tenant::factory(),
         ];
     }
 }

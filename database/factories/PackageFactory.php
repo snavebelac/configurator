@@ -20,7 +20,7 @@ class PackageFactory extends Factory
         return [
             'name' => Str::ucFirst($this->faker->words(3, true)),
             'description' => $this->faker->sentence(),
-            'tenant_id' => Tenant::factory()->create(),
+            'tenant_id' => Tenant::factory(),
         ];
     }
 }

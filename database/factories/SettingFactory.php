@@ -21,7 +21,7 @@ class SettingFactory extends Factory
         return [
             'tax_rate' => 20.0,
             'tax_name' => 'VAT',
-            'tenant_id' => Tenant::factory()->create(),
+            'tenant_id' => Tenant::factory(),
         ];
     }
 }

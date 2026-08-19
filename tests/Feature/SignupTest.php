@@ -168,8 +168,8 @@ class SignupTest extends TestCase
 
         $this->submit()->assertHasErrors(['email' => 'unique']);
 
-        // UserFactory eagerly creates a throwaway tenant of its own, so assert
-        // on the workspace we tried to sign up rather than a raw table count.
+        // Only the existing tenant should remain — nothing was provisioned.
+        $this->assertDatabaseCount('tenants', 1);
         $this->assertDatabaseMissing('tenants', ['name' => 'Epic Fox Ltd']);
     }
 
