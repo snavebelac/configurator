@@ -37,7 +37,11 @@
         </form>
 
         <x-slot:footer>
-            Need an account? Ask your workspace admin for an invite.
+            Need an account?
+            <a href="{{ route('signup') }}"
+               class="font-medium text-ink underline-offset-4 transition-colors hover:underline">
+                Create a workspace
+            </a>
         </x-slot:footer>
     </x-auth-shell>
 </div>

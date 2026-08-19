@@ -17,6 +17,7 @@ use App\Livewire\Admin\Users\UserList;
 use App\Livewire\ForgottenPassword;
 use App\Livewire\Login;
 use App\Livewire\PasswordReset;
+use App\Livewire\Signup;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,7 @@ Route::get('/', function () {
 
 Route::middleware(['throttle:authentication'])->group(function () {
     Route::get('/login', Login::class)->name('login');
+    Route::get('/signup', Signup::class)->name('signup');
     Route::get('/forgotten-password', ForgottenPassword::class)->name('password.request');
     Route::get('/password-reset/{token}', PasswordReset::class)->name('password.reset');
 });

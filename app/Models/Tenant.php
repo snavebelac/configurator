@@ -11,4 +11,9 @@ class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
     use HasFactory, Uuid;
+
+    protected $fillable = [
+        'name',
+        'subdomain',
+    ];
 }
