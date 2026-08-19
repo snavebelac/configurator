@@ -43,9 +43,9 @@ class DashboardTest extends TestCase
         foreach ([Status::DRAFT, Status::DELIVERED, Status::ACCEPTED, Status::REJECTED, Status::ARCHIVED] as $status) {
             Proposal::factory()->create([
                 'tenant_id' => $tenant->id,
-                'user_id'   => $user->id,
+                'user_id' => $user->id,
                 'client_id' => $client->id,
-                'status'    => $status,
+                'status' => $status,
             ]);
         }
 

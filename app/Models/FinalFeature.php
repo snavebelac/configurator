@@ -25,7 +25,6 @@ class FinalFeature extends Model
         'parent_id',
         'source_feature_id',
         'order',
-        'final',
     ];
 
     protected $casts = [

@@ -28,7 +28,6 @@ class Feature extends Model
         'optional',
         'parent_id',
         'order',
-        'final',
     ];
 
     protected $casts = [
