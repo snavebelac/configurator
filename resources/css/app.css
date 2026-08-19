@@ -136,6 +136,12 @@
     }
 }
 
+/* Alpine hasn't booted yet — keep cloaked elements out of the first paint.
+   Without this the off-canvas nav drawer flashes on screen on every load. */
+[x-cloak] {
+    display: none !important;
+}
+
 /* ----- Body baseline for the brand UI ----- */
 body {
     -webkit-font-smoothing: antialiased;

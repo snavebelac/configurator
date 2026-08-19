@@ -64,15 +64,65 @@ class NavRailTest extends TestCase
     }
 
     #[Test]
-    public function the_collapsed_nav_falls_back_to_tooltips_instead_of_labels()
+    public function the_collapsed_nav_hides_labels_from_lg_up_and_offers_tooltips()
     {
         $this->user->nav_collapsed = true;
         $this->user->save();
 
+        // The label is still in the markup — it is only hidden from lg up, so
+        // the drawer keeps it. What changes is that a tooltip appears, itself
+        // scoped to lg since below that the label is visible.
         $this->get(route('dashboard'))
             ->assertOk()
             ->assertSee('aria-label="Expand navigation"', escape: false)
-            ->assertDontSee('<span class="truncate text-[13.5px] font-medium">Overview</span>', escape: false);
+            ->assertDontSee('<span class="truncate text-[13.5px] font-medium">Overview</span>', escape: false)
+            ->assertSee('lg:hidden">Overview</span>', escape: false);
+    }
+
+    #[Test]
+    public function the_rail_is_an_off_canvas_drawer_below_the_lg_breakpoint()
+    {
+        $response = $this->get(route('dashboard'))->assertOk();
+
+        // Starts translated off-screen, and comes back on-canvas from lg up.
+        $response->assertSee('-translate-x-full', escape: false);
+        $response->assertSee('lg:translate-x-0', escape: false);
+
+        // Trigger, close control and backdrop all exist, each scoped to the
+        // side of the breakpoint where it makes sense.
+        $response->assertSee('aria-label="Open navigation"', escape: false);
+        $response->assertSee('aria-label="Close navigation"', escape: false);
+        $response->assertSee('$store.nav.toggle()', escape: false);
+        $response->assertSee('$store.nav.close()', escape: false);
+    }
+
+    #[Test]
+    public function the_drawer_shows_labels_even_when_the_saved_preference_is_collapsed()
+    {
+        $this->user->nav_collapsed = true;
+        $this->user->save();
+
+        // Collapsing is a desktop concern: the label is rendered either way and
+        // only hidden from lg up, so the drawer is never icons-only.
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('<span class="truncate text-[13.5px] font-medium lg:hidden">Overview</span>', escape: false);
+    }
+
+    #[Test]
+    public function the_collapse_control_is_desktop_only_and_the_close_control_is_not()
+    {
+        $response = $this->get(route('dashboard'))->assertOk();
+
+        // Collapsing makes no sense in a drawer; closing makes none on desktop.
+        $this->assertMatchesRegularExpression(
+            '/class="[^"]*\bhidden\b[^"]*\blg:flex\b[^"]*"[^>]*aria-label="Collapse navigation"/s',
+            $response->getContent(),
+        );
+        $this->assertMatchesRegularExpression(
+            '/class="[^"]*\blg:hidden\b[^"]*"[^>]*aria-label="Close navigation"/s',
+            $response->getContent(),
+        );
     }
 
     #[Test]

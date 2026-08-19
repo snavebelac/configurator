@@ -43,25 +43,34 @@
     <main class="flex min-w-0 flex-1 flex-col">
 
         {{-- TOP BAR --}}
-        <header class="sticky top-0 z-10 flex h-[60px] items-center gap-6 border-b border-rule bg-paper px-8">
-            <div class="flex items-center gap-2 text-[13px] text-slate">
-                <span>{{ $user?->tenant?->name ?? 'Workspace' }}</span>
-                <span class="text-slate-faint">/</span>
-                <strong class="font-medium text-ink">{{ $crumb }}</strong>
+        <header class="sticky top-0 z-30 flex h-[60px] items-center gap-4 border-b border-rule bg-paper px-5 lg:gap-6 lg:px-8">
+            {{-- Drawer trigger — below lg the rail is off-canvas --}}
+            <button type="button"
+                    x-on:click="$store.nav.toggle()"
+                    class="-ml-1 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-2 hover:text-ink lg:hidden"
+                    aria-label="Open navigation"
+                    x-bind:aria-expanded="$store.nav.open.toString()">
+                <x-phosphor-list class="size-[18px]" />
+            </button>
+
+            <div class="flex min-w-0 items-center gap-2 text-[13px] text-slate">
+                <span class="hidden truncate sm:inline">{{ $user?->tenant?->name ?? 'Workspace' }}</span>
+                <span class="hidden text-slate-faint sm:inline">/</span>
+                <strong class="truncate font-medium text-ink">{{ $crumb }}</strong>
             </div>
 
             <button type="button"
-                    class="ml-auto flex w-[360px] items-center gap-3 rounded-[10px] border border-rule bg-paper-2 px-3.5 py-1.5 text-[13px] text-slate transition-colors hover:border-slate-faint hover:bg-white">
+                    class="ml-auto flex shrink-0 items-center gap-3 rounded-[10px] border border-rule bg-paper-2 px-3.5 py-1.5 text-[13px] text-slate transition-colors hover:border-slate-faint hover:bg-white lg:w-[360px]">
                 <x-phosphor-magnifying-glass class="size-[15px] opacity-60" />
-                <span>Search anything…</span>
-                <span class="ml-auto flex gap-0.5">
+                <span class="hidden lg:inline">Search anything…</span>
+                <span class="ml-auto hidden gap-0.5 lg:flex">
                     <kbd class="rounded border border-b-2 border-rule bg-white px-1.5 py-0 font-mono text-[10.5px] font-medium leading-[18px] text-slate">⌘</kbd>
                     <kbd class="rounded border border-b-2 border-rule bg-white px-1.5 py-0 font-mono text-[10.5px] font-medium leading-[18px] text-slate">K</kbd>
                 </span>
             </button>
         </header>
 
-        <div class="px-10 pb-20 pt-9">
+        <div class="px-5 pb-20 pt-6 lg:px-10 lg:pt-9">
             {{ $slot }}
         </div>
     </main>
