@@ -59,10 +59,6 @@
                     <kbd class="rounded border border-b-2 border-rule bg-white px-1.5 py-0 font-mono text-[10.5px] font-medium leading-[18px] text-slate">K</kbd>
                 </span>
             </button>
-
-            <button type="button" class="flex size-9 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-2 hover:text-ink" title="Notifications">
-                <x-phosphor-bell class="size-[18px]" />
-            </button>
         </header>
 
         <div class="px-10 pb-20 pt-9">
