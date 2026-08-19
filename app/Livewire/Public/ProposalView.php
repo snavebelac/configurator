@@ -5,6 +5,7 @@ namespace App\Livewire\Public;
 use App\Enums\ActivityAction;
 use App\Enums\Status;
 use App\Facades\Settings;
+use App\Helpers\ProposalPricing;
 use App\Models\Activity;
 use App\Models\Proposal;
 use App\Models\ProposalResponse;
@@ -126,19 +127,21 @@ class ProposalView extends Component
             ->values()
             ->all();
 
-        $selected = $this->proposal->features()
-            ->where('optional', true)
-            ->whereIn('id', $ids)
-            ->get();
+        $features = $this->proposal->features()->get();
 
-        $required = $this->proposal->features()->where('optional', false)->get();
+        // Only optional lines that actually belong to this proposal count.
+        $selectedIds = $features
+            ->filter(fn ($feature) => $feature->optional && in_array((int) $feature->id, $ids, true))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
 
-        // getRawOriginal bypasses FinalFeature's price accessor, which converts
-        // pence to pounds. Totals stay in integer pence end to end.
-        $total = $required->concat($selected)
-            ->sum(fn ($feature) => (int) $feature->getRawOriginal('price') * (int) $feature->quantity);
+        // Recomputed here rather than taken from the payload — including the
+        // percentage lines, whose amounts depend on which fixed lines the
+        // client kept.
+        $pricing = app(ProposalPricing::class)->calculate($features, $selectedIds);
 
-        $this->storeResponse(Status::ACCEPTED, $selected->pluck('id')->all(), (int) $total);
+        $this->storeResponse(Status::ACCEPTED, $selectedIds, $pricing['subtotal']);
     }
 
     public function reject(): void
@@ -208,50 +211,63 @@ class ProposalView extends Component
 
         $features = $this->proposal->features;
 
-        $roots = $features->whereNull('parent_id')
+        // Percentage lines are pulled out of the main document and given their
+        // own section: they aren't things being bought, they're a proportion of
+        // everything above them, and they need the reader to have seen the
+        // rest first.
+        $fixed = $features->filter(fn ($f) => $f->isFixed());
+        $percentageFeatures = $features->filter(fn ($f) => $f->isPercentage())
+            ->sortBy([['order', 'asc'], ['name', 'asc']])
+            ->values();
+
+        $roots = $fixed->whereNull('parent_id')
             ->sortBy([['order', 'asc'], ['name', 'asc']])
             ->values();
 
         $groups = $roots->map(fn ($root) => [
             'root' => $root,
-            'children' => $features->where('parent_id', $root->id)->sortBy('name')->values(),
+            'children' => $fixed->where('parent_id', $root->id)->sortBy('name')->values(),
         ]);
-
-        $requiredTotal = (float) $features->where('optional', false)
-            ->sum(fn ($f) => $f->price * $f->quantity);
-
-        $optionalFeatures = $features->where('optional', true);
-        $optionalTotal = (float) $optionalFeatures
-            ->sum(fn ($f) => $f->price * $f->quantity);
-
-        $optionalInitial = $optionalFeatures
-            ->mapWithKeys(fn ($f) => [(string) $f->id => [
-                'on' => true,
-                'price' => (float) ($f->price * $f->quantity),
-            ]])
-            ->all();
 
         $response = $this->proposal->response;
 
-        // Once answered, the optional toggles freeze to the client's recorded
-        // choice instead of staying interactive.
-        if ($response !== null) {
-            $kept = array_map('intval', $response->selected_feature_ids ?? []);
+        // Once answered, the toggles freeze to the client's recorded choice
+        // instead of staying interactive.
+        $kept = $response !== null
+            ? array_map('intval', $response->selected_feature_ids ?? [])
+            : null;
 
-            $optionalInitial = $optionalFeatures
-                ->mapWithKeys(fn ($f) => [(string) $f->id => [
-                    'on' => in_array((int) $f->id, $kept, true),
-                    'price' => (float) ($f->price * $f->quantity),
-                ]])
-                ->all();
-        }
+        $isOn = fn ($feature) => $kept === null || in_array((int) $feature->id, $kept, true);
+
+        // Everything handed to Alpine is in integer pence, matching
+        // ProposalPricing, so the figure on screen and the figure recorded on
+        // acceptance agree exactly rather than drifting by rounding.
+        $requiredBase = (int) $fixed->where('optional', false)
+            ->sum(fn ($f) => (int) $f->getRawOriginal('price') * (int) $f->quantity);
+
+        $optionalInitial = $fixed->where('optional', true)
+            ->mapWithKeys(fn ($f) => [(string) $f->id => [
+                'on' => $isOn($f),
+                'price' => (int) $f->getRawOriginal('price') * (int) $f->quantity,
+            ]])
+            ->all();
+
+        $percentageInitial = $percentageFeatures
+            ->mapWithKeys(fn ($f) => [(string) $f->id => [
+                'on' => $isOn($f),
+                'optional' => (bool) $f->optional,
+                'rate' => (int) $f->percentage_rate,
+            ]])
+            ->all();
 
         return view('livewire.public.proposal-view', [
             'groups' => $groups,
-            'requiredTotal' => $requiredTotal,
-            'optionalTotal' => $optionalTotal,
-            'optionalCount' => $optionalFeatures->count(),
+            'percentageFeatures' => $percentageFeatures,
+            'requiredBase' => $requiredBase,
+            'optionalCount' => $fixed->where('optional', true)->count()
+                + $percentageFeatures->where('optional', true)->count(),
             'optionalInitial' => $optionalInitial,
+            'percentageInitial' => $percentageInitial,
             'response' => $response,
             'canRespond' => $this->canRespond(),
             'taxName' => Settings::getTaxName(),

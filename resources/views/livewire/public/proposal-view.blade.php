@@ -82,6 +82,82 @@
                     </div>
                 @endforelse
 
+                @if ($percentageFeatures->isNotEmpty())
+                    {{-- Proportional lines sit after the itemised work: they
+                         are a share of everything above, so they only make
+                         sense once the reader has seen it. --}}
+                    <section class="mt-16 border-t border-ink/10 pt-10">
+                        <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate-soft">
+                            Applied to the total
+                        </p>
+
+                        <div class="mt-6 flex flex-col divide-y divide-rule-soft">
+                            @foreach ($percentageFeatures as $percentageFeature)
+                                @php $isOptional = (bool) $percentageFeature->optional; @endphp
+                                <div wire:key="pct-{{ $percentageFeature->id }}"
+                                     class="grid gap-6 py-5 transition-opacity duration-200 sm:grid-cols-[1fr_auto]"
+                                     @if ($isOptional)
+                                        x-bind:class="isOn({{ $percentageFeature->id }}) ? 'opacity-100' : 'opacity-45'"
+                                     @endif>
+
+                                    <div class="min-w-0">
+                                        <div class="flex items-baseline gap-3">
+                                            <h3 class="font-display text-[24px] leading-[1.25] text-ink">
+                                                {{ $percentageFeature->name }}
+                                            </h3>
+                                            <span class="whitespace-nowrap font-mono text-[13px] text-slate-soft tnum">
+                                                {{ $percentageFeature->percentageForHumans() }}
+                                            </span>
+                                        </div>
+                                        @if ($percentageFeature->description)
+                                            <p class="mt-2 max-w-[52ch] text-[14px] leading-[1.55] text-slate">
+                                                {{ $percentageFeature->description }}
+                                            </p>
+                                        @endif
+                                        <p class="mt-2 text-[11.5px] uppercase tracking-[0.14em] text-slate-soft">
+                                            {{ $percentageFeature->percentageForHumans() }} of the selected work
+                                        </p>
+                                    </div>
+
+                                    <div class="flex flex-col items-end gap-3">
+                                        <div class="flex items-baseline gap-1 font-mono leading-none tnum">
+                                            <span class="text-[14px] text-slate-soft">{{ $currency->toSymbol() }}</span>
+                                            <span class="text-[22px] text-ink"
+                                                  x-text="formatWhole(percentageAmount({{ $percentageFeature->id }}))"></span>
+                                        </div>
+
+                                        @if ($isOptional)
+                                            <button type="button"
+                                                    x-on:click="toggle({{ $percentageFeature->id }})"
+                                                    x-bind:disabled="locked"
+                                                    x-bind:class="[
+                                                        isOn({{ $percentageFeature->id }}) ? 'bg-fox border-fox-deep' : 'bg-white border-rule',
+                                                        locked ? 'cursor-default opacity-70' : '',
+                                                    ]"
+                                                    class="relative h-7 w-[52px] rounded-full border transition-colors duration-200"
+                                                    x-bind:aria-pressed="isOn({{ $percentageFeature->id }})"
+                                                    aria-label="Toggle {{ $percentageFeature->name }}">
+                                                <span class="absolute top-[2px] left-[2px] size-[22px] rounded-full bg-ink shadow-sm transition-transform duration-200"
+                                                      x-bind:style="isOn({{ $percentageFeature->id }}) ? 'transform: translateX(24px)' : 'transform: translateX(0)'"></span>
+                                            </button>
+                                            <p class="text-[10.5px] font-medium uppercase tracking-[0.2em]"
+                                               x-bind:class="isOn({{ $percentageFeature->id }}) ? 'text-ink' : 'text-slate-soft'">
+                                                <span x-text="isOn({{ $percentageFeature->id }}) ? 'Included' : 'Excluded'"></span>
+                                                <span class="text-slate-soft"> · Optional</span>
+                                            </p>
+                                        @else
+                                            <div class="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.2em] text-slate">
+                                                <x-phosphor-lock-simple class="size-3 text-slate-soft" />
+                                                Included
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
                 @if ($proposal->additional)
                     <section class="mt-20 border-t border-ink/10 pt-10">
                         <p class="text-[10.5px] font-medium uppercase tracking-[0.22em] text-slate-soft">Notes</p>
@@ -148,7 +224,7 @@
                         <dl class="flex flex-col gap-3 text-[13px]">
                             <div class="flex items-baseline justify-between">
                                 <dt class="text-slate">Required</dt>
-                                <dd class="font-mono tnum text-ink">{{ $currency->toSymbol() }}{{ number_format($requiredTotal, 0) }}</dd>
+                                <dd class="font-mono tnum text-ink">{{ $currency->toSymbol() }}{{ number_format($requiredBase / 100, 0) }}</dd>
                             </div>
                             <div class="flex items-baseline justify-between">
                                 <dt class="text-slate">
@@ -161,6 +237,19 @@
                                     {{ $currency->toSymbol() }}<span x-text="formatWhole(optionalSum)"></span>
                                 </dd>
                             </div>
+                            @foreach ($percentageFeatures as $percentageFeature)
+                                <div class="flex items-baseline justify-between"
+                                     wire:key="rail-pct-{{ $percentageFeature->id }}"
+                                     x-bind:class="isOn({{ $percentageFeature->id }}) ? '' : 'opacity-45'">
+                                    <dt class="min-w-0 truncate text-slate">
+                                        {{ $percentageFeature->name }}
+                                        <span class="text-slate-soft">· {{ $percentageFeature->percentageForHumans() }}</span>
+                                    </dt>
+                                    <dd class="ml-3 shrink-0 font-mono tnum text-ink">
+                                        {{ $currency->toSymbol() }}<span x-text="formatWhole(percentageAmount({{ $percentageFeature->id }}))"></span>
+                                    </dd>
+                                </div>
+                            @endforeach
                             <div class="flex items-baseline justify-between pt-2 text-slate-soft">
                                 <dt>{{ $taxName }} ({{ rtrim(rtrim(number_format($taxRate, 1), '0'), '.') }}%)</dt>
                                 <dd class="font-mono tnum">
@@ -244,26 +333,35 @@
     <script>
         function proposalConfigurator() {
             return {
-                required: {{ $requiredTotal }},
+                // Everything here is integer pence, matching ProposalPricing
+                // on the server. Working in pounds would let the figure on
+                // screen drift from the one recorded on acceptance.
+                requiredBase: {{ $requiredBase }},
                 taxRate: {{ $taxRate }} / 100,
                 optionals: @js($optionalInitial),
-                // Frozen once the client has answered — the panel then shows
-                // what they chose rather than staying explorable.
+                percentages: @js($percentageInitial),
                 locked: @js((bool) $response),
 
                 toggle(id) {
                     if (this.locked) return;
-                    this.optionals[id].on = ! this.optionals[id].on;
+                    const line = this.optionals[id] ?? this.percentages[id];
+                    if (line) line.on = ! line.on;
                 },
-                // The payload sent to the server on accept: ids only. Prices
-                // are recomputed server-side, so nothing here is trusted.
+                // The payload sent on accept: ids only, fixed and percentage
+                // alike. Amounts are recomputed server-side, so nothing here
+                // is trusted.
                 selectedOptionalIds() {
-                    return Object.entries(this.optionals)
-                        .filter(([, o]) => o.on)
-                        .map(([id]) => id);
+                    const ids = [];
+                    for (const [id, o] of Object.entries(this.optionals)) {
+                        if (o.on) ids.push(id);
+                    }
+                    for (const [id, p] of Object.entries(this.percentages)) {
+                        if (p.optional && p.on) ids.push(id);
+                    }
+                    return ids;
                 },
                 isOn(id) {
-                    return this.optionals[id]?.on ?? false;
+                    return (this.optionals[id] ?? this.percentages[id])?.on ?? false;
                 },
                 get optionalSum() {
                     let sum = 0;
@@ -273,19 +371,41 @@
                     return sum;
                 },
                 get optionalOnCount() {
-                    return Object.values(this.optionals).filter(o => o.on).length;
+                    let n = Object.values(this.optionals).filter(o => o.on).length;
+                    n += Object.values(this.percentages).filter(p => p.optional && p.on).length;
+                    return n;
+                },
+                // What the percentages are a proportion of: the fixed lines
+                // currently included, never each other.
+                get fixedBase() {
+                    return this.requiredBase + this.optionalSum;
+                },
+                // Mirrors ProposalPricing::lineAmount — basis points, rounded
+                // half up to the penny.
+                percentageAmount(id) {
+                    const line = this.percentages[id];
+                    if (! line || ! line.on) return 0;
+                    return Math.round(this.fixedBase * line.rate / 10000);
+                },
+                get percentageSum() {
+                    let sum = 0;
+                    for (const id of Object.keys(this.percentages)) {
+                        sum += this.percentageAmount(id);
+                    }
+                    return sum;
                 },
                 get subtotal() {
-                    return this.required + this.optionalSum;
+                    return this.fixedBase + this.percentageSum;
                 },
                 get tax() {
-                    return this.subtotal * this.taxRate;
+                    return Math.round(this.subtotal * this.taxRate);
                 },
                 get total() {
                     return this.subtotal + this.tax;
                 },
-                formatWhole(n) {
-                    return Number(Math.round(n)).toLocaleString('en-GB');
+                // Pence in, whole currency units out.
+                formatWhole(pence) {
+                    return Number(Math.round(pence / 100)).toLocaleString('en-GB');
                 },
             };
         }
