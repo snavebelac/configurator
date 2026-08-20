@@ -100,7 +100,7 @@
                  running total at the foot of the card. --}}
             £{{ number_format($this->percentageAmount(), 2) }}
         @elseif ($this->isRecurring())
-            £{{ number_format((float) $price * (int) $quantity, 2) }}<span class="text-slate-soft">{{ $this->finalFeature->billingSuffix() }}</span>
+            £{{ number_format((float) $price * (int) $quantity, 2) }}<span class="ml-1 text-slate-soft">{{ $this->finalFeature->billingSuffix() }}</span>
         @else
             £{{ number_format((float) $price * (int) $quantity, 2) }}
         @endif
