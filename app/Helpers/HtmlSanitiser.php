@@ -28,11 +28,39 @@ class HtmlSanitiser
      */
     private const ALLOWED_ELEMENTS = [
         'p', 'br',
-        'h2', 'h3', 'h4',
-        'strong', 'em', 'u', 's',
+        'h2', 'h3',
+        'strong', 'em',
         'ul', 'ol', 'li',
-        'blockquote',
-        'hr',
+    ];
+
+    /**
+     * Elements whose tag goes but whose words stay.
+     *
+     * Symfony drops an unconfigured element *along with its children*, so a
+     * clause that arrived wrapped in a <div>, a fee table, or Word's <b> would
+     * lose its text and not just its formatting. On a document with legal
+     * weight, silently deleting a paragraph is far worse than showing it
+     * unstyled — so anything that plausibly carries prose is unwrapped rather
+     * than dropped. Everything still unlisted (script, style, iframe, and the
+     * rest) keeps the default: gone entirely, children included.
+     *
+     * @var list<string>
+     */
+    private const UNWRAPPED_ELEMENTS = [
+        // Generic wrappers.
+        'div', 'span', 'section', 'article', 'main', 'header', 'footer',
+        // Formatting the editor no longer offers.
+        'blockquote', 's', 'strike', 'u', 'sub', 'sup', 'small', 'pre', 'code',
+        // Legacy emphasis — Word and older editors emit these rather than
+        // <strong>/<em>.
+        'b', 'i', 'font',
+        // Headings outside the two the editor offers.
+        'h1', 'h4', 'h5', 'h6',
+        // Tables: no allowlist entry, but a table of fees is exactly the kind
+        // of content nobody can afford to lose.
+        'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption', 'colgroup',
+        // Definition lists.
+        'dl', 'dt', 'dd',
     ];
 
     private HtmlSanitizer $sanitizer;
@@ -46,6 +74,10 @@ class HtmlSanitiser
             // document to carry classes, styles or ids, and allowing them
             // widens the surface for nothing.
             $config = $config->allowElement($element, []);
+        }
+
+        foreach (self::UNWRAPPED_ELEMENTS as $element) {
+            $config = $config->blockElement($element);
         }
 
         // Links are the one exception, and are heavily constrained.

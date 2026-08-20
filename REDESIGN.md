@@ -359,7 +359,65 @@ What needs attention:
 - The dashboard's four-column KPI strip and its `grid-cols-[1.3fr_1fr]` split.
 - The proposal builder and modals generally, which assume pointer input.
 
-## Where things live## Where things live
+### 6. Getting a real terms document into the editor
+
+Terms are authored in the rich-text editor, and the assumption behind that is
+that somebody types or pastes them. In practice a tenant's terms usually arrive
+from a lawyer as a Word document or a PDF, and neither pastes well.
+
+**What actually happens.** Pasting from a web page or from Word in the browser
+is fine — real `<ol>`/`<li>` reach the clipboard and TipTap parses them. Pasting
+from **desktop** Word is not: it puts no list on the clipboard at all. Each item
+is a paragraph carrying `style='mso-list:l0 level1 lfo1'`, with the "1." as
+literal text inside a span Word marks `mso-list:Ignore`. The `mso-list` style is
+the only record that it was ever a list, and we strip attributes on save. So the
+numbers freeze into the text: insert a clause and nothing renumbers. It looks
+almost right, which is the dangerous part on a document with legal weight. PDF
+is worse — plain text only, with hard line breaks mid-sentence.
+
+Upstream won't fix this for us: [tiptap#1526] was closed as completed in July
+2026 with "Word paste should work significantly better now", and re-tested two
+weeks later by a user who found desktop Word still broken while browser Word
+worked.
+
+**Done (2026-08-20):** the editor carries a note telling authors to paste from
+Word as plain text and re-apply structure. Cheap, honest, and because terms are
+versioned it is a once-per-set chore rather than a recurring one.
+
+**Worth building later, in order of appetite:**
+
+- **Attach the document instead of retyping it.** Let a tenant either author
+  terms in the editor *or* upload the lawyer's PDF/DOCX and have the proposal
+  link to it. The smaller of the two, and it sidesteps fidelity entirely —
+  nobody has to reproduce a legal document in an allowlist that has no tables
+  and no `4.2.1` numbering. Needs thought about how an attachment pins to a
+  version the way a body does, and what the client-facing page shows in place
+  of rendered terms.
+- **Import a .docx into the draft.** [mammoth.js] converts .docx to semantic
+  HTML by reading the document's *styles* rather than the clipboard, so lists
+  survive as lists. Actively maintained. This fits the existing flow exactly:
+  import is just another way to fill a draft, and publishing stays a deliberate
+  act with a human review in between.
+- A paste transformer via `transformPastedHTML` is possible but not
+  recommended. The order is load-bearing — read the `mso-list` markers, rebuild
+  the list, *then* clean; clean first and the evidence is gone, and it fails
+  silently with valid-but-wrong HTML. [Intevation's office-paste extension] is
+  the established option, untouched since Sept 2025.
+- Tiptap's own [Conversion API] does official DOCX import, needs a paid
+  subscription, and sends the document to a third party — wrong for terms
+  nobody wants leaving the building.
+
+**The constraint behind all of it:** the allowlist has no tables and `<ol>`
+gives 1./2./3., not `4.2.1`. Even a perfect import produces something that
+doesn't look like the source. That is the real argument for the attachment
+route, and it is adjacent to letting tenants brand their client-facing pages.
+
+[tiptap#1526]: https://github.com/ueberdosis/tiptap/issues/1526
+[mammoth.js]: https://github.com/mwilliamson/mammoth.js/
+[Intevation's office-paste extension]: https://github.com/Intevation/tiptap-extension-office-paste
+[Conversion API]: https://tiptap.dev/docs/conversion/import/docx/editor-extension
+
+## Where things live
 
 - Static design reference: `design-prototypes/` (HTML/CSS only — not served).
 - Brand tokens: `resources/css/app.css` (top of `@theme` block).

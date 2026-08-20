@@ -7,10 +7,15 @@
  * every other page, including the public client-facing proposal, stays on the
  * small bundle.
  *
- * The enabled nodes deliberately mirror App\Helpers\HtmlSanitiser's allowlist.
- * Anything enabled here that isn't allowed there would be silently stripped on
- * save, which reads as the editor losing the author's work — so the two lists
- * are kept in step by hand, and neither should be changed alone.
+ * The enabled nodes deliberately mirror App\Helpers\HtmlSanitiser's allowlist,
+ * which in turn mirrors the toolbar. Anything enabled here that isn't allowed
+ * there would be silently stripped on save, which reads as the editor losing
+ * the author's work — so the three are kept in step by hand, and none should
+ * be changed alone.
+ *
+ * The set is deliberately narrow. A terms document is headings, paragraphs,
+ * lists, emphasis and links; quotes, strikethrough and dividers have no place
+ * in one, so they are off rather than merely unbuttoned.
  */
 export default function registerRichTextEditor(Alpine) {
     Alpine.data('richText', (initialContent = '', wireModel = null) => {
@@ -28,26 +33,34 @@ export default function registerRichTextEditor(Alpine) {
             updatedAt: Date.now(),
 
             async init() {
-                const [{ Editor }, { default: StarterKit }, { default: Link }] = await Promise.all([
+                // StarterKit v3 already bundles Link and Underline, so both
+                // are configured through it rather than imported separately.
+                const [{ Editor }, { default: StarterKit }] = await Promise.all([
                     import('@tiptap/core'),
                     import('@tiptap/starter-kit'),
-                    import('@tiptap/extension-link'),
                 ]);
 
                 editor = new Editor({
                     element: this.$refs.editor,
                     extensions: [
                         StarterKit.configure({
-                            heading: { levels: [2, 3, 4] },
-                            // Off: no allowlist entry, and neither belongs in
-                            // a terms document.
+                            heading: { levels: [2, 3] },
+                            link: {
+                                openOnClick: false,
+                                autolink: true,
+                                protocols: ['http', 'https', 'mailto'],
+                            },
+                            // Off: none of these belong in a terms document,
+                            // and none are on the sanitiser's allowlist. Left
+                            // enabled they would still be reachable by
+                            // keyboard shortcut or paste and then vanish on
+                            // save.
+                            blockquote: false,
+                            strike: false,
+                            horizontalRule: false,
+                            underline: false,
                             codeBlock: false,
                             code: false,
-                        }),
-                        Link.configure({
-                            openOnClick: false,
-                            autolink: true,
-                            protocols: ['http', 'https', 'mailto'],
                         }),
                     ],
                     content: initialContent || '',

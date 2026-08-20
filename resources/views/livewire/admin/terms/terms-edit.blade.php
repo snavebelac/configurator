@@ -81,11 +81,6 @@
                                         x-on:click="run('toggleItalic')">
                                     <x-phosphor-text-italic class="size-4" />
                                 </button>
-                                <button type="button" title="Strikethrough" class="{{ $btn }}"
-                                        x-bind:class="isActive('strike') && '{{ $btnOn }}'"
-                                        x-on:click="run('toggleStrike')">
-                                    <x-phosphor-text-strikethrough class="size-4" />
-                                </button>
 
                                 <span class="mx-1 h-5 w-px bg-rule"></span>
 
@@ -99,11 +94,6 @@
                                         x-on:click="run('toggleOrderedList')">
                                     <x-phosphor-list-numbers class="size-4" />
                                 </button>
-                                <button type="button" title="Quote" class="{{ $btn }}"
-                                        x-bind:class="isActive('blockquote') && '{{ $btnOn }}'"
-                                        x-on:click="run('toggleBlockquote')">
-                                    <x-phosphor-quotes class="size-4" />
-                                </button>
 
                                 <span class="mx-1 h-5 w-px bg-rule"></span>
 
@@ -111,10 +101,6 @@
                                         x-bind:class="isActive('link') && '{{ $btnOn }}'"
                                         x-on:click="setLink()">
                                     <x-phosphor-link-simple class="size-4" />
-                                </button>
-                                <button type="button" title="Divider" class="{{ $btn }}"
-                                        x-on:click="run('setHorizontalRule')">
-                                    <x-phosphor-minus class="size-4" />
                                 </button>
 
                                 <span class="ml-auto flex items-center gap-1 pr-1">
@@ -131,10 +117,25 @@
                         </div>
 
                         <p class="mt-1.5 text-[12px] text-slate">
-                            Everything in the toolbar is kept: headings, bold, italic and
-                            strikethrough, bulleted and numbered lists, quotes, dividers and
-                            links. Styling, images, tables and anything else are stripped on
-                            save — this renders on a public page.
+                            Headings, bold, italic, lists and links — everything in the toolbar
+                            is kept. Anything else is stripped on save, because this renders on
+                            a public page.
+                        </p>
+
+                        {{-- Desktop Word doesn't put a real list on the clipboard: each item
+                             arrives as a paragraph with the number frozen into it as text, so
+                             pasted terms look right until a clause is inserted and nothing
+                             renumbers. Better to warn than to let that reach a client. --}}
+                        <p class="mt-2 flex items-start gap-2 rounded-lg border border-rule bg-paper-2 px-3 py-2.5 text-[12px] text-slate">
+                            <x-phosphor-info class="mt-px size-3.5 shrink-0 text-slate-soft" />
+                            <span>
+                                <span class="font-medium text-ink">Pasting from Word?</span>
+                                Numbered lists come across as plain paragraphs with the numbers
+                                baked in as text, so they won't renumber when you edit. Paste as
+                                plain text (<span class="font-mono text-[11px]">⇧⌘V</span>) and
+                                re-apply the headings and lists here. Pasting from a web page or
+                                Word in the browser works normally.
+                            </span>
                         </p>
                         @error('body')
                             <p class="mt-1.5 text-[12px] text-status-rejected-fg">{{ $message }}</p>

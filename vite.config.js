@@ -19,6 +19,6 @@ export default defineConfig({
         // — which `npm run build` does, since dev and build share it — every
         // request for these modules 504s and the editor silently never mounts.
         // Naming them here pre-bundles them at server start instead.
-        include: ['@tiptap/core', '@tiptap/starter-kit', '@tiptap/extension-link'],
+        include: ['@tiptap/core', '@tiptap/starter-kit'],
     },
 });

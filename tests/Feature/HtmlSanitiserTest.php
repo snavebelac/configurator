@@ -58,24 +58,89 @@ class HtmlSanitiserTest extends TestCase
     public function the_formatting_the_editor_produces_survives()
     {
         $input = '<h2>Scope</h2>'
-            .'<p>The supplier will deliver <strong>the agreed work</strong>, <em>nothing more</em> and <s>nothing struck</s>.</p>'
+            .'<p>The supplier will deliver <strong>the agreed work</strong> and <em>nothing more</em>.</p>'
             .'<h3>Payment</h3>'
             .'<ul><li>Item one</li><li>Item two</li></ul>'
-            .'<ol><li>First</li></ol>'
-            .'<blockquote><p>Quoted</p></blockquote>'
-            .'<hr />';
+            .'<ol><li>First</li></ol>';
 
         $output = (string) $this->sanitiser->sanitise($input);
 
         // Every one of these has a button in the terms toolbar, so dropping
         // any of them here would mean an author writing something that
         // silently vanishes on save.
-        foreach (['<h2>', '<h3>', '<strong>', '<em>', '<s>', '<ul>', '<ol>', '<li>', '<blockquote>', '<hr'] as $needle) {
+        foreach (['<h2>', '<h3>', '<strong>', '<em>', '<ul>', '<ol>', '<li>'] as $needle) {
             $this->assertStringContainsString($needle, $output, "Sanitiser dropped {$needle}");
         }
 
         $this->assertStringContainsString('Scope', $output);
         $this->assertStringContainsString('Item two', $output);
+    }
+
+    /**
+     * Symfony drops an unconfigured element together with its children, so
+     * anything that plausibly carries prose is unwrapped instead. Losing a
+     * clause because it arrived inside a <div> would be far worse than showing
+     * it unstyled.
+     */
+    #[Test]
+    public function text_inside_unsupported_markup_survives_unwrapped()
+    {
+        $input = '<div><p>A clause in a wrapper.</p></div>'
+            .'<table><tr><td>Setup fee</td><td>£2,000</td></tr></table>'
+            .'<p><b>Bold from Word</b> and <i>italic from Word</i></p>';
+
+        $output = (string) $this->sanitiser->sanitise($input);
+
+        foreach (['A clause in a wrapper.', 'Setup fee', '£2,000', 'Bold from Word', 'italic from Word'] as $words) {
+            $this->assertStringContainsString($words, $output, "Sanitiser lost {$words}");
+        }
+
+        // The markup itself still goes.
+        foreach (['<div', '<table', '<td', '<b>', '<i>'] as $needle) {
+            $this->assertStringNotContainsString($needle, $output, "Sanitiser kept {$needle}");
+        }
+    }
+
+    /**
+     * Unwrapping must not extend to elements whose *content* is the payload —
+     * a script's body has to go with it, not survive as visible text.
+     */
+    #[Test]
+    public function the_contents_of_dangerous_elements_go_with_them()
+    {
+        $output = (string) $this->sanitiser->sanitise(
+            '<p>Fine</p><script>alert(1)</script><style>body{display:none}</style>',
+        );
+
+        $this->assertStringContainsString('Fine', $output);
+        $this->assertStringNotContainsString('alert(1)', $output);
+        $this->assertStringNotContainsString('display:none', $output);
+    }
+
+    /**
+     * The toolbar offers headings, bold, italic, lists and links and nothing
+     * else — a terms document has no use for a pull quote or a strikethrough.
+     * These are disabled in the editor too; the allowlist is the backstop for
+     * anything that arrives by paste or keyboard shortcut.
+     */
+    #[Test]
+    public function formatting_the_toolbar_does_not_offer_is_stripped()
+    {
+        $input = '<blockquote><p>Quoted</p></blockquote>'
+            .'<p><s>Struck</s> and <u>underlined</u></p>'
+            .'<h4>Too deep</h4>'
+            .'<hr />';
+
+        $output = (string) $this->sanitiser->sanitise($input);
+
+        foreach (['<blockquote>', '<s>', '<u>', '<h4>', '<hr'] as $needle) {
+            $this->assertStringNotContainsString($needle, $output, "Sanitiser kept {$needle}");
+        }
+
+        // The words survive; only the markup around them goes.
+        $this->assertStringContainsString('Quoted', $output);
+        $this->assertStringContainsString('Struck', $output);
+        $this->assertStringContainsString('underlined', $output);
     }
 
     #[Test]
