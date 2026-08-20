@@ -26,7 +26,8 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 >
 > That completes everything that changes what a proposal *contains*. **Present
 > mode is next** — and it now has the full picture to present: fixed work,
-> nested features, percentages, recurring costs and terms.
+> nested features, percentages, recurring costs and terms. It was **fully
+> scoped on 2026-08-20** (see item 2 below); no code written yet.
 >
 > Folding in the user's separate stand-alone proposal app is **cancelled** —
 > the two have diverged too far to be worth porting anything; rebuild here
@@ -228,29 +229,90 @@ operator screen with full controls, and a client screen showing a clean view of
 the same proposal that updates as the operator changes things. Static prototype
 at `design-prototypes/present.html`.
 
-Sketched shape: route `dashboard.proposal.present` mounting a Livewire
-component on a full-bleed `components.layouts.present` with no rail or topbar;
-required vs. optional features, fox-yellow toggle, sticky live total in mono.
+Shape: route `dashboard.proposal.present` mounting a Livewire component on a
+full-bleed `components.layouts.present` with no rail or topbar; required vs.
+optional features, fox-yellow toggle, sticky live total in mono.
 
-**Settle these before writing any code:**
+**Scoped and settled 2026-08-20 — these are decisions, not options.**
 
-- Does the client screen mirror in real time, and over what? Livewire polling
-  is cheap; broadcasting needs a driver decision — `BROADCAST_CONNECTION` is
-  currently `log` with nothing configured.
-- Is the client screen the existing `/p/{uuid}` view or a separate presented
-  one? Reusing it keeps a single code path, but that view is built for solo
-  reading, not for being driven by someone else.
-- **Does presenting mutate the proposal, or is it a scratch session the
-  operator can walk away from?** The big one — it decides whether Present mode
-  writes to `final_features` or holds its state somewhere else entirely.
-- What does the operator see that the client doesn't? Margins and internal
-  notes came up early; `final_features.notes` exists and is still unused.
-- How does it end? If a client accepts in the room, does that reuse the accept
-  flow and its `ProposalResponse` record?
+**The model is a shared spreadsheet.** That was literally the thing this
+replaces: a sheet on a Zoom screen-share where ticking a row or changing a
+quantity moved the total in front of everyone. So everything the operator does
+takes effect immediately and visibly on both screens.
+
+**Durable, but uncommitted.** Every toggle, quantity change and note writes to a
+*working copy* the instant it happens — close the laptop, reopen, it is all
+still there. What is deferred is not saving but **applying**: the proposal of
+record keeps its own figures until the operator says so. Presenting can
+therefore never silently rewrite a proposal, while nothing typed in the room is
+ever at risk.
+
+- **Storage** — a `presentations` row (proposal, operator, client-screen token,
+  lifecycle timestamps, a version counter for cheap polling) plus a
+  `presentation_lines` row per feature carrying `included`, `quantity` and
+  `notes`. Per-line rows rather than one JSON blob, so a 4,000-character note
+  being typed can't be clobbered by a toggle landing at the same moment.
+- **In scope per line** — include/exclude, quantity, internal notes. **Price
+  editing is deliberately out** for v1; renegotiating a rate mid-call is a
+  bigger conversation than this feature.
+- **Adding lines is in scope** — the operator can pull a feature out of the
+  library mid-call via the existing `FeaturePicker`, which already handles
+  parent auto-attach and de-dup. Packages are not (too much surface for a
+  screen built to present).
+- **Applying** — a pending-changes panel sits on the operator screen the whole
+  time, not a modal on exit, so changes can be applied mid-call as often as
+  wanted. If a presentation ends without applying, a banner on the proposal
+  spells out what changed ("Photography turned off · Site refresh qty 1→2 · 2
+  notes added") with Apply and Discard.
+- **Transport** — `wire:poll` at roughly a second against the presentation's
+  version counter. **No broadcasting**: nothing is installed (no Reverb, no
+  Pusher, no laravel-echo; `BROADCAST_CONNECTION=log`), and a websocket server
+  is a dependency plus a process plus a deployment story to buy latency nobody
+  in the room can perceive. The state lives in a row either way, so this is a
+  transport swap later, not a redesign.
+- **The client screen is its own component** on `components.layouts.present`,
+  sharing partials and `ProposalPricing` with `/p/{uuid}` rather than forking
+  it. The share link is built for solo reading at desk distance with an accept
+  CTA; a screen someone else is driving is a different job, and every
+  presentation tweak would otherwise risk the share link. Reached by the
+  presentation token so there is no passcode dance mid-demo.
+- **Operator-only** — internal notes (`final_features.notes`, currently unused)
+  and a "still on the table" figure for what is toggled off. **Not margin**:
+  there is no cost data anywhere in the schema, so margin needs a `cost` column
+  first and is its own feature.
+- **Accepting in the room** — the operator *arms* the accept step and the
+  **client** presses accept on the client screen, so the `ProposalResponse`
+  records the client's own act rather than the operator's IP and click.
+
+**Accepting is itself the commit — this is forced, not a preference.**
+`ProposalResponse` recomputes the total server-side from `final_features`, so
+accepting against an un-applied working copy would record the old quantities
+and the wrong money. Accept therefore applies the working copy and records the
+response in one transaction. Which means the review/apply banner only ever
+appears for presentations that ended *without* an acceptance — exactly the case
+where thinking before applying is worth something.
+
+**Known work this lands on:**
+
+- `ProposalView::accept()` has to come out into a shared action first — both
+  paths must record responses through the same code, never a copy. It is the
+  code that already refuses to trust client-submitted prices.
+- The Alpine pricing mirror is buried inside the 530-line
+  `livewire/public/proposal-view.blade.php` with only one partial extracted.
+  Pulling it out is part of this job.
+- `proposal_responses` needs to record how it was accepted (share link vs. in
+  the room) and which presentation it came from.
+- The client screen is unauthenticated, so the tenant scope is a no-op there:
+  name the tenant explicitly with `Settings::forTenant()` and stamp `tenant_id`
+  by hand, exactly as `ProposalView` does.
+- Don't hard-code brand colours into the client screen — tenant-level branding
+  of client-facing views is a wanted future feature, and every literal is work
+  it will have to undo.
 
 Pricing is already solved and must be reused rather than reimplemented:
-`App\Helpers\ProposalPricing` in pence, mirrored in Alpine for live totals,
-covering fixed work, percentages and recurring costs.
+`App\Helpers\ProposalPricing` in pence, covering fixed work, percentages and
+recurring costs. Quantity changes flow through it, so percentage lines re-cut
+themselves for free.
 
 ### 3. Wire the command palette
 
