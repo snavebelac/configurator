@@ -7,7 +7,7 @@
 @php
     $id = $attributes->get('id', $name);
 @endphp
-<div {{ $attributes->whereDoesntStartWith(['id', 'class']) }}>
+<div {{ $attributes->whereDoesntStartWith('id') }}>
     <label for="{{ $id }}" class="flex cursor-pointer items-start gap-3">
         <input type="checkbox"
                id="{{ $id }}"

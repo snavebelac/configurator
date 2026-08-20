@@ -18,7 +18,7 @@
     $inputClasses = 'block w-full rounded-lg border bg-paper-2 px-3 py-2 text-[14px] text-ink focus:bg-white focus:outline-none transition-colors '
         .($hasError ? 'border-status-rejected-dot/50 focus:border-status-rejected-fg' : 'border-rule focus:border-ink');
 @endphp
-<div {{ $attributes->whereDoesntStartWith(['id', 'class']) }}>
+<div {{ $attributes->whereDoesntStartWith('id') }}>
     <label for="{{ $id }}" class="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.08em] text-slate">
         {{ $label }}
     </label>
