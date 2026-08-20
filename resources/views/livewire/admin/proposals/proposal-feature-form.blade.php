@@ -1,12 +1,18 @@
+@php
+    $cellInput = 'w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-[13.5px] text-ink hover:border-rule focus:border-ink focus:bg-paper-2 focus:outline-none transition-colors';
+    $numberInput = $cellInput.' text-right font-mono text-[13px] tabular-nums';
+@endphp
 <div @class([
     'group grid items-center gap-3 px-4 py-2.5 transition-colors',
     'bg-paper-2/40 hover:bg-paper-2' => $isChild,
     'hover:bg-paper-2/60' => ! $isChild,
 ]) style="{{ $gridTemplate }}">
 
-    {{-- Drag handle (parent rows only) --}}
+    {{-- Drag handle. Only fixed parent rows reorder: a percentage is a share
+         of everything above it and a recurring charge isn't part of the
+         one-off document at all, so neither has a position to move. --}}
     <div class="flex justify-center">
-        @unless ($isChild)
+        @if (! $isChild && ! $this->isPercentage() && ! $this->isRecurring())
             <button type="button"
                     x-sort:handle
                     class="cursor-grab rounded p-1 text-slate-soft transition-colors hover:text-ink active:cursor-grabbing"
@@ -14,7 +20,7 @@
                     aria-label="Drag to reorder">
                 <x-phosphor-dots-six-vertical class="size-3.5" />
             </button>
-        @endunless
+        @endif
     </div>
 
     {{-- Name --}}
@@ -24,29 +30,54 @@
         @endif
         <input type="text"
                wire:model.blur="name"
-               class="w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-[13.5px] font-medium text-ink hover:border-rule focus:border-ink focus:bg-paper-2 focus:outline-none transition-colors">
+               class="{{ $cellInput }} font-medium">
     </div>
 
-    {{-- Qty --}}
-    <div class="text-right">
-        <input type="number"
-               min="1"
-               step="1"
-               wire:model.blur="quantity"
-               class="w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-right font-mono text-[13px] text-ink tabular-nums hover:border-rule focus:border-ink focus:bg-paper-2 focus:outline-none transition-colors">
-    </div>
+    @if ($this->isPercentage())
+        {{-- Rate --}}
+        <div class="flex items-center justify-end gap-1">
+            <input type="number"
+                   min="0"
+                   max="100"
+                   step="0.01"
+                   wire:model.blur="percentage"
+                   class="{{ $numberInput }}">
+            <span class="text-[13px] text-slate-soft">%</span>
+        </div>
+    @else
+        {{-- Qty --}}
+        <div class="text-right">
+            <input type="number"
+                   min="1"
+                   step="1"
+                   wire:model.blur="quantity"
+                   class="{{ $numberInput }}">
+        </div>
 
-    {{-- Unit price --}}
-    <div class="flex items-center justify-end gap-1">
-        <span class="text-slate-soft text-[13px]">£</span>
-        <input type="number"
-               min="0"
-               step="0.01"
-               wire:model.blur="price"
-               class="w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-right font-mono text-[13px] text-ink tabular-nums hover:border-rule focus:border-ink focus:bg-paper-2 focus:outline-none transition-colors">
-    </div>
+        {{-- Unit price --}}
+        <div class="flex items-center justify-end gap-1">
+            <span class="text-[13px] text-slate-soft">£</span>
+            <input type="number"
+                   min="0"
+                   step="0.01"
+                   wire:model.blur="price"
+                   class="{{ $numberInput }}">
+        </div>
+    @endif
 
-    {{-- Type (required / optional) --}}
+    @if ($this->isRecurring())
+        {{-- Billing period --}}
+        <div>
+            <select wire:model.live="billingPeriod"
+                    class="w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-[13px] text-ink hover:border-rule focus:border-ink focus:bg-paper-2 focus:outline-none transition-colors">
+                @foreach ($billingPeriods as $period)
+                    <option value="{{ $period->value }}">{{ $period->label() }}</option>
+                @endforeach
+            </select>
+        </div>
+    @endif
+
+    {{-- Required / optional --}}
     <div>
         <label class="inline-flex cursor-pointer items-center gap-2">
             <input type="checkbox"
@@ -64,7 +95,15 @@
 
     {{-- Line total --}}
     <div class="text-right font-mono text-[13px] text-ink tabular-nums">
-        £{{ number_format((float) $price * (int) $quantity, 2) }}
+        @if ($this->isPercentage())
+            {{-- Of the fixed lines with every optional counted in, matching the
+                 running total at the foot of the card. --}}
+            £{{ number_format($this->percentageAmount(), 2) }}
+        @elseif ($this->isRecurring())
+            £{{ number_format((float) $price * (int) $quantity, 2) }}<span class="text-slate-soft">{{ $this->finalFeature->billingSuffix() }}</span>
+        @else
+            £{{ number_format((float) $price * (int) $quantity, 2) }}
+        @endif
     </div>
 
     {{-- Remove --}}

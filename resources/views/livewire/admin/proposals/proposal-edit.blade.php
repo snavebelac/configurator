@@ -1,5 +1,15 @@
 @php
-    $gridTemplate = 'grid-template-columns: 24px minmax(0,2fr) 80px 120px 130px 110px 40px;';
+    // One template per pricing type: a percentage line has a rate where a
+    // fixed line has quantity and unit price, and a recurring line needs a
+    // billing period column that neither of the others has.
+    $fixedGrid = 'grid-template-columns: 24px minmax(0,2fr) 80px 120px 130px 110px 40px;';
+    $percentageGrid = 'grid-template-columns: 24px minmax(0,2fr) 120px 130px 110px 40px;';
+    $recurringGrid = 'grid-template-columns: 24px minmax(0,2fr) 80px 120px 120px 130px 110px 40px;';
+
+    $sectionHead = 'flex flex-wrap items-baseline justify-between gap-3 border-y border-rule-soft bg-paper-2/60 px-4 py-2.5 first:border-t-0';
+    $sectionTitle = 'text-[11px] font-medium uppercase tracking-[0.08em] text-ink';
+    $sectionNote = 'text-[11.5px] text-slate';
+    $columnHead = 'grid items-center gap-3 border-b border-rule px-4 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate';
 @endphp
 <div class="mx-auto max-w-[1480px]" wire:key="proposal-edit-{{ $proposal->id }}">
 
@@ -81,45 +91,118 @@
             </div>
         </x-card-header>
 
-        @if ($featureGroups->isNotEmpty())
-            <div class="grid items-center gap-3 border-b border-rule px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-slate"
-                 style="{{ $gridTemplate }}">
-                <div aria-hidden="true"></div>
-                <div>Name</div>
-                <div class="text-right">Qty</div>
-                <div class="text-right">Unit price</div>
-                <div>Type</div>
-                <div class="text-right">Line total</div>
-                <div aria-hidden="true"></div>
-            </div>
-
-            <ul x-sort="$wire.reorderParents($item, $position)"
-                x-sort:config="{ ghostClass: 'opacity-40' }"
-                class="flex flex-col">
-                @foreach ($featureGroups as $group)
-                    <li x-sort:item="{{ $group['root']->id }}"
-                        wire:key="group-{{ $group['root']->id }}"
-                        class="border-b border-rule-soft last:border-b-0">
-                        <livewire:admin.proposals.proposal-feature-form
-                            :final-feature-id="$group['root']->id"
-                            :is-child="false"
-                            :grid-template="$gridTemplate"
-                            :key="'feature-'.$group['root']->id" />
-                        @foreach ($group['children'] as $child)
-                            <livewire:admin.proposals.proposal-feature-form
-                                :final-feature-id="$child->id"
-                                :is-child="true"
-                                :grid-template="$gridTemplate"
-                                :key="'feature-'.$child->id" />
-                        @endforeach
-                    </li>
-                @endforeach
-            </ul>
-        @else
+        @if ($proposal->features->isEmpty())
             <div class="px-4 py-16 text-center">
                 <div class="font-display text-[18px] text-ink">This proposal has no features</div>
                 <p class="mt-1.5 text-sm text-slate">Return to the list and start a new proposal to pick features from your library.</p>
             </div>
+        @else
+            {{-- One-off work. The only section that reorders: these are the
+                 things being bought, and the order they're read in is the
+                 order the client sees. --}}
+            @if ($featureGroups->isNotEmpty())
+                <div class="{{ $sectionHead }}">
+                    <span class="{{ $sectionTitle }}">One-off work</span>
+                    <span class="{{ $sectionNote }}">Drag to reorder — this is the order the client reads.</span>
+                </div>
+
+                <div class="{{ $columnHead }}" style="{{ $fixedGrid }}">
+                    <div aria-hidden="true"></div>
+                    <div>Name</div>
+                    <div class="text-right">Qty</div>
+                    <div class="text-right">Unit price</div>
+                    <div>Included</div>
+                    <div class="text-right">Line total</div>
+                    <div aria-hidden="true"></div>
+                </div>
+
+                <ul x-sort="$wire.reorderParents($item, $position)"
+                    x-sort:config="{ ghostClass: 'opacity-40' }"
+                    class="flex flex-col">
+                    @foreach ($featureGroups as $group)
+                        <li x-sort:item="{{ $group['root']->id }}"
+                            wire:key="group-{{ $group['root']->id }}"
+                            class="border-b border-rule-soft last:border-b-0">
+                            <livewire:admin.proposals.proposal-feature-form
+                                :final-feature-id="$group['root']->id"
+                                :is-child="false"
+                                :grid-template="$fixedGrid"
+                                :key="'feature-'.$group['root']->id" />
+                            @foreach ($group['children'] as $child)
+                                <livewire:admin.proposals.proposal-feature-form
+                                    :final-feature-id="$child->id"
+                                    :is-child="true"
+                                    :grid-template="$fixedGrid"
+                                    :key="'feature-'.$child->id" />
+                            @endforeach
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
+            {{-- Percentage lines. Kept apart because they aren't things being
+                 bought — they're a share of everything above, and they move
+                 whenever the one-off work does. --}}
+            @if ($percentageFeatures->isNotEmpty())
+                <div class="{{ $sectionHead }}">
+                    <span class="{{ $sectionTitle }}">Percentage of the work</span>
+                    <span class="{{ $sectionNote }}">A share of the one-off lines above. Never of each other, so two of these don't compound.</span>
+                </div>
+
+                <div class="{{ $columnHead }}" style="{{ $percentageGrid }}">
+                    <div aria-hidden="true"></div>
+                    <div>Name</div>
+                    <div class="text-right">Rate</div>
+                    <div>Included</div>
+                    <div class="text-right">Amount</div>
+                    <div aria-hidden="true"></div>
+                </div>
+
+                <div class="flex flex-col">
+                    @foreach ($percentageFeatures as $feature)
+                        <div wire:key="percentage-{{ $feature->id }}" class="border-b border-rule-soft last:border-b-0">
+                            <livewire:admin.proposals.proposal-feature-form
+                                :final-feature-id="$feature->id"
+                                :is-child="false"
+                                :grid-template="$percentageGrid"
+                                :fixed-base="$fixedBase"
+                                :key="'feature-'.$feature->id" />
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            {{-- Ongoing costs. Never summed into the one-off figure — a build
+                 fee and a monthly fee are different commitments. --}}
+            @if ($recurringFeatures->isNotEmpty())
+                <div class="{{ $sectionHead }}">
+                    <span class="{{ $sectionTitle }}">Ongoing costs</span>
+                    <span class="{{ $sectionNote }}">Totalled per billing period, and kept out of the one-off figure.</span>
+                </div>
+
+                <div class="{{ $columnHead }}" style="{{ $recurringGrid }}">
+                    <div aria-hidden="true"></div>
+                    <div>Name</div>
+                    <div class="text-right">Qty</div>
+                    <div class="text-right">Amount</div>
+                    <div>Billed</div>
+                    <div>Included</div>
+                    <div class="text-right">Per period</div>
+                    <div aria-hidden="true"></div>
+                </div>
+
+                <div class="flex flex-col">
+                    @foreach ($recurringFeatures as $feature)
+                        <div wire:key="recurring-{{ $feature->id }}" class="border-b border-rule-soft last:border-b-0">
+                            <livewire:admin.proposals.proposal-feature-form
+                                :final-feature-id="$feature->id"
+                                :is-child="false"
+                                :grid-template="$recurringGrid"
+                                :key="'feature-'.$feature->id" />
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         @endif
 
         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule-soft bg-paper-2 px-6 py-4">

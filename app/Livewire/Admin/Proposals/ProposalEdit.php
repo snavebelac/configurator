@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Admin\Proposals;
 
+use App\Enums\PricingType;
 use App\Enums\Status;
 use App\Facades\Settings;
+use App\Helpers\ProposalPricing;
 use App\Livewire\Admin\AdminComponent;
 use App\Models\FinalFeature;
 use App\Models\Proposal;
@@ -146,8 +148,13 @@ class ProposalEdit extends AdminComponent
 
     public function reorderParents(int $finalFeatureId, int $position): void
     {
+        // Fixed roots only. Percentage and recurring lines are shown in their
+        // own sections and can't be dragged, so including them here would make
+        // the dropped position refer to a different list than the one on
+        // screen.
         $parentIds = $this->proposal->features()
             ->whereNull('parent_id')
+            ->where('pricing_type', PricingType::Fixed)
             ->orderBy('order')
             ->orderBy('name')
             ->pluck('id')
@@ -172,8 +179,25 @@ class ProposalEdit extends AdminComponent
     {
         $this->proposal->load(['features', 'client', 'user', 'response', 'termsVersion.terms']);
 
+        $features = $this->proposal->features;
+
+        // The everything-on basis, matching the running total at the foot of
+        // the card and Proposal::total(). A percentage row shows its share of
+        // this rather than the £0.00 its own price column would imply.
+        $pricing = app(ProposalPricing::class)->calculate(
+            $features,
+            $features->where('optional', true)->pluck('id')->map(fn ($id) => (int) $id)->all(),
+        );
+
         return view('livewire.admin.proposals.proposal-edit', [
-            'featureGroups' => $this->groupFeatures($this->proposal->features),
+            'featureGroups' => $this->groupFeatures($features),
+            'percentageFeatures' => $features->filter(fn (FinalFeature $f) => $f->isPercentage())
+                ->sortBy([['order', 'asc'], ['name', 'asc']])
+                ->values(),
+            'recurringFeatures' => $features->filter(fn (FinalFeature $f) => $f->isRecurring())
+                ->sortBy([['billing_period', 'asc'], ['order', 'asc'], ['name', 'asc']])
+                ->values(),
+            'fixedBase' => $pricing['fixedBase'],
             'currencySymbol' => Settings::getCurrency()->toSymbol(),
             'termsOptions' => Terms::query()
                 ->with('currentVersion')
@@ -189,13 +213,18 @@ class ProposalEdit extends AdminComponent
      */
     private function groupFeatures(Collection $features): Collection
     {
-        $roots = $features->whereNull('parent_id')
+        // Fixed lines only — percentages and recurring charges are priced on
+        // different terms and get sections of their own, the same way the
+        // client-facing view separates them.
+        $fixed = $features->filter(fn (FinalFeature $feature) => $feature->isFixed());
+
+        $roots = $fixed->whereNull('parent_id')
             ->sortBy([['order', 'asc'], ['name', 'asc']])
             ->values();
 
         return $roots->map(fn (FinalFeature $root) => [
             'root' => $root,
-            'children' => $features->where('parent_id', $root->id)
+            'children' => $fixed->where('parent_id', $root->id)
                 ->sortBy('name')
                 ->values(),
         ]);
