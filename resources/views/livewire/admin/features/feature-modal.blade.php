@@ -9,20 +9,10 @@
     <form wire:submit.prevent="save">
         <div class="flex flex-col gap-6 px-8 py-7">
 
-            <x-field
-                label="Name"
-                name="name"
-                placeholder="Hydroponics bay refit" />
-
-            <x-field
-                label="Description"
-                name="description"
-                placeholder="Enough greens to keep Down Below fed for a month." />
-
             {{-- How this line is priced. A percentage is a share of the rest
                  of the proposal, so it hides price, quantity and parent. --}}
-            <div class="border-t border-rule-soft pt-5">
-                <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate">Pricing</p>
+            <div>
+                <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate">How is this priced?</p>
                 <div class="grid grid-cols-3 gap-2">
                     @foreach ($pricingTypes as $type)
                         <button type="button"
@@ -37,6 +27,18 @@
                         </button>
                     @endforeach
                 </div>
+            </div>
+
+            <div class="flex flex-col gap-6 border-t border-rule-soft pt-5">
+                <x-field
+                    label="Name"
+                    name="name"
+                    placeholder="Hydroponics bay refit" />
+
+                <x-field
+                    label="Description"
+                    name="description"
+                    placeholder="Enough greens to keep Down Below fed for a month." />
             </div>
 
             @if ($pricingType === \App\Enums\PricingType::Recurring->value)
