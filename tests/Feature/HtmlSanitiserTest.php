@@ -58,7 +58,7 @@ class HtmlSanitiserTest extends TestCase
     public function the_formatting_the_editor_produces_survives()
     {
         $input = '<h2>Scope</h2>'
-            .'<p>The supplier will deliver <strong>the agreed work</strong> and <em>nothing more</em>.</p>'
+            .'<p>The supplier will deliver <strong>the agreed work</strong>, <em>nothing more</em> and <s>nothing struck</s>.</p>'
             .'<h3>Payment</h3>'
             .'<ul><li>Item one</li><li>Item two</li></ul>'
             .'<ol><li>First</li></ol>'
@@ -67,7 +67,10 @@ class HtmlSanitiserTest extends TestCase
 
         $output = (string) $this->sanitiser->sanitise($input);
 
-        foreach (['<h2>', '<h3>', '<strong>', '<em>', '<ul>', '<ol>', '<li>', '<blockquote>', '<hr'] as $needle) {
+        // Every one of these has a button in the terms toolbar, so dropping
+        // any of them here would mean an author writing something that
+        // silently vanishes on save.
+        foreach (['<h2>', '<h3>', '<strong>', '<em>', '<s>', '<ul>', '<ol>', '<li>', '<blockquote>', '<hr'] as $needle) {
             $this->assertStringContainsString($needle, $output, "Sanitiser dropped {$needle}");
         }
 

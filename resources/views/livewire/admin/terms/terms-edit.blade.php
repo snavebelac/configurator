@@ -131,8 +131,10 @@
                         </div>
 
                         <p class="mt-1.5 text-[12px] text-slate">
-                            Headings, lists, emphasis and links. Anything else is stripped on save —
-                            this renders on a public page.
+                            Everything in the toolbar is kept: headings, bold, italic and
+                            strikethrough, bulleted and numbered lists, quotes, dividers and
+                            links. Styling, images, tables and anything else are stripped on
+                            save — this renders on a public page.
                         </p>
                         @error('body')
                             <p class="mt-1.5 text-[12px] text-status-rejected-fg">{{ $message }}</p>
