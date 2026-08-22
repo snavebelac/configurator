@@ -1,5 +1,8 @@
 @php
     $clientOptions = $clients->mapWithKeys(fn ($client) => [$client->id => $client->name])->all();
+    $termsChoices = $termsOptions->mapWithKeys(fn ($set) => [
+        $set->currentVersion->id => $set->name.' · '.$set->currentVersion->label().($set->is_default ? ' (default)' : ''),
+    ])->all();
     $selectedCount = count($selectedFeatureIds);
 @endphp
 <div class="mx-auto max-w-[1480px]">
@@ -30,6 +33,16 @@
                     name="name"
                     placeholder="E.g. Zocalo market refresh — stage one"
                     class="sm:col-span-3" />
+
+                @if (! empty($termsChoices))
+                    <x-select-field
+                        label="Terms"
+                        name="termsVersionId"
+                        :options="$termsChoices"
+                        placeholder="— No terms —"
+                        hint="You'll get a last look at this before the proposal is sent."
+                        class="sm:col-span-2" />
+                @endif
             </div>
         </x-card>
 

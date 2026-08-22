@@ -10,6 +10,8 @@ use App\Models\Feature;
 use App\Models\FinalFeature;
 use App\Models\Package;
 use App\Models\Proposal;
+use App\Models\Terms;
+use App\Models\TermsVersion;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -32,6 +34,57 @@ class ProposalCreate extends AdminComponent
 
     #[Validate('required')]
     public ?int $clientId = null;
+
+    /**
+     * The terms this proposal will go out under. Associated now rather than
+     * pinned at delivery, so the choice is visible from the start — the
+     * delivery confirmation is where it gets a last look before it's sent.
+     */
+    #[Validate('nullable|integer')]
+    public ?int $termsVersionId = null;
+
+    public function mount(): void
+    {
+        $this->termsVersionId = $this->defaultTermsVersionId();
+    }
+
+    /**
+     * What a new proposal starts with: the current version of the set marked
+     * default, falling back to the most recently published version of any set
+     * when no default has been chosen. Always the latest version — an older
+     * one is never a sensible starting point.
+     */
+    private function defaultTermsVersionId(): ?int
+    {
+        $default = Terms::query()
+            ->where('is_default', true)
+            ->first()
+            ?->currentVersion?->id;
+
+        if ($default !== null) {
+            return $default;
+        }
+
+        return TermsVersion::query()
+            ->published()
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->first()
+            ?->id;
+    }
+
+    /**
+     * Never trust the submitted id: it has to be a published version this
+     * tenant owns, and the tenant scope does the second half.
+     */
+    private function resolveTermsVersionId(): ?int
+    {
+        if ($this->termsVersionId === null) {
+            return null;
+        }
+
+        return TermsVersion::query()->published()->find($this->termsVersionId)?->id;
+    }
 
     protected $messages = [
         'selectedFeatureIds.required' => 'Please select at least one feature',
@@ -145,6 +198,7 @@ class ProposalCreate extends AdminComponent
 
         $proposal->client()->associate($this->clientId);
         $proposal->user()->associate(auth()->user());
+        $proposal->terms_version_id = $this->resolveTermsVersionId();
         $proposal->save();
 
         $features = Feature::whereIn('id', $this->selectedFeatureIds)->get();
@@ -211,6 +265,12 @@ class ProposalCreate extends AdminComponent
             'selectedGroups' => $selectedGroups,
             'selectedTotal' => $selectedTotal,
             'clients' => $clients,
+            'termsOptions' => Terms::query()
+                ->with('currentVersion')
+                ->orderByDesc('is_default')
+                ->orderBy('name')
+                ->get()
+                ->filter(fn (Terms $set) => $set->currentVersion !== null),
         ]);
     }
 
