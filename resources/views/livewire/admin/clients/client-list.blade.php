@@ -3,7 +3,7 @@
         ? 'You haven\'t added a client yet. Add one and they\'ll show up here — ready to attach to proposals.'
         : 'Every person or company you\'ve ever sent a proposal to, in one place.';
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         title="Clients."

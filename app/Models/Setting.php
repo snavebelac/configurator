@@ -18,6 +18,7 @@ class Setting extends Model
         'tax_rate',
         'tax_name',
         'tax_inclusive',
+        'default_share_expiry_days',
         'logo',
         'company_name',
     ];
@@ -46,6 +47,7 @@ class Setting extends Model
             'currency' => CurrencySymbol::class,
             'tax_rate' => 'float',
             'tax_inclusive' => 'boolean',
+            'default_share_expiry_days' => 'integer',
         ];
     }
 }

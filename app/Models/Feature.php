@@ -16,11 +16,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Feature extends Model
 {
     /** @use HasFactory<FeatureFactory> */
-    use BelongsToTenant, HasFactory, SoftDeletes, Uuid;
+    use BelongsToTenant, HasFactory, Searchable, SoftDeletes, Uuid;
 
     protected $fillable = [
         'name',
@@ -145,5 +146,17 @@ class Feature extends Model
     public function percentageForHumans(): string
     {
         return rtrim(rtrim(number_format($this->percentage, 2), '0'), '.').'%';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'tenant_id' => $this->tenant_id,
+            'name' => $this->name,
+        ];
     }
 }

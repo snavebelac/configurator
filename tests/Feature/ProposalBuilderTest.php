@@ -12,6 +12,7 @@ use App\Models\Proposal;
 use App\Models\Setting;
 use App\Models\Tenant;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -173,5 +174,52 @@ class ProposalBuilderTest extends TestCase
             ->call('removeFinalFeature');
 
         $this->assertSoftDeleted('final_features', ['id' => $finalFeature->id]);
+    }
+
+    #[Test]
+    public function final_feature_writes_bump_the_parent_proposals_updated_at()
+    {
+        [$tenant, $user] = $this->signIn();
+        $client = Client::factory()->create(['tenant_id' => $tenant->id]);
+
+        $proposal = Proposal::factory()->create([
+            'tenant_id' => $tenant->id,
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'status' => Status::DRAFT,
+        ]);
+        $proposal->updated_at = Carbon::now()->subDays(30);
+        $proposal->saveQuietly();
+        $oldUpdatedAt = $proposal->fresh()->updated_at;
+
+        $finalFeature = new FinalFeature([
+            'name' => 'New line item',
+            'description' => 'x',
+            'price' => 100,
+            'quantity' => 1,
+            'optional' => false,
+            'order' => 1,
+        ]);
+        $finalFeature->proposal()->associate($proposal);
+        $finalFeature->save();
+
+        $afterCreate = $proposal->fresh()->updated_at;
+        $this->assertTrue($afterCreate->gt($oldUpdatedAt), 'create should bump parent updated_at');
+
+        $proposal->updated_at = Carbon::now()->subDays(30);
+        $proposal->saveQuietly();
+
+        $finalFeature->update(['name' => 'Renamed']);
+
+        $afterUpdate = $proposal->fresh()->updated_at;
+        $this->assertTrue($afterUpdate->gt(Carbon::now()->subMinutes(5)), 'update should bump parent updated_at');
+
+        $proposal->updated_at = Carbon::now()->subDays(30);
+        $proposal->saveQuietly();
+
+        $finalFeature->delete();
+
+        $afterDelete = $proposal->fresh()->updated_at;
+        $this->assertTrue($afterDelete->gt(Carbon::now()->subMinutes(5)), 'delete should bump parent updated_at');
     }
 }

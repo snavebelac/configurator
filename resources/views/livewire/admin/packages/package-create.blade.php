@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-[760px]">
+<div class="max-w-[760px]">
 
     <x-page-header
         title="New package."

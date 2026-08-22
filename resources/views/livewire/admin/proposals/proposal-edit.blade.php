@@ -11,11 +11,11 @@
     $sectionNote = 'text-[11.5px] text-slate';
     $columnHead = 'grid items-center gap-3 border-b border-rule px-4 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-slate';
 @endphp
-<div class="mx-auto max-w-[1480px]" wire:key="proposal-edit-{{ $proposal->id }}">
+<div class="max-w-[1480px]" wire:key="proposal-edit-{{ $proposal->id }}">
 
     <x-page-header
         :title="$proposal->name ?: 'Untitled proposal'"
-        :eyebrow="'Editing · ' . ucfirst($proposal->status->value)">
+        :eyebrow="'Editing · '.ucfirst($proposal->status->value).($proposal->reference ? ' · '.$proposal->reference : '')">
         <x-slot:actions>
             <x-btn variant="ghost" :href="route('dashboard.proposals')">Back to list</x-btn>
             <x-btn variant="ghost" :href="route('proposal.view', ['proposal' => $proposal->uuid])" target="_blank">

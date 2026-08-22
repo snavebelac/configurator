@@ -32,6 +32,15 @@ descriptions go in `CHANGELOG.md`; this file is the **mid-flight checkpoint**.
 > Folding in the user's separate stand-alone proposal app is **cancelled** —
 > the two have diverged too far to be worth porting anything; rebuild here
 > instead.
+>
+> **Merged the server's April work in on 2026-08-22.** It had been sitting
+> unpulled since 2026-04-27. Most of it was superseded — that branch's public
+> share link, settings page and Carbon fix were all rebuilt better here — so
+> only the parts with no local equivalent came across: the **⌘K command
+> palette** (now wired to the topbar trigger that had been decorative since the
+> redesign started), **per-tenant proposal references** (`YYYY/NNNN`, resetting
+> yearly), the `NoIndex` middleware on `/p/{uuid}`, and the `updated_at` bump
+> when a proposal's line items change.
 
 ## Where we are
 
@@ -95,10 +104,11 @@ The static reference for the whole direction lives in `design-prototypes/`
   `font-medium` on display elements.
 - **Shell** — 64px slim icon rail (ink, fox-yellow active accent, tooltip on
   hover) + 60px sticky topbar with workspace breadcrumb and a `⌘K` search
-  trigger.
+  trigger, which now opens the real palette.
 - **Audience scope** — desktop / laptop first. The nav is responsive as of
   2026-08-19 (off-canvas drawer below `lg`); page content is not yet.
-- **Command palette** — agreed feature, not yet wired (visual trigger only).
+- **Command palette** — built and wired (2026-08-22, merged from the April
+  server branch). Scout `collection` driver, so no external search service.
 - **Present mode** — agreed direction, prototype only. Real implementation
   comes after the back-office is consistent.
 
@@ -202,6 +212,65 @@ The static reference for the whole direction lives in `design-prototypes/`
 - `tests/Feature/{LoginTest,PasswordResetTest}.php` — 10 tests covering
   render + brand copy, validation, invalid/inactive login,
   happy-path redirect, reset-link dispatch, and password update.
+- `app/Livewire/Admin/Shared/CommandPalette.php` +
+  `resources/views/livewire/admin/shared/command-palette.blade.php` —
+  ⌘K / Ctrl+K command palette mounted globally in the admin layout.
+  Suggested actions (new proposal / feature / package / teammate),
+  recent proposals on empty query, and live-search across proposals,
+  clients, features and packages via Laravel Scout. Tenant-scoped via
+  Scout `where('tenant_id', ...)` plus the existing global scope.
+  Shipping with `SCOUT_DRIVER=database` so there's no external
+  dependency; the same code runs against Algolia once credentials are
+  in `.env`. Algolia was chosen over Meilisearch / Typesense because
+  it's the only one of the three with a permanent free Cloud tier
+  ("Build" — 1M records + 10k searches/mo, no credit card). Index
+  settings live in `config/scout.php` with `filterOnly(tenant_id)` in
+  `attributesForFaceting` for each model so the where-clause filter
+  applies. 8 Pest tests in `tests/Feature/CommandPaletteTest.php`
+  cover open/close, suggested actions, search across all four models,
+  and tenant isolation.
+- `app/Livewire/Admin/Settings.php` +
+  `resources/views/livewire/admin/settings.blade.php` — full tenant
+  settings admin page (currency, tax name/rate, tax-inclusive toggle,
+  default share-link expiry in days). Reachable from the nav rail via
+  the `gear-six` icon at `/dashboard/settings`. The new
+  `default_share_expiry_days` column on `settings` (nullable — null
+  means "never") is used by the share modal to pre-populate the
+  expiry date picker. `SettingsHelper` was extended to take an
+  optional `?int $tenantId` so the public preview can resolve a
+  proposal's settings from its own tenant rather than the session.
+- `app/Livewire/Public/ProposalPreview.php` + new public route
+  `/p/{uuid}` (named `proposal.share`) — the editorial client preview
+  is now genuinely public, with no `auth` middleware. The route is
+  rate-limited to 120 requests/minute and emits `X-Robots-Tag:
+  noindex, nofollow` via `App\Http\Middleware\NoIndex`. Both views
+  (admin and public) render the **same** Blade template
+  (`livewire/admin/proposals/preview.blade.php`) so design changes
+  flow to both surfaces without duplication. The component bypasses
+  the tenant scope explicitly (`Proposal::withoutGlobalScope('tenant')`)
+  and rebinds the `Settings` singleton to the proposal's own tenant
+  so currency / tax / etc. resolve correctly without a session
+  tenant. `proposals` gained `expires_at` and `access_code_hash`
+  columns: when set, the public preview renders an expired notice or
+  a 6-digit code-entry gate instead of the proposal. The unlock
+  cookie is an HMAC of `proposal_id|access_code_hash` keyed by
+  `app.key`, so regenerating the code changes the hash and
+  immediately invalidates every existing cookie on the next visit.
+  Code submissions are rate-limited to 5 attempts per
+  IP+proposal per 15 min. The admin in-app preview at
+  `/dashboard/proposal/preview/{uuid}` ignores expiry + code gates so
+  admins always see the proposal unfiltered.
+- `app/Livewire/Admin/Proposals/ShareModal.php` +
+  `resources/views/livewire/admin/proposals/share-modal.blade.php` —
+  a "Share" button on the proposal-edit header opens a modal with
+  the public URL (one-click copy), an expiry date picker (defaulting
+  to today + the tenant's `default_share_expiry_days` if set), and
+  an optional access-code section. Generating a code shows the plain
+  6-digit value once, and the bcrypt hash is only persisted on save.
+  Tests across `tests/Feature/{PublicProposalPreviewTest,ShareModalTest}.php`
+  (15 cases) cover unauth render, tenant isolation, the expiry / code
+  gates, code regeneration invalidating cookies, admin bypassing both
+  gates, and modal flows for expiry-only and code-only configurations.
 
 ## What's left, in rough priority
 
@@ -218,7 +287,7 @@ panel with subject-type-coloured icons. The dashboard also gained
 Things worth adding next:
 - `feature.created` and `proposal.deleted` events for fuller coverage.
 - A "View all activity" page if the 8-row panel feels insufficient.
-- Retention is now its own item (7) rather than a bullet here.
+- Retention is now its own item (3) rather than a bullet here.
 - Note `proposal.accepted` / `proposal.rejected` already exist, added with
   the public client view.
 
@@ -246,6 +315,8 @@ still there. What is deferred is not saving but **applying**: the proposal of
 record keeps its own figures until the operator says so. Presenting can
 therefore never silently rewrite a proposal, while nothing typed in the room is
 ever at risk.
+
+**Shape of the thing:**
 
 - **Storage** — a `presentations` row (proposal, operator, client-screen token,
   lifecycle timestamps, a version counter for cheap polling) plus a
@@ -314,19 +385,7 @@ Pricing is already solved and must be reused rather than reimplemented:
 recurring costs. Quantity changes flow through it, so percentage lines re-cut
 themselves for free.
 
-### 3. Wire the command palette
-
-Topbar's `⌘K` search trigger is still purely visual.
-
-- New Livewire component `App\Livewire\Admin\Shared\CommandPalette`
-  rendered inside the admin layout, listening for `⌘K` / `Ctrl+K` via
-  Alpine.
-- Items: navigate (proposals, clients, features, packages, settings),
-  create new (proposal, package, client, feature, user), and search
-  across proposals + clients + features + packages by name.
-- Match the visual pattern from `design-prototypes/dashboard.html`.
-
-### 4. Activity retention
+### 3. Activity retention
 
 The `activities` table grows without bound. Promoted out of "smaller cleanups"
 because a purge that silently deletes history is a product decision, not a
@@ -335,7 +394,7 @@ settle first are the retention window, whether it's per-tenant configurable
 (which would put it on the settings screen), and whether anything needs
 exporting before deletion.
 
-### 5. Responsive page content
+### 4. Responsive page content
 
 The nav went responsive on 2026-08-19 — off-canvas drawer below `lg`, adaptive
 topbar — but page *content* is still built desktop-first, so this is a feature
@@ -359,7 +418,7 @@ What needs attention:
 - The dashboard's four-column KPI strip and its `grid-cols-[1.3fr_1fr]` split.
 - The proposal builder and modals generally, which assume pointer input.
 
-### 6. Getting a real terms document into the editor
+### 5. Getting a real terms document into the editor
 
 Terms are authored in the rich-text editor, and the assumption behind that is
 that somebody types or pastes them. In practice a tenant's terms usually arrive
@@ -417,12 +476,166 @@ route, and it is adjacent to letting tenants brand their client-facing pages.
 [Intevation's office-paste extension]: https://github.com/Intevation/tiptap-extension-office-paste
 [Conversion API]: https://tiptap.dev/docs/conversion/import/docx/editor-extension
 
-## Where things live
+### 6. View tracking on shared proposals
 
-- Static design reference: `design-prototypes/` (HTML/CSS only — not served).
-- Brand tokens: `resources/css/app.css` (top of `@theme` block).
-- Layout shell: `resources/views/components/layouts/admin.blade.php`.
-- Shared components: `resources/views/components/{logo,menu-item,pill,page-header,card,card-header,btn,money,th,field,checkbox-field,select-field,modal}.blade.php`.
-- Done dashboard: `resources/views/livewire/admin/dashboard.blade.php` +
-  `app/Livewire/Admin/Dashboard.php`.
-- Coverage pattern to copy for new pages: `tests/Feature/DashboardTest.php`.
+Today the public preview at `/p/{uuid}` is read-only — there's no
+record of who has actually opened a share link or when. A simple "has
+the client seen this?" answer would be high-value on the
+proposal-edit page and the dashboard's "needs attention" feed.
+
+- New `proposal_views` table — `proposal_id`, `viewed_at`, hashed IP +
+  user-agent fingerprint (so we can roughly distinguish the client
+  from the salesperson clicking their own preview link).
+- `App\Livewire\Public\ProposalPreview::mount()` records a view when
+  it renders the unlocked preview state (not the gate / expired
+  states). Dedupe within a short window (e.g. 30 min) per
+  fingerprint to avoid re-counting refreshes.
+- Surface on the proposal-edit meta strip: "Last seen 2 days ago · 4
+  views" or "Not yet viewed".
+- Surface on the dashboard: "Stuck delivered" rows could show "Seen
+  X days ago" or "Never opened" — that's the truly stuck signal.
+- Open question: how granular do we want the dedupe window, and do
+  we surface raw view counts or just last-seen-at?
+
+### 7. Per-tenant identity on the customer preview
+
+The public proposal preview at `/p/{uuid}` currently uses the Epic Fox
+brand palette and typography, and shows nothing about the issuing
+tenant beyond the salesperson's name. For a multi-tenant SaaS that's
+sub-optimal — every tenant's clients see the same look and the same
+generic footer. v1 scope is **fonts, colours, logo, and contact
+details** (no full theme system).
+
+Schema is already partway there: `settings.logo` and
+`settings.company_name` columns exist in the migration but neither is
+read or written anywhere yet. Fill in the rest:
+
+- **Branding fields on `settings`**:
+  - Brand colour columns (e.g. `brand_ink`, `brand_accent`) — hex
+    strings, validated as `/#[0-9a-f]{6}/i`.
+  - Font selection — most realistic shape is a small curated
+    enum/list (Libre Baskerville, Inter, Playfair Display, IBM
+    Plex…) rather than letting tenants paste arbitrary font names.
+    Two slots: display and body, or just display.
+  - Logo upload — single image, stored on Laravel's `public` disk.
+    Display preview + replace + remove in the settings page.
+    Reasonable size cap (e.g. 1MB) and content-type allowlist.
+- **Contact fields on `settings`** (none of these exist yet):
+  - `company_email`, `company_phone`, `company_address` (single
+    multi-line string is fine for v1; can split into structured
+    fields later if needed). The user-account email belongs to the
+    salesperson and isn't the right thing to render in a customer
+    proposal — the company contact is a tenant-level fact.
+- **Settings form**: a new "Brand & company" section on the settings
+  page with the logo uploader, colour pickers, font selector, and
+  the four contact fields. Existing tax/currency section stays as it
+  is.
+- **Render path**: the customer preview layout (and only the customer
+  preview — not the admin chrome) emits an inline `<style>` block
+  that overrides the relevant CSS custom properties on `<body>`:
+  `--color-ink`, `--color-fox`, `--font-display`, `--font-sans`.
+  Logo replaces the existing fox mark in the masthead. Contact
+  details render in the document footer or sidebar (replacing the
+  current generic "All prices in GBP…" copy).
+- **Tenant resolution**: the existing `Setting::forTenant()` helper
+  already covers fetching the proposal's tenant settings without a
+  session — extend `SettingsHelper` to expose the new fields the
+  same way it currently exposes tax/currency.
+
+Open questions:
+- Curated font list vs. free-text? Curated is safer (consistent
+  rendering, no third-party leak through `<link rel="preconnect">`).
+- Do we offer a "preview your customer view" toggle on the settings
+  page so admins can sanity-check the palette before saving?
+- How does the access-code gate look when the tenant has rebranded —
+  does the gate inherit the brand, or stay neutral so it reads as a
+  Configurator-issued auth screen?
+- Address: single textarea (good enough for footer rendering) or
+  structured (line 1, line 2, city, postcode, country)? Structured
+  scales better but is more form to fill in.
+
+### 8. Attachments on proposals (documents + images)
+
+Allow proposals to carry uploaded documents and images. Primary use
+case is **site maps** — sketches or diagrams that contextualise the
+proposed work — but the same primitive could carry contracts, mood
+boards, screenshots, signed agreements, etc. The shape is
+deliberately deferred until this is picked up.
+
+Open questions worth banging out before any code:
+
+- Where do attachments surface in the customer preview? Inline
+  within feature sections, a dedicated "Documents" group at the
+  bottom, or a side rail?
+- Allowed file types — images + PDF only, or broader (DWG, etc.)?
+  Size cap?
+- Does an attachment belong to the whole proposal, or can it be
+  attached to a specific feature?
+- Storage — Laravel `public` disk vs. a private disk with signed
+  URLs that respect the same expiry / access-code gates as the
+  share link itself? (Sensitive site maps probably want the same
+  gate as the proposal text.)
+- Admin UX — a single drop-zone on the proposal-edit page, or a
+  modal flow? Reorder / caption?
+
+### 9. Help / inline documentation around the admin
+
+There's currently no in-product explanation of how the system
+behaves, and some of the model is non-obvious to a first-time admin.
+The most acute case: when an admin edits a feature **on a proposal**,
+they're editing the snapshot (`FinalFeature`) — the original library
+feature is untouched. Without that being said anywhere in the UI,
+it's easy to assume edits propagate back to the library.
+
+What this looks like:
+
+- Small `<x-help>` Blade primitive (info icon → click reveals
+  popover) that can be dropped next to any action or section
+  heading.
+- Targeted callouts at known confusion points:
+  - The proposal-edit features table — clarify that line edits
+    only affect this proposal's snapshot, not the library.
+  - The share modal — clarify that regenerating the access code
+    immediately locks out anyone who's already authenticated, and
+    that expiry kicks in at the end of the chosen day.
+  - The packages screen — clarify that pivot overrides only apply
+    when the package is *added* to a proposal; later library edits
+    don't ripple into existing proposals.
+- A lightweight "what's new" or onboarding pane could grow out of
+  the same primitive later, but the immediate need is the
+  reassurance copy described above.
+
+Open question: do we want all this rendered inline, or also a
+dedicated `/dashboard/help` page that mirrors the same content for
+people who'd rather scroll-and-read than hunt-and-click?
+
+### 10. Smaller cleanups
+
+- Description / additional-notes editing in the proposal admin (both
+  fields render beautifully on the client preview if set, but there's
+  no admin UI to edit them).
+- `feature.created` and `proposal.deleted` events for fuller activity
+  feed coverage.
+- A "View all activity" page if the 8-row dashboard panel feels
+  insufficient.
+- Periodic purge of activities older than ~12 months once volume
+  warrants it.
+- Bell icon in the topbar is purely visual — no notifications system
+  behind it.
+- Mobile / tablet support — the rail will need a collapsible/off-canvas
+  treatment. Deferred until desktop is locked in.
+- Drop the legacy `primary/*` / `success/*` / `warning/*` / `gray/*`
+  ramps from `resources/css/app.css` and the `.button*` / `.toastify*`
+  classes that depend on them, now that everything renders against
+  brand tokens. Also revisit whether to keep Toastify + SweetAlert2 or
+  replace with in-house components.
+- Three pre-redesign legacy components are still on disk but
+  unreferenced anywhere in views/PHP: `livewire/admin/shared/{progress,
+  select}.blade.php`, `components/{info,alert}.blade.php` (plus their
+  `App\Livewire\Admin\Shared\*` PHP). Safe to delete in a tidy-up pass.
+- Flip `SCOUT_DRIVER` to `algolia` once the Algolia "Build" project is
+  provisioned. Set `ALGOLIA_APP_ID` / `ALGOLIA_SECRET` in `.env`, then
+  `php artisan scout:sync-index-settings` (pushes the index settings
+  declared in `config/scout.php`, including `filterOnly(tenant_id)`),
+  followed by `php artisan scout:import "App\\Models\\Proposal"`
+  (repeat for `Client`, `Feature`, `Package`) to seed the indexes.

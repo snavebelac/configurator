@@ -1,7 +1,7 @@
 @php
     $memberCount = $features->count();
 @endphp
-<div class="mx-auto max-w-[1480px]" wire:key="package-edit-{{ $package->id }}">
+<div class="max-w-[1480px]" wire:key="package-edit-{{ $package->id }}">
 
     <x-page-header
         :title="$package->name ?: 'Untitled package'"

@@ -13,7 +13,7 @@
         ? 'Nothing here yet. Start your first proposal and it will land in this list.'
         : 'Every quote you\'ve sent and every draft you\'ve started. Open any row to keep editing or hand it to a client.';
 @endphp
-<div class="mx-auto max-w-[1480px]">
+<div class="max-w-[1480px]">
 
     <x-page-header
         title="Proposals."
@@ -82,8 +82,12 @@
                     <tr wire:key="row-{{ $proposal->id }}" class="group transition-colors hover:bg-paper-2 last:[&>td]:border-b-0">
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">
                             <x-row-title :href="route('dashboard.proposal.edit', ['proposal' => $proposal->id])">{{ $proposal->name }}</x-row-title>
-                            <div class="mt-0.5 text-xs text-slate">
-                                {{ $proposal->features->count() }} {{ Str::plural('feature', $proposal->features->count()) }}
+                            <div class="mt-0.5 flex items-center gap-2 text-xs text-slate">
+                                @if ($proposal->reference)
+                                    <span class="font-mono tnum text-slate-soft">{{ $proposal->reference }}</span>
+                                    <span class="text-slate-soft">·</span>
+                                @endif
+                                <span>{{ $proposal->features->count() }} {{ Str::plural('feature', $proposal->features->count()) }}</span>
                             </div>
                         </td>
                         <td class="border-b border-rule-soft px-4 py-3.5 align-middle text-[13.5px] text-ink">

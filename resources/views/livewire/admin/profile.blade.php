@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-3xl">
+<div class="max-w-3xl">
 
     <x-page-header
         title="Your profile."

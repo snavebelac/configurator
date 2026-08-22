@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\RequireActiveUser;
 use App\Livewire\Admin\Clients\ClientList;
 use App\Livewire\Admin\Dashboard;
@@ -60,7 +61,8 @@ Route::middleware(['auth', RequireActiveUser::class])->prefix('dashboard')->grou
 
 // Client-facing proposal. Deliberately outside the auth group — this is the
 // link that gets shared with clients. Access is by unguessable UUID, with an
-// optional per-proposal passcode on top.
-Route::middleware(['throttle:public-proposal'])->group(function () {
+// optional per-proposal passcode on top. NoIndex keeps it out of search
+// results, which matters for a link that is public but not meant to be found.
+Route::middleware(['throttle:public-proposal', NoIndex::class])->group(function () {
     Route::get('/p/{proposal:uuid}', ProposalView::class)->name('proposal.view');
 });

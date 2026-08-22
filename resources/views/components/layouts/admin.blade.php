@@ -62,6 +62,7 @@
             </div>
 
             <button type="button"
+                    onclick="Livewire.dispatch('open-palette')"
                     class="ml-auto flex shrink-0 items-center gap-3 rounded-[10px] border border-rule bg-paper-2 px-3.5 py-1.5 text-[13px] text-slate transition-colors hover:border-slate-faint hover:bg-white lg:w-[360px]">
                 <x-phosphor-magnifying-glass class="size-[15px] opacity-60" />
                 <span class="hidden lg:inline">Search anything…</span>
@@ -78,6 +79,7 @@
     </main>
 </div>
 
+@livewire('admin.shared.command-palette')
 @livewire('wire-elements-modal')
 </body>
 </html>

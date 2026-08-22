@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\Tenant;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -52,5 +53,48 @@ class DashboardTest extends TestCase
         $this->get(route('dashboard'))
             ->assertOk()
             ->assertSee($user->name);
+    }
+
+    #[Test]
+    public function the_attention_pill_uses_human_readable_age_for_stale_drafts_and_stuck_delivered(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->create(['tenant_id' => $tenant->id, 'active' => true]);
+        $this->actingAs($user)->session(['tenant_id' => $tenant->id]);
+
+        $client = Client::factory()->create(['tenant_id' => $tenant->id]);
+
+        $staleDraft = Proposal::factory()->create([
+            'tenant_id' => $tenant->id,
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'status' => Status::DRAFT,
+            'name' => 'Stale draft',
+        ]);
+        $staleDraft->updated_at = Carbon::now()->subDays(10);
+        $staleDraft->saveQuietly();
+
+        $stuckDelivered = Proposal::factory()->create([
+            'tenant_id' => $tenant->id,
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'status' => Status::DELIVERED,
+            'name' => 'Stuck delivered',
+        ]);
+        $stuckDelivered->updated_at = Carbon::now()->subDays(20);
+        $stuckDelivered->saveQuietly();
+
+        $response = $this->get(route('dashboard'))->assertOk();
+
+        $response->assertSeeText('10d untouched');
+        $response->assertSeeText('Delivered');
+        $response->assertSeeText('20d');
+        // Guard against the Carbon-3 float regression: diffInDays now returns a
+        // float, so the pill must show a whole number of days, never "10.4d".
+        $this->assertDoesNotMatchRegularExpression(
+            '/\d+\.\d+d/',
+            $response->getContent(),
+            'Dashboard rendered a decimal-day value — diffInDays leaked into the pill again',
+        );
     }
 }
