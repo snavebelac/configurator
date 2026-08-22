@@ -68,6 +68,11 @@ class ProposalEdit extends AdminComponent
      * Send the proposal: move it out of draft so the client's public link can
      * be answered. Until this happens accept/reject is not offered.
      */
+    /**
+     * Reached from DeliverProposalModal, never straight from a button — the
+     * confirmation restates the client, the total and the terms first.
+     */
+    #[On('deliverProposalConfirmed')]
     public function markAsDelivered(): void
     {
         if (! $this->proposal->canBeDelivered()) {
@@ -80,17 +85,11 @@ class ProposalEdit extends AdminComponent
             return;
         }
 
-        // Pin the terms as they stand right now. Doing it here rather than at
-        // creation means a proposal drafted in March and sent in July goes out
-        // under July's terms, and doing it at all means editing the tenant's
-        // terms afterwards can't rewrite what was sent.
-        if ($this->proposal->terms_version_id === null) {
-            $this->proposal->terms_version_id = Terms::query()
-                ->where('is_default', true)
-                ->first()
-                ?->currentVersion?->id;
-        }
-
+        // No silent fallback to the default set any more. Terms are attached
+        // when the proposal is created and shown again in the delivery
+        // confirmation, so quietly attaching some here would contradict the
+        // screen the user just agreed to — including when it said "nothing
+        // attached" and they meant it.
         $this->proposal->status = Status::DELIVERED;
         $this->proposal->save();
 

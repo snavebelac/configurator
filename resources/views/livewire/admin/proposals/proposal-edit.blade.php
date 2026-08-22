@@ -24,8 +24,7 @@
             </x-btn>
             @if ($proposal->canBeDelivered())
                 <x-btn variant="accent" type="button"
-                       wire:click="markAsDelivered"
-                       wire:confirm="Mark this proposal as delivered? Your client will be able to accept or decline it from the share link.">
+                       wire:click="$dispatch('openModal', {component: 'admin.proposals.deliver-proposal-modal', arguments: {proposalId: {{ $proposal->id }} }})">
                     Mark as delivered
                 </x-btn>
             @endif
@@ -329,8 +328,8 @@
                         </div>
                     @else
                         <p class="mb-5 text-[13px] text-slate">
-                            Nothing attached yet. The default set is pinned automatically when you mark this
-                            proposal delivered, or choose one now.
+                            Nothing attached. This proposal will go out with no terms unless you
+                            choose a set below — you'll be asked to confirm before it's sent.
                         </p>
                     @endif
 
